@@ -280,6 +280,121 @@ main {
     opacity: 0.5;
 }
 
+/* Login Screen */
+.login-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: var(--bg-color);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-md);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+.login-screen.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.login-card {
+    background-color: var(--surface-color);
+    border-radius: var(--radius-lg);
+    padding: 32px 24px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color);
+    transform: translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.login-screen.active .login-card {
+    transform: translateY(0);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.login-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-expense), var(--accent-investment));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.login-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.login-header p {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-size: 16px;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    -webkit-appearance: none;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--accent-expense);
+    box-shadow: 0 0 0 3px var(--accent-expense-light);
+}
+
+.login-btn {
+    margin-top: 12px;
+}
+
+.login-error {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    background-color: rgba(255, 59, 48, 0.1);
+    color: #ff3b30;
+    font-size: 14px;
+    text-align: center;
+    font-weight: 500;
+}
+
 /* Animations */
 .fade-enter-active {
     animation: fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;

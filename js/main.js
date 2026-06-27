@@ -13,7 +13,12 @@ const DOM = {
     sideMenu: document.getElementById('side-menu'),
     menuOverlay: document.getElementById('menu-overlay'),
     expenseContainer: document.getElementById('expense-container'),
-    investmentContainer: document.getElementById('investment-container')
+    investmentContainer: document.getElementById('investment-container'),
+    
+    // Login Elements
+    loginScreen: document.getElementById('login-screen'),
+    loginForm: document.getElementById('login-form'),
+    loginError: document.getElementById('login-error')
 };
 
 // Mode Config
@@ -55,6 +60,41 @@ function setupEventListeners() {
     DOM.menuBtn.addEventListener('click', toggleMenu);
     DOM.closeMenuBtn.addEventListener('click', toggleMenu);
     DOM.menuOverlay.addEventListener('click', toggleMenu);
+    
+    // Login Form Submit (Simulated for now until Supabase is ready)
+    DOM.loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const submitBtn = document.getElementById('submit-login');
+        
+        // Basic loading state
+        submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Signing in...';
+        submitBtn.style.opacity = '0.7';
+        
+        // Simulate network delay
+        setTimeout(() => {
+            // For now, accept any non-empty input
+            if (email && password) {
+                // Success
+                DOM.loginScreen.classList.remove('active');
+                
+                // Reset button
+                submitBtn.innerHTML = 'Sign In';
+                submitBtn.style.opacity = '1';
+                
+                // Initialize app content here if needed
+                updateUI();
+            } else {
+                // This shouldn't happen due to HTML5 'required' attribute, but just in case
+                DOM.loginError.textContent = 'Please enter both email and password.';
+                DOM.loginError.style.display = 'block';
+                submitBtn.innerHTML = 'Sign In';
+                submitBtn.style.opacity = '1';
+            }
+        }, 800);
+    });
 }
 
 // Toggle Side Menu
