@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#f0f2f5" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <title>Finance App</title>
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon.png">
+    
+    <link rel="stylesheet" href="./css/style.css">
+    
+    <!-- Phosphor Icons for SVG icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-bar">
+        <button id="menu-btn" class="icon-btn" aria-label="Menu">
+            <i class="ph ph-list"></i>
+        </button>
+        
+        <h1 id="app-title">Expense management</h1>
+        
+        <button id="toggle-mode-btn" class="icon-btn" aria-label="Switch Mode">
+            <!-- Default mode icon: showing investment icon as it's the target to switch to from expenses -->
+            <i class="ph ph-wallet"></i>
+        </button>
+    </nav>
+
+    <!-- Side Menu (Hidden by default) -->
+    <div id="side-menu" class="side-menu">
+        <div class="menu-header">
+            <h2>Menu</h2>
+            <button id="close-menu-btn" class="icon-btn">
+                <i class="ph ph-x"></i>
+            </button>
+        </div>
+        <div class="menu-content">
+            <!-- Empty for now, as requested -->
+        </div>
+    </div>
+    <!-- Overlay for Side Menu -->
+    <div id="menu-overlay" class="menu-overlay"></div>
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="fade-enter-active">
+        <!-- Expense Mode Container -->
+        <div id="expense-container" class="mode-container active">
+            <div class="dashboard-card">
+                <p class="card-subtitle">Total Expenses</p>
+                <h2 class="card-title">€0.00</h2>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="primary-btn">
+                    <i class="ph ph-plus"></i> Add Transaction
+                </button>
+            </div>
+            
+            <div class="transactions-list">
+                <h3 class="section-title">Recent Transactions</h3>
+                <div class="empty-state">
+                    <i class="ph ph-receipt"></i>
+                    <p>No expenses yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Investment Mode Container -->
+        <div id="investment-container" class="mode-container">
+            <div class="dashboard-card investment-card">
+                <p class="card-subtitle">Total Portfolio Value</p>
+                <h2 class="card-title">€0.00</h2>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="primary-btn investment-btn">
+                    <i class="ph ph-plus"></i> Add Investment
+                </button>
+            </div>
+            
+            <div class="transactions-list">
+                <h3 class="section-title">Current Assets</h3>
+                <div class="empty-state">
+                    <i class="ph ph-chart-line-up"></i>
+                    <p>No investments yet</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="./js/main.js" type="module"></script>
+</body>
+</html>

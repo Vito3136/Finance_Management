@@ -1,0 +1,297 @@
+/* Base Variables & Theme */
+:root {
+    /* Light Theme Colors */
+    --bg-color: #f0f2f5;
+    --surface-color: #ffffff;
+    --text-primary: #1c1c1e;
+    --text-secondary: #8e8e93;
+    
+    /* Brand Colors */
+    --accent-expense: #007aff; /* iOS Blue */
+    --accent-expense-light: #e5f1ff;
+    --accent-investment: #34c759; /* iOS Green */
+    --accent-investment-light: #ebf9ee;
+    
+    --border-color: rgba(0, 0, 0, 0.1);
+    --overlay-color: rgba(0, 0, 0, 0.4);
+    
+    /* Typography */
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    
+    /* Spacing & Radii */
+    --radius-lg: 20px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    
+    /* Top Bar safe area for notch */
+    --safe-top: env(safe-area-inset-top, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Dark Theme Colors */
+        --bg-color: #000000;
+        --surface-color: #1c1c1e;
+        --text-primary: #ffffff;
+        --text-secondary: #aeaeb2;
+        
+        --border-color: rgba(255, 255, 255, 0.1);
+        --overlay-color: rgba(0, 0, 0, 0.7);
+        
+        --accent-expense-light: rgba(0, 122, 255, 0.2);
+        --accent-investment-light: rgba(52, 199, 89, 0.2);
+    }
+}
+
+/* Reset & Global */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on iOS */
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Top Navigation Bar */
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(60px + var(--safe-top));
+    padding-top: var(--safe-top);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+    background: rgba(var(--surface-color), 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 100;
+}
+
+#app-title {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    transition: opacity 0.2s ease;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.icon-btn:active {
+    background-color: var(--border-color);
+    transform: scale(0.95);
+}
+
+/* Side Menu */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100vh;
+    background-color: var(--surface-color);
+    z-index: 200;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.side-menu.open {
+    transform: translateX(280px);
+}
+
+.menu-header {
+    height: calc(60px + var(--safe-top));
+    padding-top: var(--safe-top);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: var(--spacing-lg);
+    padding-right: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.menu-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--overlay-color);
+    z-index: 150;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.menu-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Main Content */
+main {
+    padding-top: calc(76px + var(--safe-top));
+    padding-bottom: 40px;
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.mode-container {
+    width: 100%;
+    position: absolute;
+    top: calc(76px + var(--safe-top));
+    left: 0;
+    padding: 0 var(--spacing-md);
+    opacity: 0;
+    transform: translateX(20px);
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    visibility: hidden;
+}
+
+.mode-container.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    position: relative;
+    top: 0;
+    visibility: visible;
+}
+
+/* Dashboard Card */
+.dashboard-card {
+    background-color: var(--surface-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+}
+
+.card-subtitle {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Action Buttons */
+.action-buttons {
+    margin-bottom: var(--spacing-lg);
+}
+
+.primary-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: var(--radius-md);
+    border: none;
+    background-color: var(--accent-expense);
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.primary-btn.investment-btn {
+    background-color: var(--accent-investment);
+    box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3);
+}
+
+.primary-btn:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+}
+
+/* Transactions List */
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+    color: var(--text-secondary);
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+/* Animations */
+.fade-enter-active {
+    animation: fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
