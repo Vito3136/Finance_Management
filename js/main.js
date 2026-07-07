@@ -8,7 +8,11 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Application State
 const state = {
-    mode: 'home', // Initial mode
+    globalMode: 'expense', // 'expense' or 'investment'
+    views: {
+        expense: 'home',
+        investment: 'investment'
+    },
     isMenuOpen: false,
     user: null
 };
@@ -41,33 +45,40 @@ const DOM = {
 const MODE_CONFIG = {
     home: {
         title: 'Finance Management',
-        nextMode: 'investment',
-        iconHTML: '<i class="ph ph-chart-line-up"></i>',
-        container: DOM.homeContainer
+        container: DOM.homeContainer,
+        group: 'expense'
     },
     expense: {
         title: 'Expenses History',
-        nextMode: 'home',
-        iconHTML: '<i class="ph ph-house"></i>',
-        container: DOM.expenseContainer
+        container: DOM.expenseContainer,
+        group: 'expense'
     },
     investment: {
         title: 'Investment management',
-        nextMode: 'home',
-        iconHTML: '<i class="ph ph-wallet"></i>',
-        container: DOM.investmentContainer
+        container: DOM.investmentContainer,
+        group: 'investment'
     },
     salary: {
         title: 'Salary credits',
-        nextMode: 'home', 
-        iconHTML: '<i class="ph ph-house"></i>',
-        container: DOM.salaryContainer
+        container: DOM.salaryContainer,
+        group: 'expense'
     },
     various: {
         title: 'Various accreditations',
-        nextMode: 'home',
-        iconHTML: '<i class="ph ph-house"></i>',
-        container: DOM.variousContainer
+        container: DOM.variousContainer,
+        group: 'expense'
+    }
+};
+
+// Global Mode Config (for top-right toggle)
+const GLOBAL_MODE_CONFIG = {
+    expense: {
+        nextMode: 'investment',
+        iconHTML: '<i class="ph ph-wallet"></i>' // show wallet to switch to investment
+    },
+    investment: {
+        nextMode: 'expense',
+        iconHTML: '<i class="ph ph-chart-line-up"></i>' // show chart to switch to expense
     }
 };
 
@@ -94,10 +105,10 @@ async function checkSession() {
 
 // Setup Event Listeners
 function setupEventListeners() {
-    // Mode Toggle
+    // Mode Toggle (Top-right button)
     DOM.toggleModeBtn.addEventListener('click', () => {
         if (navigator.vibrate) navigator.vibrate(50);
-        state.mode = MODE_CONFIG[state.mode].nextMode;
+        state.globalMode = GLOBAL_MODE_CONFIG[state.globalMode].nextMode;
         updateUI();
     });
 
@@ -110,18 +121,18 @@ function setupEventListeners() {
     DOM.navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             const target = e.currentTarget.getAttribute('data-target');
-            let newMode = 'home';
+            let newView = 'home';
             
-            // Map container id to state mode
-            if (target === 'salary-container') newMode = 'salary';
-            else if (target === 'various-container') newMode = 'various';
-            else if (target === 'expense-container') newMode = 'expense';
-            else if (target === 'investment-container') newMode = 'investment';
-            else if (target === 'home-container') newMode = 'home';
+            // Map container id to state view
+            if (target === 'salary-container') newView = 'salary';
+            else if (target === 'various-container') newView = 'various';
+            else if (target === 'expense-container') newView = 'expense';
+            else if (target === 'investment-container') newView = 'investment';
+            else if (target === 'home-container') newView = 'home';
             
-            if (state.mode !== newMode) {
+            if (state.views[state.globalMode] !== newView) {
                 if (navigator.vibrate) navigator.vibrate(50);
-                state.mode = newMode;
+                state.views[state.globalMode] = newView;
                 updateUI();
             }
             toggleMenu(); // Close menu
@@ -291,34 +302,36 @@ let containerTimeout;
 
 // Update UI based on State
 function updateUI() {
-    const config = MODE_CONFIG[state.mode];
+    const currentViewKey = state.views[state.globalMode];
+    const viewConfig = MODE_CONFIG[currentViewKey];
+    const globalConfig = GLOBAL_MODE_CONFIG[state.globalMode];
 
     // Clear previous timeouts to prevent overlapping animations
     if (uiTimeout) clearTimeout(uiTimeout);
     if (containerTimeout) clearTimeout(containerTimeout);
 
     // Update title immediately (prevents Safari ghosting bug)
-    DOM.appTitle.textContent = config.title;
+    DOM.appTitle.textContent = viewConfig.title;
 
     // Animate button change
     DOM.toggleModeBtn.style.transform = 'scale(0.8) rotate(180deg)';
     DOM.toggleModeBtn.style.opacity = '0';
 
     uiTimeout = setTimeout(() => {
-        DOM.toggleModeBtn.innerHTML = config.iconHTML;
+        DOM.toggleModeBtn.innerHTML = globalConfig.iconHTML;
         DOM.toggleModeBtn.style.transform = 'scale(1) rotate(0deg)';
         DOM.toggleModeBtn.style.opacity = '1';
     }, 200);
 
     // Update Menu Groups visibility
-    const isInvestment = state.mode === 'investment';
+    const isInvestment = state.globalMode === 'investment';
     document.getElementById('expense-menu-group').style.display = isInvestment ? 'none' : 'block';
     document.getElementById('investment-menu-group').style.display = isInvestment ? 'block' : 'none';
 
     // Update active class on nav links
     DOM.navLinks.forEach(link => {
         const target = link.getAttribute('data-target');
-        if (target === config.container.id) {
+        if (target === viewConfig.container.id) {
             link.classList.add('active');
         } else {
             link.classList.remove('active');
@@ -332,7 +345,7 @@ function updateUI() {
 
     // Small delay to allow the fade out before showing new one
     containerTimeout = setTimeout(() => {
-        config.container.classList.add('active');
+        viewConfig.container.classList.add('active');
     }, 150);
 }
 
