@@ -110,22 +110,41 @@
     <main id="main-content" class="fade-enter-active">
         <!-- Expense Mode Container -->
         <div id="expense-container" class="mode-container active">
-            <div class="dashboard-card">
-                <p class="card-subtitle">Total Expenses</p>
-                <h2 class="card-title">€0.00</h2>
-            </div>
-
-            <div class="action-buttons">
-                <button class="primary-btn">
-                    <i class="ph ph-plus"></i> Add Transaction
+            
+            <div class="action-buttons-vertical">
+                <button class="action-btn btn-salary" id="btn-add-salary">
+                    + Add salary credit
+                </button>
+                <button class="action-btn btn-expense" id="btn-add-expense">
+                    + Add expense
                 </button>
             </div>
 
+            <div class="widgets-grid">
+                <div class="widget widget-remaining">
+                    <h3 class="widget-value">15000</h3>
+                    <p class="widget-label">RIMANENTI DA SPENDERE</p>
+                </div>
+                <div class="widget widget-spent">
+                    <h3 class="widget-value">15000</h3>
+                    <p class="widget-label">TOTALE SPESI</p>
+                </div>
+                <div class="widget widget-saved">
+                    <h3 class="widget-value">23000</h3>
+                    <p class="widget-label">RISPARMIATI TOTALE</p>
+                </div>
+                <div class="widget widget-gross">
+                    <h3 class="widget-value">40000</h3>
+                    <p class="widget-label">LORDO TOTALE</p>
+                </div>
+            </div>
+
             <div class="transactions-list">
-                <h3 class="section-title">Recent Transactions</h3>
-                <div class="empty-state">
-                    <i class="ph ph-receipt"></i>
-                    <p>No expenses yet</p>
+                <h3 class="section-title">Recent accreditations</h3>
+                <div class="transaction-placeholders">
+                    <div class="placeholder-item"></div>
+                    <div class="placeholder-item"></div>
+                    <div class="placeholder-item"></div>
                 </div>
             </div>
         </div>
