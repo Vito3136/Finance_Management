@@ -156,16 +156,24 @@ function toggleMenu() {
     }
 }
 
+// Timeout references for debouncing UI updates
+let uiTimeout;
+let containerTimeout;
+
 // Update UI based on State
 function updateUI() {
     const config = MODE_CONFIG[state.mode];
+
+    // Clear previous timeouts to prevent overlapping animations
+    if (uiTimeout) clearTimeout(uiTimeout);
+    if (containerTimeout) clearTimeout(containerTimeout);
 
     // Animate title change
     DOM.appTitle.style.opacity = '0';
     DOM.toggleModeBtn.style.transform = 'scale(0.8) rotate(180deg)';
     DOM.toggleModeBtn.style.opacity = '0';
 
-    setTimeout(() => {
+    uiTimeout = setTimeout(() => {
         DOM.appTitle.textContent = config.title;
         DOM.appTitle.style.opacity = '1';
 
@@ -178,7 +186,7 @@ function updateUI() {
     config.inactiveContainer.classList.remove('active');
 
     // Small delay to allow the fade out of the old container before showing new one
-    setTimeout(() => {
+    containerTimeout = setTimeout(() => {
         config.activeContainer.classList.add('active');
     }, 150);
 }
