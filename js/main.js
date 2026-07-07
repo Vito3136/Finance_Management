@@ -23,6 +23,11 @@ const DOM = {
     menuOverlay: document.getElementById('menu-overlay'),
     expenseContainer: document.getElementById('expense-container'),
     investmentContainer: document.getElementById('investment-container'),
+    salaryContainer: document.getElementById('salary-container'),
+    variousContainer: document.getElementById('various-container'),
+    
+    // Menu Links
+    navLinks: document.querySelectorAll('.nav-link'),
 
     // Login Elements
     loginScreen: document.getElementById('login-screen'),
@@ -37,15 +42,25 @@ const MODE_CONFIG = {
         title: 'Expense management',
         nextMode: 'investment',
         iconHTML: '<i class="ph ph-chart-line-up"></i>',
-        activeContainer: DOM.expenseContainer,
-        inactiveContainer: DOM.investmentContainer
+        container: DOM.expenseContainer
     },
     investment: {
         title: 'Investment management',
         nextMode: 'expense',
         iconHTML: '<i class="ph ph-wallet"></i>',
-        activeContainer: DOM.investmentContainer,
-        inactiveContainer: DOM.expenseContainer
+        container: DOM.investmentContainer
+    },
+    salary: {
+        title: 'Salary credits',
+        nextMode: 'expense', // Where top right button goes
+        iconHTML: '<i class="ph ph-shopping-cart"></i>',
+        container: DOM.salaryContainer
+    },
+    various: {
+        title: 'Various accreditations',
+        nextMode: 'expense',
+        iconHTML: '<i class="ph ph-shopping-cart"></i>',
+        container: DOM.variousContainer
     }
 };
 
@@ -83,6 +98,27 @@ function setupEventListeners() {
     DOM.menuBtn.addEventListener('click', toggleMenu);
     DOM.closeMenuBtn.addEventListener('click', toggleMenu);
     DOM.menuOverlay.addEventListener('click', toggleMenu);
+
+    // Nav Links (Side Menu)
+    DOM.navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            const target = e.currentTarget.getAttribute('data-target');
+            let newMode = 'expense';
+            
+            // Map container id to state mode
+            if (target === 'salary-container') newMode = 'salary';
+            else if (target === 'various-container') newMode = 'various';
+            else if (target === 'expense-container') newMode = 'expense';
+            else if (target === 'investment-container') newMode = 'investment';
+            
+            if (state.mode !== newMode) {
+                if (navigator.vibrate) navigator.vibrate(50);
+                state.mode = newMode;
+                updateUI();
+            }
+            toggleMenu(); // Close menu
+        });
+    });
     
     // Logout Logic
     if (DOM.logoutBtn) {
@@ -267,12 +303,14 @@ function updateUI() {
         DOM.toggleModeBtn.style.opacity = '1';
     }, 200);
 
-    // Switch containers
-    config.inactiveContainer.classList.remove('active');
+    // Hide all containers
+    Object.values(MODE_CONFIG).forEach(c => {
+        c.container.classList.remove('active');
+    });
 
-    // Small delay to allow the fade out of the old container before showing new one
+    // Small delay to allow the fade out before showing new one
     containerTimeout = setTimeout(() => {
-        config.activeContainer.classList.add('active');
+        config.container.classList.add('active');
     }, 150);
 }
 

@@ -195,6 +195,12 @@ body {
     background-color: var(--border-color);
 }
 
+.menu-divider {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    margin: 12px 0;
+}
+
 .text-danger {
     color: #ff3b30 !important;
 }

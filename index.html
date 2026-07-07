@@ -133,6 +133,21 @@
             </button>
         </div>
         <div class="menu-content">
+            <button id="nav-salary" class="menu-item nav-link" data-target="salary-container">
+                <i class="ph ph-money"></i>
+                <span>Salary credits</span>
+            </button>
+            <button id="nav-various" class="menu-item nav-link" data-target="various-container">
+                <i class="ph ph-piggy-bank"></i>
+                <span>Various accreditations</span>
+            </button>
+            <button id="nav-expenses" class="menu-item nav-link" data-target="expense-container">
+                <i class="ph ph-shopping-cart"></i>
+                <span>Expenses</span>
+            </button>
+            
+            <hr class="menu-divider">
+
             <button id="logout-btn" class="menu-item text-danger">
                 <i class="ph ph-sign-out"></i>
                 <span>Logout</span>
@@ -144,6 +159,29 @@
 
     <!-- Main Content Area -->
     <main id="main-content" class="fade-enter-active">
+        
+        <!-- Salary Credits Container -->
+        <div id="salary-container" class="mode-container">
+            <div class="transactions-list">
+                <h3 class="section-title">Salary Credits History</h3>
+                <div class="empty-state">
+                    <i class="ph ph-money"></i>
+                    <p>No salary credits yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Various Accreditations Container -->
+        <div id="various-container" class="mode-container">
+            <div class="transactions-list">
+                <h3 class="section-title">Various Accreditations</h3>
+                <div class="empty-state">
+                    <i class="ph ph-piggy-bank"></i>
+                    <p>No various accreditations yet</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Expense Mode Container -->
         <div id="expense-container" class="mode-container active">
             
