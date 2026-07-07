@@ -74,6 +74,42 @@
         </div>
     </div>
 
+    <!-- Add Salary Modal -->
+    <div id="add-salary-modal" class="custom-modal">
+        <div class="custom-modal-content form-modal">
+            <div class="modal-header">
+                <h3>Add Salary Credit</h3>
+                <button type="button" id="close-salary-modal" class="icon-btn close-btn">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            
+            <form id="add-salary-form">
+                <div class="input-group">
+                    <label for="salary-amount">Total Amount (€)</label>
+                    <input type="number" id="salary-amount" step="0.01" required placeholder="0.00">
+                </div>
+                <div class="input-group">
+                    <label for="salary-spendable">Spendable Amount (€)</label>
+                    <input type="number" id="salary-spendable" step="0.01" required placeholder="0.00">
+                    <span class="input-hint">Amount you can spend from this salary</span>
+                </div>
+                <div class="input-group">
+                    <label for="salary-date">Date</label>
+                    <input type="date" id="salary-date" required>
+                </div>
+                <div class="input-group">
+                    <label for="salary-desc">Description (Optional)</label>
+                    <input type="text" id="salary-desc" placeholder="e.g. October Salary">
+                </div>
+                
+                <button type="submit" class="primary-btn btn-salary submit-btn">
+                    Save Credit
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Top Navigation Bar -->
     <nav class="top-bar">
         <button id="menu-btn" class="icon-btn" aria-label="Menu">

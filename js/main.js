@@ -155,6 +155,75 @@ function setupEventListeners() {
             demoModal.classList.remove('active');
         });
     }
+
+    // Add Salary Modal Logic
+    const btnAddSalary = document.getElementById('btn-add-salary');
+    const addSalaryModal = document.getElementById('add-salary-modal');
+    const closeSalaryModal = document.getElementById('close-salary-modal');
+    const addSalaryForm = document.getElementById('add-salary-form');
+
+    if (btnAddSalary && addSalaryModal && closeSalaryModal && addSalaryForm) {
+        // Open modal
+        btnAddSalary.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            // Default date to today
+            document.getElementById('salary-date').valueAsDate = new Date();
+            addSalaryModal.classList.add('active');
+        });
+
+        // Close modal
+        closeSalaryModal.addEventListener('click', () => {
+            addSalaryModal.classList.remove('active');
+            addSalaryForm.reset();
+        });
+
+        // Submit form
+        addSalaryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('salary-amount').value);
+            const spendable = parseFloat(document.getElementById('salary-spendable').value);
+            const date = document.getElementById('salary-date').value;
+            const description = document.getElementById('salary-desc').value;
+            const submitBtn = addSalaryForm.querySelector('button[type="submit"]');
+
+            if (spendable > amount) {
+                alert("Spendable amount cannot be greater than the total amount!");
+                return;
+            }
+
+            // Loading state
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Saving...';
+            submitBtn.disabled = true;
+
+            // Insert into Supabase
+            const { data, error } = await supabase
+                .from('salary_credits')
+                .insert([
+                    { 
+                        user_id: state.user.id,
+                        total_amount: amount, 
+                        spendable_amount: spendable, 
+                        credit_date: date, 
+                        description: description 
+                    }
+                ]);
+
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+
+            if (error) {
+                console.error("Error saving salary:", error);
+                alert("Error saving data: " + error.message);
+            } else {
+                alert("Salary credit saved successfully!");
+                addSalaryModal.classList.remove('active');
+                addSalaryForm.reset();
+                // TODO: Update the UI counters here later
+            }
+        });
+    }
 }
 
 // Toggle Side Menu
