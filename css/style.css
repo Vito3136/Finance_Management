@@ -463,6 +463,59 @@ main {
     transform: scale(0.98);
 }
 
+/* Custom Modal */
+.custom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: var(--overlay-color);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-md);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.custom-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.custom-modal-content {
+    background-color: var(--surface-color);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    width: 100%;
+    max-width: 320px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    border: 1px solid var(--border-color);
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.custom-modal.active .custom-modal-content {
+    transform: scale(1);
+}
+
+.custom-modal-content h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.custom-modal-content p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
 /* Animations */
 .fade-enter-active {
     animation: fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;

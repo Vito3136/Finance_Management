@@ -142,10 +142,17 @@ function setupEventListeners() {
 
     // Demo Button Logic
     const demoBtn = document.getElementById('demo-btn');
-    if (demoBtn) {
+    const demoModal = document.getElementById('demo-modal');
+    const closeDemoModal = document.getElementById('close-demo-modal');
+    
+    if (demoBtn && demoModal && closeDemoModal) {
         demoBtn.addEventListener('click', () => {
             if (navigator.vibrate) navigator.vibrate(50);
-            alert("Demo version is not yet available.");
+            demoModal.classList.add('active');
+        });
+        
+        closeDemoModal.addEventListener('click', () => {
+            demoModal.classList.remove('active');
         });
     }
 }
