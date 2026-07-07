@@ -1,26 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#f0f2f5" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
     <title>Finance App</title>
-    
+
     <!-- PWA Settings -->
     <link rel="manifest" href="./manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.png">
-    
+
     <link rel="stylesheet" href="./css/style.css">
-    
+
     <!-- Phosphor Icons for SVG icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+
     <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
     <!-- Login Screen Overlay -->
     <div id="login-screen" class="login-screen active">
@@ -29,26 +32,27 @@
                 <div class="login-icon">
                     <i class="ph ph-lock-key"></i>
                 </div>
-                <h2>Welcome Back</h2>
-                <p>Sign in to manage your finances safely.</p>
+                <h2>Finance Management</h2>
+                <p>Developed by Vito Ditrani</p>
             </div>
-            
+
             <form id="login-form">
                 <div class="input-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" required autocomplete="email">
+                    <input type="email" id="email" placeholder="you@example.com" required autocomplete="email">
                 </div>
                 <div class="input-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" required autocomplete="current-password">
+                    <input type="password" id="password" placeholder="••••••••" required
+                        autocomplete="current-password">
                 </div>
-                
+
                 <button type="submit" class="primary-btn login-btn" id="submit-login">
                     Sign In
                 </button>
             </form>
             <div id="login-error" class="login-error" style="display: none;"></div>
-            
+
             <div class="demo-section">
                 <p class="demo-text">
                     App designed for mobile experience.<br>
@@ -61,23 +65,14 @@
         </div>
     </div>
 
-    <!-- Custom Modal for Demo Alert -->
-    <div id="demo-modal" class="custom-modal">
-        <div class="custom-modal-content">
-            <h3>Notice</h3>
-            <p>Demo version is not yet available.</p>
-            <button id="close-demo-modal" class="primary-btn">Close</button>
-        </div>
-    </div>
-
     <!-- Top Navigation Bar -->
     <nav class="top-bar">
         <button id="menu-btn" class="icon-btn" aria-label="Menu">
             <i class="ph ph-list"></i>
         </button>
-        
+
         <h1 id="app-title">Expense management</h1>
-        
+
         <button id="toggle-mode-btn" class="icon-btn" aria-label="Switch Mode">
             <!-- Default mode icon: showing investment icon as it's the target to switch to from expenses -->
             <i class="ph ph-wallet"></i>
@@ -110,13 +105,13 @@
                 <p class="card-subtitle">Total Expenses</p>
                 <h2 class="card-title">€0.00</h2>
             </div>
-            
+
             <div class="action-buttons">
                 <button class="primary-btn">
                     <i class="ph ph-plus"></i> Add Transaction
                 </button>
             </div>
-            
+
             <div class="transactions-list">
                 <h3 class="section-title">Recent Transactions</h3>
                 <div class="empty-state">
@@ -132,13 +127,13 @@
                 <p class="card-subtitle">Total Portfolio Value</p>
                 <h2 class="card-title">€0.00</h2>
             </div>
-            
+
             <div class="action-buttons">
                 <button class="primary-btn investment-btn">
                     <i class="ph ph-plus"></i> Add Investment
                 </button>
             </div>
-            
+
             <div class="transactions-list">
                 <h3 class="section-title">Current Assets</h3>
                 <div class="empty-state">
@@ -151,4 +146,5 @@
 
     <script src="./js/main.js" type="module"></script>
 </body>
+
 </html>
