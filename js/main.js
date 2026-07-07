@@ -1,7 +1,7 @@
 // --- SUPABASE CONFIGURATION ---
 // INSERISCI QUI LE TUE CHIAVI (Puoi trovarle in Project Settings -> API su Supabase)
-const SUPABASE_URL = 'INSERISCI_IL_TUO_PROJECT_URL_QUI';
-const SUPABASE_ANON_KEY = 'INSERISCI_LA_TUA_ANON_KEY_QUI';
+const SUPABASE_URL = 'https://hcvktcdrgrsnmxqtvfeg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhjdmt0Y2RyZ3Jzbm14cXR2ZmVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NjkwNTYsImV4cCI6MjA5ODE0NTA1Nn0.Mj-xmxF6zTXxquVhVyPYkM45gb5R8sw_ftmKy7Oo7e0';
 
 // Inizializza il client Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -23,7 +23,7 @@ const DOM = {
     menuOverlay: document.getElementById('menu-overlay'),
     expenseContainer: document.getElementById('expense-container'),
     investmentContainer: document.getElementById('investment-container'),
-    
+
     // Login Elements
     loginScreen: document.getElementById('login-screen'),
     loginForm: document.getElementById('login-form'),
@@ -58,7 +58,7 @@ async function init() {
 // Check if user is already logged in
 async function checkSession() {
     const { data: { session }, error } = await supabase.auth.getSession();
-    
+
     if (session) {
         // User is already logged in
         state.user = session.user;
@@ -82,28 +82,28 @@ function setupEventListeners() {
     DOM.menuBtn.addEventListener('click', toggleMenu);
     DOM.closeMenuBtn.addEventListener('click', toggleMenu);
     DOM.menuOverlay.addEventListener('click', toggleMenu);
-    
+
     // REAL Login Form Submit with Supabase
     DOM.loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const submitBtn = document.getElementById('submit-login');
-        
+
         // Reset previous errors
         DOM.loginError.style.display = 'none';
-        
+
         // Loading state
         submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Signing in...';
         submitBtn.disabled = true;
-        
+
         // Chiamata reale a Supabase per il login
         const { data, error } = await supabase.auth.signInWithPassword({
             email: email,
             password: password,
         });
-        
+
         if (error) {
             // Login Fallito
             DOM.loginError.textContent = error.message;
@@ -116,7 +116,7 @@ function setupEventListeners() {
             DOM.loginScreen.classList.remove('active');
             submitBtn.innerHTML = 'Sign In';
             submitBtn.disabled = false;
-            
+
             // Pulisci i campi
             document.getElementById('password').value = '';
         }
@@ -126,7 +126,7 @@ function setupEventListeners() {
 // Toggle Side Menu
 function toggleMenu() {
     state.isMenuOpen = !state.isMenuOpen;
-    
+
     if (state.isMenuOpen) {
         DOM.sideMenu.classList.add('open');
         DOM.menuOverlay.classList.add('show');
@@ -141,16 +141,16 @@ function toggleMenu() {
 // Update UI based on State
 function updateUI() {
     const config = MODE_CONFIG[state.mode];
-    
+
     // Animate title change
     DOM.appTitle.style.opacity = '0';
     DOM.toggleModeBtn.style.transform = 'scale(0.8) rotate(180deg)';
     DOM.toggleModeBtn.style.opacity = '0';
-    
+
     setTimeout(() => {
         DOM.appTitle.textContent = config.title;
         DOM.appTitle.style.opacity = '1';
-        
+
         DOM.toggleModeBtn.innerHTML = config.iconHTML;
         DOM.toggleModeBtn.style.transform = 'scale(1) rotate(0deg)';
         DOM.toggleModeBtn.style.opacity = '1';
@@ -158,7 +158,7 @@ function updateUI() {
 
     // Switch containers
     config.inactiveContainer.classList.remove('active');
-    
+
     // Small delay to allow the fade out of the old container before showing new one
     setTimeout(() => {
         config.activeContainer.classList.add('active');
@@ -168,7 +168,7 @@ function updateUI() {
 // Run app
 document.addEventListener('DOMContentLoaded', () => {
     init();
-    
+
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
