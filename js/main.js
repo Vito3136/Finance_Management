@@ -139,6 +139,15 @@ function setupEventListeners() {
             document.getElementById('password').value = '';
         }
     });
+
+    // Demo Button Logic
+    const demoBtn = document.getElementById('demo-btn');
+    if (demoBtn) {
+        demoBtn.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            alert("Demo version is not yet available.");
+        });
+    }
 }
 
 // Toggle Side Menu

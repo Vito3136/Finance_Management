@@ -431,6 +431,38 @@ main {
     font-weight: 500;
 }
 
+.demo-section {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.demo-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.secondary-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: transparent;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.secondary-btn:active {
+    background-color: var(--border-color);
+    transform: scale(0.98);
+}
+
 /* Animations */
 .fade-enter-active {
     animation: fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
