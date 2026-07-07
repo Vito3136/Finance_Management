@@ -8,7 +8,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Application State
 const state = {
-    mode: 'expense', // 'expense' or 'investment'
+    mode: 'home', // Initial mode
     isMenuOpen: false,
     user: null
 };
@@ -21,6 +21,7 @@ const DOM = {
     closeMenuBtn: document.getElementById('close-menu-btn'),
     sideMenu: document.getElementById('side-menu'),
     menuOverlay: document.getElementById('menu-overlay'),
+    homeContainer: document.getElementById('home-container'),
     expenseContainer: document.getElementById('expense-container'),
     investmentContainer: document.getElementById('investment-container'),
     salaryContainer: document.getElementById('salary-container'),
@@ -38,28 +39,34 @@ const DOM = {
 
 // Mode Config
 const MODE_CONFIG = {
-    expense: {
-        title: 'Expense management',
+    home: {
+        title: 'Finance Management',
         nextMode: 'investment',
         iconHTML: '<i class="ph ph-chart-line-up"></i>',
+        container: DOM.homeContainer
+    },
+    expense: {
+        title: 'Expenses History',
+        nextMode: 'home',
+        iconHTML: '<i class="ph ph-house"></i>',
         container: DOM.expenseContainer
     },
     investment: {
         title: 'Investment management',
-        nextMode: 'expense',
+        nextMode: 'home',
         iconHTML: '<i class="ph ph-wallet"></i>',
         container: DOM.investmentContainer
     },
     salary: {
         title: 'Salary credits',
-        nextMode: 'expense', // Where top right button goes
-        iconHTML: '<i class="ph ph-shopping-cart"></i>',
+        nextMode: 'home', 
+        iconHTML: '<i class="ph ph-house"></i>',
         container: DOM.salaryContainer
     },
     various: {
         title: 'Various accreditations',
-        nextMode: 'expense',
-        iconHTML: '<i class="ph ph-shopping-cart"></i>',
+        nextMode: 'home',
+        iconHTML: '<i class="ph ph-house"></i>',
         container: DOM.variousContainer
     }
 };
@@ -103,13 +110,14 @@ function setupEventListeners() {
     DOM.navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             const target = e.currentTarget.getAttribute('data-target');
-            let newMode = 'expense';
+            let newMode = 'home';
             
             // Map container id to state mode
             if (target === 'salary-container') newMode = 'salary';
             else if (target === 'various-container') newMode = 'various';
             else if (target === 'expense-container') newMode = 'expense';
             else if (target === 'investment-container') newMode = 'investment';
+            else if (target === 'home-container') newMode = 'home';
             
             if (state.mode !== newMode) {
                 if (navigator.vibrate) navigator.vibrate(50);

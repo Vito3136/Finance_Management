@@ -133,6 +133,10 @@
             </button>
         </div>
         <div class="menu-content">
+            <button id="nav-home" class="menu-item nav-link" data-target="home-container">
+                <i class="ph ph-house"></i>
+                <span>Homepage</span>
+            </button>
             <button id="nav-salary" class="menu-item nav-link" data-target="salary-container">
                 <i class="ph ph-money"></i>
                 <span>Salary credits</span>
@@ -160,30 +164,8 @@
     <!-- Main Content Area -->
     <main id="main-content" class="fade-enter-active">
         
-        <!-- Salary Credits Container -->
-        <div id="salary-container" class="mode-container">
-            <div class="transactions-list">
-                <h3 class="section-title">Salary Credits History</h3>
-                <div class="empty-state">
-                    <i class="ph ph-money"></i>
-                    <p>No salary credits yet</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Various Accreditations Container -->
-        <div id="various-container" class="mode-container">
-            <div class="transactions-list">
-                <h3 class="section-title">Various Accreditations</h3>
-                <div class="empty-state">
-                    <i class="ph ph-piggy-bank"></i>
-                    <p>No various accreditations yet</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Expense Mode Container -->
-        <div id="expense-container" class="mode-container active">
+        <!-- Homepage Container -->
+        <div id="home-container" class="mode-container active">
             
             <div class="action-buttons-vertical">
                 <button class="action-btn btn-salary" id="btn-add-salary">
@@ -219,6 +201,39 @@
                     <div class="placeholder-item"></div>
                     <div class="placeholder-item"></div>
                     <div class="placeholder-item"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Salary Credits Container -->
+        <div id="salary-container" class="mode-container">
+            <div class="transactions-list">
+                <h3 class="section-title">Salary Credits History</h3>
+                <div class="empty-state">
+                    <i class="ph ph-money"></i>
+                    <p>No salary credits yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Various Accreditations Container -->
+        <div id="various-container" class="mode-container">
+            <div class="transactions-list">
+                <h3 class="section-title">Various Accreditations</h3>
+                <div class="empty-state">
+                    <i class="ph ph-piggy-bank"></i>
+                    <p>No various accreditations yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expenses Container -->
+        <div id="expense-container" class="mode-container">
+            <div class="transactions-list">
+                <h3 class="section-title">Expenses History</h3>
+                <div class="empty-state">
+                    <i class="ph ph-shopping-cart"></i>
+                    <p>No expenses yet</p>
                 </div>
             </div>
         </div>
