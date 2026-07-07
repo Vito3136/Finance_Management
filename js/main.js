@@ -311,6 +311,21 @@ function updateUI() {
         DOM.toggleModeBtn.style.opacity = '1';
     }, 200);
 
+    // Update Menu Groups visibility
+    const isInvestment = state.mode === 'investment';
+    document.getElementById('expense-menu-group').style.display = isInvestment ? 'none' : 'block';
+    document.getElementById('investment-menu-group').style.display = isInvestment ? 'block' : 'none';
+
+    // Update active class on nav links
+    DOM.navLinks.forEach(link => {
+        const target = link.getAttribute('data-target');
+        if (target === config.container.id) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+
     // Hide all containers
     Object.values(MODE_CONFIG).forEach(c => {
         c.container.classList.remove('active');

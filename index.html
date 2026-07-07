@@ -133,22 +133,34 @@
             </button>
         </div>
         <div class="menu-content">
-            <button id="nav-home" class="menu-item nav-link" data-target="home-container">
-                <i class="ph ph-house"></i>
-                <span>Homepage</span>
-            </button>
-            <button id="nav-salary" class="menu-item nav-link" data-target="salary-container">
-                <i class="ph ph-money"></i>
-                <span>Salary credits</span>
-            </button>
-            <button id="nav-various" class="menu-item nav-link" data-target="various-container">
-                <i class="ph ph-piggy-bank"></i>
-                <span>Various accreditations</span>
-            </button>
-            <button id="nav-expenses" class="menu-item nav-link" data-target="expense-container">
-                <i class="ph ph-shopping-cart"></i>
-                <span>Expenses</span>
-            </button>
+            <!-- Expense Menu Items -->
+            <div id="expense-menu-group" class="menu-group">
+                <button class="menu-item nav-link active" data-target="home-container">
+                    <i class="ph ph-house"></i>
+                    <span>Homepage</span>
+                </button>
+                <button class="menu-item nav-link" data-target="salary-container">
+                    <i class="ph ph-money"></i>
+                    <span>Salary credits</span>
+                </button>
+                <button class="menu-item nav-link" data-target="various-container">
+                    <i class="ph ph-piggy-bank"></i>
+                    <span>Various accreditations</span>
+                </button>
+                <button class="menu-item nav-link" data-target="expense-container">
+                    <i class="ph ph-shopping-cart"></i>
+                    <span>Expenses</span>
+                </button>
+            </div>
+
+            <!-- Investment Menu Items -->
+            <div id="investment-menu-group" class="menu-group" style="display: none;">
+                <button class="menu-item nav-link" data-target="investment-container">
+                    <i class="ph ph-house"></i>
+                    <span>Homepage</span>
+                </button>
+                <!-- Altre voci investment in futuro -->
+            </div>
             
             <hr class="menu-divider">
 
