@@ -297,15 +297,14 @@ function updateUI() {
     if (uiTimeout) clearTimeout(uiTimeout);
     if (containerTimeout) clearTimeout(containerTimeout);
 
-    // Animate title change
-    DOM.appTitle.style.opacity = '0';
+    // Update title immediately (prevents Safari ghosting bug)
+    DOM.appTitle.textContent = config.title;
+
+    // Animate button change
     DOM.toggleModeBtn.style.transform = 'scale(0.8) rotate(180deg)';
     DOM.toggleModeBtn.style.opacity = '0';
 
     uiTimeout = setTimeout(() => {
-        DOM.appTitle.textContent = config.title;
-        DOM.appTitle.style.opacity = '1';
-
         DOM.toggleModeBtn.innerHTML = config.iconHTML;
         DOM.toggleModeBtn.style.transform = 'scale(1) rotate(0deg)';
         DOM.toggleModeBtn.style.opacity = '1';
