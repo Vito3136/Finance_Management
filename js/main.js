@@ -1,7 +1,16 @@
+// --- SUPABASE CONFIGURATION ---
+// INSERISCI QUI LE TUE CHIAVI (Puoi trovarle in Project Settings -> API su Supabase)
+const SUPABASE_URL = 'INSERISCI_IL_TUO_PROJECT_URL_QUI';
+const SUPABASE_ANON_KEY = 'INSERISCI_LA_TUA_ANON_KEY_QUI';
+
+// Inizializza il client Supabase
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // Application State
 const state = {
     mode: 'expense', // 'expense' or 'investment'
-    isMenuOpen: false
+    isMenuOpen: false,
+    user: null
 };
 
 // DOM Elements
@@ -26,32 +35,45 @@ const MODE_CONFIG = {
     expense: {
         title: 'Expense management',
         nextMode: 'investment',
-        iconHTML: '<i class="ph ph-chart-line-up"></i>', // Icon to switch to investment
+        iconHTML: '<i class="ph ph-chart-line-up"></i>',
         activeContainer: DOM.expenseContainer,
         inactiveContainer: DOM.investmentContainer
     },
     investment: {
         title: 'Investment management',
         nextMode: 'expense',
-        iconHTML: '<i class="ph ph-wallet"></i>', // Icon to switch to expense
+        iconHTML: '<i class="ph ph-wallet"></i>',
         activeContainer: DOM.investmentContainer,
         inactiveContainer: DOM.expenseContainer
     }
 };
 
 // Initialize App
-function init() {
+async function init() {
     setupEventListeners();
+    await checkSession();
     updateUI();
+}
+
+// Check if user is already logged in
+async function checkSession() {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    
+    if (session) {
+        // User is already logged in
+        state.user = session.user;
+        DOM.loginScreen.classList.remove('active');
+    } else {
+        // Show login screen
+        DOM.loginScreen.classList.add('active');
+    }
 }
 
 // Setup Event Listeners
 function setupEventListeners() {
     // Mode Toggle
     DOM.toggleModeBtn.addEventListener('click', () => {
-        // Add a tiny vibration on supported devices
         if (navigator.vibrate) navigator.vibrate(50);
-        
         state.mode = MODE_CONFIG[state.mode].nextMode;
         updateUI();
     });
@@ -61,39 +83,43 @@ function setupEventListeners() {
     DOM.closeMenuBtn.addEventListener('click', toggleMenu);
     DOM.menuOverlay.addEventListener('click', toggleMenu);
     
-    // Login Form Submit (Simulated for now until Supabase is ready)
-    DOM.loginForm.addEventListener('submit', (e) => {
+    // REAL Login Form Submit with Supabase
+    DOM.loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const submitBtn = document.getElementById('submit-login');
         
-        // Basic loading state
-        submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Signing in...';
-        submitBtn.style.opacity = '0.7';
+        // Reset previous errors
+        DOM.loginError.style.display = 'none';
         
-        // Simulate network delay
-        setTimeout(() => {
-            // For now, accept any non-empty input
-            if (email && password) {
-                // Success
-                DOM.loginScreen.classList.remove('active');
-                
-                // Reset button
-                submitBtn.innerHTML = 'Sign In';
-                submitBtn.style.opacity = '1';
-                
-                // Initialize app content here if needed
-                updateUI();
-            } else {
-                // This shouldn't happen due to HTML5 'required' attribute, but just in case
-                DOM.loginError.textContent = 'Please enter both email and password.';
-                DOM.loginError.style.display = 'block';
-                submitBtn.innerHTML = 'Sign In';
-                submitBtn.style.opacity = '1';
-            }
-        }, 800);
+        // Loading state
+        submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Signing in...';
+        submitBtn.disabled = true;
+        
+        // Chiamata reale a Supabase per il login
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+        
+        if (error) {
+            // Login Fallito
+            DOM.loginError.textContent = error.message;
+            DOM.loginError.style.display = 'block';
+            submitBtn.innerHTML = 'Sign In';
+            submitBtn.disabled = false;
+        } else {
+            // Login Successo
+            state.user = data.user;
+            DOM.loginScreen.classList.remove('active');
+            submitBtn.innerHTML = 'Sign In';
+            submitBtn.disabled = false;
+            
+            // Pulisci i campi
+            document.getElementById('password').value = '';
+        }
     });
 }
 
