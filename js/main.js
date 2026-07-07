@@ -27,7 +27,8 @@ const DOM = {
     // Login Elements
     loginScreen: document.getElementById('login-screen'),
     loginForm: document.getElementById('login-form'),
-    loginError: document.getElementById('login-error')
+    loginError: document.getElementById('login-error'),
+    logoutBtn: document.getElementById('logout-btn')
 };
 
 // Mode Config
@@ -82,6 +83,23 @@ function setupEventListeners() {
     DOM.menuBtn.addEventListener('click', toggleMenu);
     DOM.closeMenuBtn.addEventListener('click', toggleMenu);
     DOM.menuOverlay.addEventListener('click', toggleMenu);
+    
+    // Logout Logic
+    if (DOM.logoutBtn) {
+        DOM.logoutBtn.addEventListener('click', async () => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            // Chiudi il menu
+            toggleMenu();
+            
+            // Esegui il sign out su Supabase
+            await supabase.auth.signOut();
+            
+            // Pulisci lo stato e mostra la schermata di login
+            state.user = null;
+            DOM.loginScreen.classList.add('active');
+        });
+    }
 
     // REAL Login Form Submit with Supabase
     DOM.loginForm.addEventListener('submit', async (e) => {
