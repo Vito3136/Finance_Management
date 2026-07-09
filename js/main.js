@@ -563,9 +563,9 @@ async function loadRecentAccreditations() {
     } catch (error) {
         console.error("Error loading recent accreditations:", error);
         listContainer.innerHTML = `
-            <div class="empty-state" style="color: #ff3b30;">
+            <div class="empty-state" style="color: #ff3b30; text-align: center;">
                 <i class="ph ph-warning"></i>
-                <p>Failed to load data</p>
+                <p>Failed to load data: ${error.message || JSON.stringify(error)}</p>
             </div>
         `;
     }
