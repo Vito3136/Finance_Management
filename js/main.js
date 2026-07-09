@@ -265,18 +265,24 @@ function setupEventListeners() {
 
     // Add Salary Modal Logic
     const btnAddSalary = document.getElementById('btn-add-salary');
+    const btnAddSalaryPage = document.getElementById('btn-add-salary-page');
     const addSalaryModal = document.getElementById('add-salary-modal');
     const closeSalaryModal = document.getElementById('close-salary-modal');
     const addSalaryForm = document.getElementById('add-salary-form');
 
-    if (btnAddSalary && addSalaryModal && closeSalaryModal && addSalaryForm) {
-        // Open modal
-        btnAddSalary.addEventListener('click', () => {
+    if ((btnAddSalary || btnAddSalaryPage) && addSalaryModal && closeSalaryModal && addSalaryForm) {
+        
+        const openSalaryModal = () => {
             if (navigator.vibrate) navigator.vibrate(50);
             // Default date to today
             document.getElementById('salary-date').valueAsDate = new Date();
             addSalaryModal.classList.add('active');
-        });
+        };
+
+        // Open modal from homepage button
+        if (btnAddSalary) btnAddSalary.addEventListener('click', openSalaryModal);
+        // Open modal from salary page button
+        if (btnAddSalaryPage) btnAddSalaryPage.addEventListener('click', openSalaryModal);
 
         // Close modal
         closeSalaryModal.addEventListener('click', () => {
