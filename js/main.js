@@ -99,6 +99,11 @@ async function init() {
     setupEventListeners();
     await checkSession();
     updateUI();
+    
+    // Load initial data if logged in
+    if (state.user) {
+        await loadRecentAccreditations();
+    }
 }
 
 // Check if user is already logged in and session hasn't expired
@@ -236,6 +241,9 @@ function setupEventListeners() {
 
             // Pulisci i campi
             document.getElementById('password').value = '';
+            
+            // Carica i dati iniziali
+            await loadRecentAccreditations();
         }
     });
 
@@ -319,7 +327,7 @@ function setupEventListeners() {
                 alert("Salary credit saved successfully!");
                 addSalaryModal.classList.remove('active');
                 addSalaryForm.reset();
-                // TODO: Update the UI counters here later
+                loadRecentAccreditations(); // Update list
             }
         });
     }
@@ -388,7 +396,7 @@ function setupEventListeners() {
                 alert("Various accreditation saved successfully!");
                 addVariousModal.classList.remove('active');
                 addVariousForm.reset();
-                // TODO: Update the UI counters here later
+                loadRecentAccreditations(); // Update list
             }
         });
     }
@@ -460,6 +468,107 @@ function updateUI() {
     containerTimeout = setTimeout(() => {
         viewConfig.container.classList.add('active');
     }, 150);
+}
+
+// Format Date Utility
+function formatDate(dateString) {
+    const options = { day: '2-digit', month: 'short', year: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-GB', options);
+}
+
+// Load Recent Accreditations
+async function loadRecentAccreditations() {
+    if (!state.user) return;
+    
+    const listContainer = document.getElementById('recent-accreditations-list');
+    if (!listContainer) return;
+
+    try {
+        // Fetch Salary Credits
+        const { data: salaryData, error: salaryError } = await supabase
+            .from('salary_credits')
+            .select('*')
+            .order('credit_date', { ascending: false })
+            .limit(10);
+            
+        if (salaryError) throw salaryError;
+
+        // Fetch Various Accreditations
+        const { data: variousData, error: variousError } = await supabase
+            .from('various_accreditations')
+            .select('*')
+            .order('credit_date', { ascending: false })
+            .limit(10);
+            
+        if (variousError) throw variousError;
+
+        // Map and Combine
+        const salaries = (salaryData || []).map(item => ({
+            ...item,
+            type: 'salary',
+            title: item.description || 'Salary Credit',
+            icon: 'ph-money'
+        }));
+
+        const various = (variousData || []).map(item => ({
+            ...item,
+            type: 'various',
+            title: item.description || 'Various Accreditation',
+            icon: 'ph-piggy-bank'
+        }));
+
+        let allAccreditations = [...salaries, ...various];
+        
+        // Sort descending by date, then by created_at
+        allAccreditations.sort((a, b) => {
+            const dateA = new Date(a.credit_date).getTime();
+            const dateB = new Date(b.credit_date).getTime();
+            if (dateA === dateB) {
+                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            }
+            return dateB - dateA;
+        });
+
+        // Limit to 10 overall for recent
+        allAccreditations = allAccreditations.slice(0, 10);
+
+        if (allAccreditations.length === 0) {
+            listContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="ph ph-clock-counter-clockwise"></i>
+                    <p>No recent accreditations</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Render items
+        listContainer.innerHTML = allAccreditations.map(item => `
+            <div class="transaction-item">
+                <div class="transaction-left">
+                    <div class="transaction-icon ${item.type}">
+                        <i class="ph ${item.icon}"></i>
+                    </div>
+                    <div class="transaction-info">
+                        <span class="transaction-title">${item.title}</span>
+                        <span class="transaction-date">${formatDate(item.credit_date)}</span>
+                    </div>
+                </div>
+                <div class="transaction-amount">
+                    +€${parseFloat(item.total_amount).toFixed(2)}
+                </div>
+            </div>
+        `).join('');
+
+    } catch (error) {
+        console.error("Error loading recent accreditations:", error);
+        listContainer.innerHTML = `
+            <div class="empty-state" style="color: #ff3b30;">
+                <i class="ph ph-warning"></i>
+                <p>Failed to load data</p>
+            </div>
+        `;
+    }
 }
 
 // Run app
