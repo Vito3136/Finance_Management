@@ -110,6 +110,42 @@
         </div>
     </div>
 
+    <!-- Add Various Accreditation Modal -->
+    <div id="add-various-modal" class="custom-modal">
+        <div class="custom-modal-content form-modal">
+            <div class="modal-header">
+                <h3>Add Various Accreditation</h3>
+                <button type="button" id="close-various-modal" class="icon-btn close-btn">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            
+            <form id="add-various-form">
+                <div class="input-group">
+                    <label for="various-amount">Total Amount (€)</label>
+                    <input type="number" id="various-amount" step="0.01" required placeholder="0.00">
+                </div>
+                <div class="input-group">
+                    <label for="various-spendable">Spendable Amount (€)</label>
+                    <input type="number" id="various-spendable" step="0.01" required placeholder="0.00">
+                    <span class="input-hint">Amount you can spend from this accreditation</span>
+                </div>
+                <div class="input-group">
+                    <label for="various-date">Date</label>
+                    <input type="date" id="various-date" required>
+                </div>
+                <div class="input-group">
+                    <label for="various-desc">Description (Optional)</label>
+                    <input type="text" id="various-desc" placeholder="e.g. Refund or Gift">
+                </div>
+                
+                <button type="submit" class="primary-btn btn-salary submit-btn">
+                    Save Credit
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Top Navigation Bar -->
     <nav class="top-bar">
         <button id="menu-btn" class="icon-btn" aria-label="Menu">

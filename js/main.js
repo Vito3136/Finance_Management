@@ -323,6 +323,75 @@ function setupEventListeners() {
             }
         });
     }
+
+    // Add Various Accreditation Modal Logic
+    const btnAddVarious = document.getElementById('btn-add-various');
+    const addVariousModal = document.getElementById('add-various-modal');
+    const closeVariousModal = document.getElementById('close-various-modal');
+    const addVariousForm = document.getElementById('add-various-form');
+
+    if (btnAddVarious && addVariousModal && closeVariousModal && addVariousForm) {
+        // Open modal
+        btnAddVarious.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            // Default date to today
+            document.getElementById('various-date').valueAsDate = new Date();
+            addVariousModal.classList.add('active');
+        });
+
+        // Close modal
+        closeVariousModal.addEventListener('click', () => {
+            addVariousModal.classList.remove('active');
+            addVariousForm.reset();
+        });
+
+        // Submit form
+        addVariousForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('various-amount').value);
+            const spendable = parseFloat(document.getElementById('various-spendable').value);
+            const date = document.getElementById('various-date').value;
+            const description = document.getElementById('various-desc').value;
+            const submitBtn = addVariousForm.querySelector('button[type="submit"]');
+
+            if (spendable > amount) {
+                alert("Spendable amount cannot be greater than the total amount!");
+                return;
+            }
+
+            // Loading state
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Saving...';
+            submitBtn.disabled = true;
+
+            // Insert into Supabase
+            const { data, error } = await supabase
+                .from('various_accreditations')
+                .insert([
+                    { 
+                        user_id: state.user.id,
+                        total_amount: amount, 
+                        spendable_amount: spendable, 
+                        credit_date: date, 
+                        description: description 
+                    }
+                ]);
+
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+
+            if (error) {
+                console.error("Error saving various accreditation:", error);
+                alert("Error saving data: " + error.message);
+            } else {
+                alert("Various accreditation saved successfully!");
+                addVariousModal.classList.remove('active');
+                addVariousForm.reset();
+                // TODO: Update the UI counters here later
+            }
+        });
+    }
 }
 
 // Toggle Side Menu
