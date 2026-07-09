@@ -93,7 +93,6 @@ function updateLastActivity() {
 // Track user interactions to reset the inactivity timer
 document.addEventListener('click', updateLastActivity);
 document.addEventListener('touchstart', updateLastActivity);
-document.addEventListener('keydown', updateLastActivity);
 
 // Initialize App
 async function init() {
@@ -194,15 +193,18 @@ function setupEventListeners() {
     DOM.loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // Close keyboard on mobile (Face ID / Autofill bug fix)
-        if (document.activeElement) {
-            document.activeElement.blur();
-        }
-        document.getElementById('email').blur();
-        document.getElementById('password').blur();
-
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
+
+        // Close keyboard on mobile (Face ID / Autofill bug fix)
+        // Eseguito leggermente in ritardo per non bloccare l'evento submit nativo di Safari
+        setTimeout(() => {
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
+            document.getElementById('email').blur();
+            document.getElementById('password').blur();
+        }, 50);
         const submitBtn = document.getElementById('submit-login');
 
         // Reset previous errors
