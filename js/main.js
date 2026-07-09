@@ -204,7 +204,7 @@ function setupEventListeners() {
             }
             document.getElementById('email').blur();
             document.getElementById('password').blur();
-        }, 50);
+        }, 150);
         const submitBtn = document.getElementById('submit-login');
 
         // Reset previous errors
