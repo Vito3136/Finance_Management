@@ -82,6 +82,19 @@ const GLOBAL_MODE_CONFIG = {
     }
 };
 
+const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+function updateLastActivity() {
+    if (state.user) {
+        localStorage.setItem('last_activity', Date.now().toString());
+    }
+}
+
+// Track user interactions to reset the inactivity timer
+document.addEventListener('click', updateLastActivity);
+document.addEventListener('touchstart', updateLastActivity);
+document.addEventListener('keydown', updateLastActivity);
+
 // Initialize App
 async function init() {
     setupEventListeners();
@@ -89,12 +102,26 @@ async function init() {
     updateUI();
 }
 
-// Check if user is already logged in
+// Check if user is already logged in and session hasn't expired
 async function checkSession() {
     const { data: { session }, error } = await supabase.auth.getSession();
 
     if (session) {
-        // User is already logged in
+        const lastActivity = localStorage.getItem('last_activity');
+        const now = Date.now();
+        
+        // If more than 30 minutes passed since last activity, auto-logout
+        if (lastActivity && (now - parseInt(lastActivity, 10)) > INACTIVITY_TIMEOUT) {
+            console.log("Session expired due to inactivity");
+            await supabase.auth.signOut();
+            state.user = null;
+            localStorage.removeItem('last_activity');
+            DOM.loginScreen.classList.add('active');
+            return;
+        }
+
+        // Session valid
+        updateLastActivity();
         state.user = session.user;
         DOM.loginScreen.classList.remove('active');
     } else {
@@ -156,9 +183,23 @@ function setupEventListeners() {
         });
     }
 
+    // Check session again when app comes to foreground
+    document.addEventListener('visibilitychange', async () => {
+        if (document.visibilityState === 'visible' && state.user) {
+            await checkSession();
+        }
+    });
+
     // REAL Login Form Submit with Supabase
     DOM.loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        // Close keyboard on mobile (Face ID / Autofill bug fix)
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
+        document.getElementById('email').blur();
+        document.getElementById('password').blur();
 
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -186,6 +227,7 @@ function setupEventListeners() {
         } else {
             // Login Successo
             state.user = data.user;
+            updateLastActivity();
             DOM.loginScreen.classList.remove('active');
             submitBtn.innerHTML = 'Sign In';
             submitBtn.disabled = false;
