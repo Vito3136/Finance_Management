@@ -103,6 +103,8 @@ async function init() {
     // Load initial data if logged in
     if (state.user) {
         await loadRecentAccreditations();
+        await loadSalaryCredits();
+        await loadVariousAccreditations();
     }
 }
 
@@ -244,6 +246,8 @@ function setupEventListeners() {
             
             // Carica i dati iniziali
             await loadRecentAccreditations();
+            await loadSalaryCredits();
+            await loadVariousAccreditations();
         }
     });
 
@@ -334,6 +338,7 @@ function setupEventListeners() {
                 addSalaryModal.classList.remove('active');
                 addSalaryForm.reset();
                 loadRecentAccreditations(); // Update list
+                loadSalaryCredits(); // Update dedicated list
             }
         });
     }
@@ -403,6 +408,7 @@ function setupEventListeners() {
                 addVariousModal.classList.remove('active');
                 addVariousForm.reset();
                 loadRecentAccreditations(); // Update list
+                loadVariousAccreditations(); // Update dedicated list
             }
         });
     }
@@ -568,6 +574,112 @@ async function loadRecentAccreditations() {
 
     } catch (error) {
         console.error("Error loading recent accreditations:", error);
+        listContainer.innerHTML = `
+            <div class="empty-state" style="color: #ff3b30; text-align: center;">
+                <i class="ph ph-warning"></i>
+                <p>Failed to load data: ${error.message || JSON.stringify(error)}</p>
+            </div>
+        `;
+    }
+}
+
+// Load Salary Credits
+async function loadSalaryCredits() {
+    if (!state.user) return;
+    
+    const listContainer = document.getElementById('salary-credits-list');
+    if (!listContainer) return;
+
+    try {
+        const { data, error } = await supabase
+            .from('salary_credits')
+            .select('*')
+            .order('credit_date', { ascending: false });
+            
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            listContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="ph ph-money"></i>
+                    <p>No salary credits yet</p>
+                </div>
+            `;
+            return;
+        }
+
+        listContainer.innerHTML = data.map(item => `
+            <div class="transaction-item">
+                <div class="transaction-left">
+                    <div class="transaction-icon salary">
+                        <i class="ph ph-money"></i>
+                    </div>
+                    <div class="transaction-info">
+                        <span class="transaction-title">${item.description || 'Salary Credit'}</span>
+                        <span class="transaction-date">${formatDate(item.credit_date)}</span>
+                    </div>
+                </div>
+                <div class="transaction-amount">
+                    +€${parseFloat(item.total_amount).toFixed(2)}
+                </div>
+            </div>
+        `).join('');
+
+    } catch (error) {
+        console.error("Error loading salary credits:", error);
+        listContainer.innerHTML = `
+            <div class="empty-state" style="color: #ff3b30; text-align: center;">
+                <i class="ph ph-warning"></i>
+                <p>Failed to load data: ${error.message || JSON.stringify(error)}</p>
+            </div>
+        `;
+    }
+}
+
+// Load Various Accreditations
+async function loadVariousAccreditations() {
+    if (!state.user) return;
+    
+    const listContainer = document.getElementById('various-accreditations-list');
+    if (!listContainer) return;
+
+    try {
+        const { data, error } = await supabase
+            .from('various_accreditations')
+            .select('*')
+            .order('credit_date', { ascending: false });
+            
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            listContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="ph ph-piggy-bank"></i>
+                    <p>No various accreditations yet</p>
+                </div>
+            `;
+            return;
+        }
+
+        listContainer.innerHTML = data.map(item => `
+            <div class="transaction-item">
+                <div class="transaction-left">
+                    <div class="transaction-icon various">
+                        <i class="ph ph-piggy-bank"></i>
+                    </div>
+                    <div class="transaction-info">
+                        <span class="transaction-title">${item.description || 'Various Accreditation'}</span>
+                        <span class="transaction-date">${formatDate(item.credit_date)}</span>
+                    </div>
+                </div>
+                <div class="transaction-amount">
+                    +€${parseFloat(item.total_amount).toFixed(2)}
+                </div>
+            </div>
+        `).join('');
+
+    } catch (error) {
+        console.error("Error loading various accreditations:", error);
         listContainer.innerHTML = `
             <div class="empty-state" style="color: #ff3b30; text-align: center;">
                 <i class="ph ph-warning"></i>
