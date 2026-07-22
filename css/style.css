@@ -368,6 +368,15 @@ main {
     background: linear-gradient(135deg, #5856D6 0%, #AF52DE 100%);
 }
 
+.widget-total-expenses {
+    background: linear-gradient(135deg, #FF2D55 0%, #FF375F 100%);
+}
+
+/* Make odd-numbered last widget span full width */
+.widgets-grid .widget:last-child:nth-child(odd) {
+    grid-column: span 2;
+}
+
 /* Placeholders */
 .transaction-placeholders {
     display: flex;
