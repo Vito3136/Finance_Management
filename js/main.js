@@ -27,6 +27,7 @@ const DOM = {
     menuOverlay: document.getElementById('menu-overlay'),
     homeContainer: document.getElementById('home-container'),
     expenseContainer: document.getElementById('expense-container'),
+    statisticsContainer: document.getElementById('statistics-container'),
     investmentContainer: document.getElementById('investment-container'),
     salaryContainer: document.getElementById('salary-container'),
     variousContainer: document.getElementById('various-container'),
@@ -59,6 +60,11 @@ const MODE_CONFIG = {
     expense: {
         title: 'Expenses History',
         container: DOM.expenseContainer,
+        group: 'expense'
+    },
+    statistics: {
+        title: 'Statistics',
+        container: DOM.statisticsContainer,
         group: 'expense'
     },
     investment: {
@@ -169,6 +175,7 @@ function setupEventListeners() {
             if (target === 'salary-container') newView = 'salary';
             else if (target === 'various-container') newView = 'various';
             else if (target === 'expense-container') newView = 'expense';
+            else if (target === 'statistics-container') newView = 'statistics';
             else if (target === 'investment-container') newView = 'investment';
             else if (target === 'home-container') newView = 'home';
             
