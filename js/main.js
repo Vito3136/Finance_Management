@@ -40,6 +40,12 @@ const DOM = {
     addExpenseForm: document.getElementById('add-expense-form'),
     expensesList: document.getElementById('expenses-list'),
     
+    // Statistics Elements
+    statRemainingValue: document.getElementById('stat-remaining-value'),
+    statSpentValue: document.getElementById('stat-spent-value'),
+    statSavedValue: document.getElementById('stat-saved-value'),
+    statGrossValue: document.getElementById('stat-gross-value'),
+    
     // Menu Links
     navLinks: document.querySelectorAll('.nav-link'),
 
@@ -120,6 +126,7 @@ async function init() {
         await loadSalaryCredits();
         await loadVariousAccreditations();
         await loadExpenses();
+        await calculateStatistics();
     }
 }
 
@@ -265,6 +272,7 @@ function setupEventListeners() {
             await loadSalaryCredits();
             await loadVariousAccreditations();
             await loadExpenses();
+            await calculateStatistics();
         }
     });
 
@@ -480,6 +488,7 @@ function setupEventListeners() {
                 DOM.addExpenseModal.classList.remove('active');
                 DOM.addExpenseForm.reset();
                 loadExpenses(); // Update dedicated list
+                calculateStatistics(); // Update total spent
             }
         });
     }
@@ -810,6 +819,32 @@ async function loadExpenses() {
                 <p>Failed to load data: ${error.message || JSON.stringify(error)}</p>
             </div>
         `;
+    }
+}
+
+// Calculate Statistics
+async function calculateStatistics() {
+    if (!state.user) return;
+
+    try {
+        // Calculate Total Expenses
+        const { data: expenses, error: expError } = await supabase
+            .from('expenses')
+            .select('amount');
+            
+        if (expError) throw expError;
+
+        let totalExpenses = 0;
+        if (expenses && expenses.length > 0) {
+            totalExpenses = expenses.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+        }
+        
+        if (DOM.statSpentValue) {
+            DOM.statSpentValue.innerText = totalExpenses.toFixed(2);
+        }
+
+    } catch (error) {
+        console.error("Error calculating statistics:", error);
     }
 }
 
