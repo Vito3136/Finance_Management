@@ -146,6 +146,37 @@
         </div>
     </div>
 
+    <!-- Add Expense Modal -->
+    <div id="add-expense-modal" class="custom-modal">
+        <div class="custom-modal-content form-modal">
+            <div class="modal-header">
+                <h3>Add Expense</h3>
+                <button type="button" id="close-expense-modal" class="icon-btn close-btn">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            
+            <form id="add-expense-form">
+                <div class="input-group">
+                    <label for="expense-amount">Amount (€)</label>
+                    <input type="number" id="expense-amount" step="0.01" required placeholder="0.00">
+                </div>
+                <div class="input-group">
+                    <label for="expense-date">Date</label>
+                    <input type="date" id="expense-date" required>
+                </div>
+                <div class="input-group">
+                    <label for="expense-desc">Description</label>
+                    <input type="text" id="expense-desc" required placeholder="e.g. Groceries">
+                </div>
+                
+                <button type="submit" class="primary-btn btn-expense submit-btn">
+                    Save Expense
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Top Navigation Bar -->
     <nav class="top-bar">
         <button id="menu-btn" class="icon-btn" aria-label="Menu">
@@ -292,11 +323,18 @@
 
         <!-- Expenses Container -->
         <div id="expense-container" class="mode-container">
+            <div class="action-buttons-vertical">
+                <button class="action-btn btn-expense" id="btn-add-expense-page">
+                    + Add expense
+                </button>
+            </div>
             <div class="transactions-list">
                 <h3 class="section-title">Expenses History</h3>
-                <div class="empty-state">
-                    <i class="ph ph-shopping-cart"></i>
-                    <p>No expenses yet</p>
+                <div id="expenses-list" class="transactions-list-container">
+                    <div class="empty-state">
+                        <i class="ph ph-shopping-cart"></i>
+                        <p>No expenses yet</p>
+                    </div>
                 </div>
             </div>
         </div>

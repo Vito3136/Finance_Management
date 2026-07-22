@@ -31,6 +31,14 @@ const DOM = {
     salaryContainer: document.getElementById('salary-container'),
     variousContainer: document.getElementById('various-container'),
     
+    // Add Expense Elements
+    btnAddExpense: document.getElementById('btn-add-expense'),
+    btnAddExpensePage: document.getElementById('btn-add-expense-page'),
+    addExpenseModal: document.getElementById('add-expense-modal'),
+    closeExpenseModal: document.getElementById('close-expense-modal'),
+    addExpenseForm: document.getElementById('add-expense-form'),
+    expensesList: document.getElementById('expenses-list'),
+    
     // Menu Links
     navLinks: document.querySelectorAll('.nav-link'),
 
@@ -105,6 +113,7 @@ async function init() {
         await loadRecentAccreditations();
         await loadSalaryCredits();
         await loadVariousAccreditations();
+        await loadExpenses();
     }
 }
 
@@ -248,6 +257,7 @@ function setupEventListeners() {
             await loadRecentAccreditations();
             await loadSalaryCredits();
             await loadVariousAccreditations();
+            await loadExpenses();
         }
     });
 
@@ -409,6 +419,60 @@ function setupEventListeners() {
                 addVariousForm.reset();
                 loadRecentAccreditations(); // Update list
                 loadVariousAccreditations(); // Update dedicated list
+            }
+        });
+    }
+
+    // Add Expense Modal Logic
+    if ((DOM.btnAddExpense || DOM.btnAddExpensePage) && DOM.addExpenseModal && DOM.closeExpenseModal && DOM.addExpenseForm) {
+        const openExpenseModal = () => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            document.getElementById('expense-date').valueAsDate = new Date();
+            DOM.addExpenseModal.classList.add('active');
+        };
+
+        if (DOM.btnAddExpense) DOM.btnAddExpense.addEventListener('click', openExpenseModal);
+        if (DOM.btnAddExpensePage) DOM.btnAddExpensePage.addEventListener('click', openExpenseModal);
+
+        DOM.closeExpenseModal.addEventListener('click', () => {
+            DOM.addExpenseModal.classList.remove('active');
+            DOM.addExpenseForm.reset();
+        });
+
+        DOM.addExpenseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('expense-amount').value);
+            const date = document.getElementById('expense-date').value;
+            const description = document.getElementById('expense-desc').value;
+            const submitBtn = DOM.addExpenseForm.querySelector('button[type="submit"]');
+
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Saving...';
+            submitBtn.disabled = true;
+
+            const { data, error } = await supabase
+                .from('expenses')
+                .insert([
+                    { 
+                        user_id: state.user.id,
+                        amount: amount, 
+                        expense_date: date, 
+                        description: description 
+                    }
+                ]);
+
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+
+            if (error) {
+                console.error("Error saving expense:", error);
+                alert("Error saving data: " + error.message);
+            } else {
+                alert("Expense saved successfully!");
+                DOM.addExpenseModal.classList.remove('active');
+                DOM.addExpenseForm.reset();
+                loadExpenses(); // Update dedicated list
             }
         });
     }
@@ -680,6 +744,59 @@ async function loadVariousAccreditations() {
 
     } catch (error) {
         console.error("Error loading various accreditations:", error);
+        listContainer.innerHTML = `
+            <div class="empty-state" style="color: #ff3b30; text-align: center;">
+                <i class="ph ph-warning"></i>
+                <p>Failed to load data: ${error.message || JSON.stringify(error)}</p>
+            </div>
+        `;
+    }
+}
+
+// Load Expenses
+async function loadExpenses() {
+    if (!state.user) return;
+    
+    const listContainer = DOM.expensesList;
+    if (!listContainer) return;
+
+    try {
+        const { data, error } = await supabase
+            .from('expenses')
+            .select('*')
+            .order('expense_date', { ascending: false });
+            
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            listContainer.innerHTML = `
+                <div class="empty-state">
+                    <i class="ph ph-shopping-cart"></i>
+                    <p>No expenses yet</p>
+                </div>
+            `;
+            return;
+        }
+
+        listContainer.innerHTML = data.map(item => `
+            <div class="transaction-item">
+                <div class="transaction-left">
+                    <div class="transaction-icon expense" style="background-color: #ff3b3020; color: #ff3b30;">
+                        <i class="ph ph-shopping-cart"></i>
+                    </div>
+                    <div class="transaction-info">
+                        <span class="transaction-title">${item.description || 'Expense'}</span>
+                        <span class="transaction-date">${formatDate(item.expense_date)}</span>
+                    </div>
+                </div>
+                <div class="transaction-amount expense-amount-text" style="color: #ff3b30;">
+                    -€${parseFloat(item.amount).toFixed(2)}
+                </div>
+            </div>
+        `).join('');
+
+    } catch (error) {
+        console.error("Error loading expenses:", error);
         listContainer.innerHTML = `
             <div class="empty-state" style="color: #ff3b30; text-align: center;">
                 <i class="ph ph-warning"></i>
