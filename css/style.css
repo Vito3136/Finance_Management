@@ -368,13 +368,28 @@ main {
     background: linear-gradient(135deg, #5856D6 0%, #AF52DE 100%);
 }
 
-.widget-total-expenses {
+.widget-reply-gross {
+    background: linear-gradient(135deg, #FF9500 0%, #FFCC00 100%);
+}
+
+.widget-reply-spendable {
+    background: linear-gradient(135deg, #32ADE6 0%, #30B0C7 100%);
+}
+
+.widget-reply-saved {
+    background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+}
+
+.widget-various-gross {
+    background: linear-gradient(135deg, #AF52DE 0%, #5856D6 100%);
+}
+
+.widget-various-spendable {
     background: linear-gradient(135deg, #FF2D55 0%, #FF375F 100%);
 }
 
-/* Make odd-numbered last widget span full width */
-.widgets-grid .widget:last-child:nth-child(odd) {
-    grid-column: span 2;
+.widget-various-saved {
+    background: linear-gradient(135deg, #30D158 0%, #34C759 100%);
 }
 
 /* Placeholders */

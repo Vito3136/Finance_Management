@@ -46,6 +46,14 @@ const DOM = {
     statSavedValue: document.getElementById('stat-saved-value'),
     statGrossValue: document.getElementById('stat-gross-value'),
     
+    statReplyGrossValue: document.getElementById('stat-reply-gross-value'),
+    statReplySpendableValue: document.getElementById('stat-reply-spendable-value'),
+    statReplySavedValue: document.getElementById('stat-reply-saved-value'),
+    
+    statVariousGrossValue: document.getElementById('stat-various-gross-value'),
+    statVariousSpendableValue: document.getElementById('stat-various-spendable-value'),
+    statVariousSavedValue: document.getElementById('stat-various-saved-value'),
+    
     // Menu Links
     navLinks: document.querySelectorAll('.nav-link'),
 
@@ -827,22 +835,66 @@ async function calculateStatistics() {
     if (!state.user) return;
 
     try {
-        // Calculate Total Expenses
-        const { data: expenses, error: expError } = await supabase
-            .from('expenses')
-            .select('amount');
-            
+        // Fetch Expenses
+        const { data: expenses, error: expError } = await supabase.from('expenses').select('amount');
         if (expError) throw expError;
 
+        // Fetch Salary (Reply)
+        const { data: salaries, error: salError } = await supabase.from('salary_credits').select('total_amount, spendable_amount');
+        if (salError) throw salError;
+
+        // Fetch Various Accreditations
+        const { data: various, error: varError } = await supabase.from('various_accreditations').select('total_amount, spendable_amount');
+        if (varError) throw varError;
+
+        // Sum Expenses
         let totalExpenses = 0;
-        if (expenses && expenses.length > 0) {
-            totalExpenses = expenses.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
-        }
+        if (expenses) totalExpenses = expenses.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
         
-        const spentEl = document.getElementById('stat-spent-value') || DOM.statSpentValue;
-        if (spentEl) {
-            spentEl.innerText = totalExpenses.toFixed(2);
+        // Sum Salary (Reply)
+        let replyGross = 0, replySpendable = 0;
+        if (salaries) {
+            replyGross = salaries.reduce((sum, item) => sum + parseFloat(item.total_amount || 0), 0);
+            replySpendable = salaries.reduce((sum, item) => sum + parseFloat(item.spendable_amount || 0), 0);
         }
+        let replySaved = replyGross - replySpendable;
+
+        // Sum Various Accreditations
+        let variousGross = 0, variousSpendable = 0;
+        if (various) {
+            variousGross = various.reduce((sum, item) => sum + parseFloat(item.total_amount || 0), 0);
+            variousSpendable = various.reduce((sum, item) => sum + parseFloat(item.spendable_amount || 0), 0);
+        }
+        let variousSaved = variousGross - variousSpendable;
+
+        // Global Totals
+        let totalGross = replyGross + variousGross;
+        let totalSaved = replySaved + variousSaved;
+        let totalRemaining = (replySpendable + variousSpendable) - totalExpenses;
+
+        // Update DOM Elements
+        const updateEl = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = value.toFixed(2);
+        };
+
+        // Update Statistics Page Widgets
+        updateEl('stat-spent-value', totalExpenses);
+        updateEl('stat-remaining-value', totalRemaining);
+        updateEl('stat-saved-value', totalSaved);
+        updateEl('stat-gross-value', totalGross);
+
+        updateEl('stat-reply-gross-value', replyGross);
+        updateEl('stat-reply-spendable-value', replySpendable);
+        updateEl('stat-reply-saved-value', replySaved);
+
+        updateEl('stat-various-gross-value', variousGross);
+        updateEl('stat-various-spendable-value', variousSpendable);
+        updateEl('stat-various-saved-value', variousSaved);
+
+        // Update Homepage Widgets
+        updateEl('home-remaining-value', totalRemaining);
+        updateEl('home-saved-value', totalSaved);
 
     } catch (error) {
         console.error("Error calculating statistics:", error);
