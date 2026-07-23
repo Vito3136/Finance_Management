@@ -839,8 +839,9 @@ async function calculateStatistics() {
             totalExpenses = expenses.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
         }
         
-        if (DOM.statSpentValue) {
-            DOM.statSpentValue.innerText = totalExpenses.toFixed(2);
+        const spentEl = document.getElementById('stat-spent-value') || DOM.statSpentValue;
+        if (spentEl) {
+            spentEl.innerText = totalExpenses.toFixed(2);
         }
 
     } catch (error) {
