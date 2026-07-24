@@ -313,6 +313,17 @@ main {
 }
 
 /* Widgets Grid */
+.statistics-subsection {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    margin: 20px 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-color);
+}
+
 .widgets-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
