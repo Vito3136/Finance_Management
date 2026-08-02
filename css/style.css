@@ -551,9 +551,7 @@ main {
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    word-break: break-word; /* Ensures long words wrap properly */
 }
 
 .transaction-date {
