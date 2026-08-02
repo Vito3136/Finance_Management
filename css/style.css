@@ -518,6 +518,8 @@ main {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex: 1;
+    min-width: 0;
 }
 
 .transaction-icon {
@@ -540,6 +542,8 @@ main {
 .transaction-info {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-width: 0;
 }
 
 .transaction-title {
@@ -547,6 +551,9 @@ main {
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .transaction-date {
@@ -558,6 +565,9 @@ main {
     font-size: 16px;
     font-weight: 700;
     color: var(--accent-expense); /* Positive for credits */
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 8px;
 }
 
 .section-title {
