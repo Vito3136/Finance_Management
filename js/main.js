@@ -675,8 +675,9 @@ async function loadRecentAccreditations() {
                         <span class="transaction-date">${formatDate(item.credit_date)}</span>
                     </div>
                 </div>
-                <div class="transaction-amount">
-                    +€${parseFloat(item.total_amount).toFixed(2)}
+                <div class="transaction-amount" style="text-align: right;">
+                    <div style="font-weight: 600; color: #34c759;">+€${parseFloat(item.total_amount).toFixed(2)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: €${parseFloat(item.spendable_amount).toFixed(2)}</div>
                 </div>
             </div>
         `).join('');
@@ -728,8 +729,9 @@ async function loadSalaryCredits() {
                         <span class="transaction-date">${formatDate(item.credit_date)}</span>
                     </div>
                 </div>
-                <div class="transaction-amount">
-                    +€${parseFloat(item.total_amount).toFixed(2)}
+                <div class="transaction-amount" style="text-align: right;">
+                    <div style="font-weight: 600; color: #34c759;">+€${parseFloat(item.total_amount).toFixed(2)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: €${parseFloat(item.spendable_amount).toFixed(2)}</div>
                 </div>
             </div>
         `).join('');
@@ -781,8 +783,9 @@ async function loadVariousAccreditations() {
                         <span class="transaction-date">${formatDate(item.credit_date)}</span>
                     </div>
                 </div>
-                <div class="transaction-amount">
-                    +€${parseFloat(item.total_amount).toFixed(2)}
+                <div class="transaction-amount" style="text-align: right;">
+                    <div style="font-weight: 600; color: #34c759;">+€${parseFloat(item.total_amount).toFixed(2)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: €${parseFloat(item.spendable_amount).toFixed(2)}</div>
                 </div>
             </div>
         `).join('');
