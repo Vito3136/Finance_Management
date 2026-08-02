@@ -325,7 +325,20 @@
                 </button>
             </div>
             <div class="transactions-list">
-                <h3 class="section-title">Expenses History</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 class="section-title" style="margin-bottom: 0;">Expenses History</h3>
+                </div>
+                
+                <div class="expense-controls">
+                    <div class="view-toggle">
+                        <button id="toggle-all-expenses" class="toggle-btn active">All</button>
+                        <button id="toggle-month-expenses" class="toggle-btn">By Month</button>
+                    </div>
+                    <div id="month-selector-container" class="month-selector" style="display: none;">
+                        <input type="month" id="expense-month-input" class="modern-input">
+                    </div>
+                </div>
+
                 <div id="expenses-list" class="transactions-list-container">
                     <div class="empty-state">
                         <i class="ph ph-shopping-cart"></i>

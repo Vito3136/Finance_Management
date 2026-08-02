@@ -15,7 +15,9 @@ const state = {
     },
     isMenuOpen: false,
     user: null,
-    totalRemaining: 0
+    totalRemaining: 0,
+    expenseViewMode: 'all', // 'all' or 'month'
+    expenseSelectedMonth: '' // 'YYYY-MM'
 };
 
 // DOM Elements
@@ -129,6 +131,13 @@ async function init() {
     await checkSession();
     updateUI();
     
+    // Set current month string (YYYY-MM) as default
+    const now = new Date();
+    const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    state.expenseSelectedMonth = currentMonthStr;
+    const monthInput = document.getElementById('expense-month-input');
+    if (monthInput) monthInput.value = currentMonthStr;
+    
     // Load initial data if logged in
     if (state.user) {
         await loadRecentAccreditations();
@@ -203,6 +212,39 @@ function setupEventListeners() {
             toggleMenu(); // Close menu
         });
     });
+    
+    // Expenses View Toggle
+    const toggleAll = document.getElementById('toggle-all-expenses');
+    const toggleMonth = document.getElementById('toggle-month-expenses');
+    const monthSelector = document.getElementById('month-selector-container');
+    const monthInput = document.getElementById('expense-month-input');
+
+    if (toggleAll && toggleMonth && monthSelector && monthInput) {
+        toggleAll.addEventListener('click', () => {
+            if (state.expenseViewMode === 'all') return;
+            state.expenseViewMode = 'all';
+            toggleAll.classList.add('active');
+            toggleMonth.classList.remove('active');
+            monthSelector.style.display = 'none';
+            loadExpenses();
+        });
+
+        toggleMonth.addEventListener('click', () => {
+            if (state.expenseViewMode === 'month') return;
+            state.expenseViewMode = 'month';
+            toggleMonth.classList.add('active');
+            toggleAll.classList.remove('active');
+            monthSelector.style.display = 'block';
+            loadExpenses();
+        });
+
+        monthInput.addEventListener('change', (e) => {
+            state.expenseSelectedMonth = e.target.value; // 'YYYY-MM'
+            if (state.expenseViewMode === 'month') {
+                loadExpenses();
+            }
+        });
+    }
     
     // Logout Logic
     if (DOM.logoutBtn) {
@@ -826,7 +868,14 @@ async function loadExpenses() {
             return;
         }
 
-        listContainer.innerHTML = data.map(item => {
+        const unhandled = data.filter(item => item.is_handled === false);
+        let handled = data.filter(item => item.is_handled !== false);
+
+        if (state.expenseViewMode === 'month' && state.expenseSelectedMonth) {
+            handled = handled.filter(item => item.expense_date.startsWith(state.expenseSelectedMonth));
+        }
+
+        const renderItem = (item) => {
             const isUnhandled = item.is_handled === false;
             const iconBg = isUnhandled ? '#e5e5ea' : '#ff3b3020';
             const iconColor = isUnhandled ? '#8e8e93' : '#ff3b30';
@@ -849,7 +898,46 @@ async function loadExpenses() {
                 </div>
             </div>
             `;
-        }).join('');
+        };
+
+        let html = '';
+
+        // 1. Sempre prima le non gestite
+        if (unhandled.length > 0) {
+            html += unhandled.map(renderItem).join('');
+        }
+
+        // 2. Poi le gestite (con divisori se siamo in modalita 'all')
+        if (handled.length > 0) {
+            if (state.expenseViewMode === 'all') {
+                let currentMonth = '';
+                handled.forEach(item => {
+                    const itemMonth = item.expense_date.substring(0, 7); // YYYY-MM
+                    if (itemMonth !== currentMonth) {
+                        currentMonth = itemMonth;
+                        const dateObj = new Date(item.expense_date);
+                        const monthName = dateObj.toLocaleString('it-IT', { month: 'long', year: 'numeric' });
+                        const capitalized = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+                        html += `<div class="month-divider">${capitalized}</div>`;
+                    }
+                    html += renderItem(item);
+                });
+            } else {
+                // Selezionato un mese specifico, mostriamo solo la lista senza divisori (o con un solo divisore in cima)
+                html += handled.map(renderItem).join('');
+            }
+        }
+
+        if (html === '') {
+            html = `
+                <div class="empty-state">
+                    <i class="ph ph-shopping-cart"></i>
+                    <p>No expenses to show</p>
+                </div>
+            `;
+        }
+
+        listContainer.innerHTML = html;
 
     } catch (error) {
         console.error("Error loading expenses:", error);
