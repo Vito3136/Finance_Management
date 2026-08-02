@@ -14,7 +14,8 @@ const state = {
         investment: 'investment'
     },
     isMenuOpen: false,
-    user: null
+    user: null,
+    totalRemaining: 0
 };
 
 // DOM Elements
@@ -370,8 +371,17 @@ function setupEventListeners() {
                 alert("Salary credit saved successfully!");
                 addSalaryModal.classList.remove('active');
                 addSalaryForm.reset();
-                loadRecentAccreditations(); // Update list
-                loadSalaryCredits(); // Update dedicated list
+                
+                // Important: Calculate statistics first to update state.totalRemaining
+                await calculateStatistics();
+                // Then process unhandled expenses if the budget allows
+                await processUnhandledExpenses();
+                
+                // Finally reload UI elements to reflect new data
+                loadRecentAccreditations(); 
+                loadSalaryCredits(); 
+                loadExpenses(); // in case expenses turned from grey to white
+                calculateStatistics(); // final sync for UI
             }
         });
     }
@@ -440,8 +450,16 @@ function setupEventListeners() {
                 alert("Various accreditation saved successfully!");
                 addVariousModal.classList.remove('active');
                 addVariousForm.reset();
+                
+                // Calculate stats to get updated totalRemaining
+                await calculateStatistics();
+                // Process unhandled expenses
+                await processUnhandledExpenses();
+                
                 loadRecentAccreditations(); // Update list
                 loadVariousAccreditations(); // Update dedicated list
+                loadExpenses(); // refresh expenses
+                calculateStatistics(); // final sync
             }
         });
     }
@@ -474,6 +492,8 @@ function setupEventListeners() {
             submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Saving...';
             submitBtn.disabled = true;
 
+            const isHandled = state.totalRemaining >= amount;
+
             const { data, error } = await supabase
                 .from('expenses')
                 .insert([
@@ -481,7 +501,8 @@ function setupEventListeners() {
                         user_id: state.user.id,
                         amount: amount, 
                         expense_date: date, 
-                        description: description 
+                        description: description,
+                        is_handled: isHandled
                     }
                 ]);
 
@@ -802,22 +823,30 @@ async function loadExpenses() {
             return;
         }
 
-        listContainer.innerHTML = data.map(item => `
-            <div class="transaction-item">
+        listContainer.innerHTML = data.map(item => {
+            const isUnhandled = item.is_handled === false;
+            const iconBg = isUnhandled ? '#e5e5ea' : '#ff3b3020';
+            const iconColor = isUnhandled ? '#8e8e93' : '#ff3b30';
+            const textColor = isUnhandled ? '#8e8e93' : '#ff3b30';
+            const extraLabel = isUnhandled ? ' <span style="font-size: 0.7rem; color: #8e8e93; font-weight: normal; margin-left: 4px;">(In attesa)</span>' : '';
+
+            return `
+            <div class="transaction-item" style="${isUnhandled ? 'opacity: 0.8;' : ''}">
                 <div class="transaction-left">
-                    <div class="transaction-icon expense" style="background-color: #ff3b3020; color: #ff3b30;">
+                    <div class="transaction-icon expense" style="background-color: ${iconBg}; color: ${iconColor};">
                         <i class="ph ph-shopping-cart"></i>
                     </div>
                     <div class="transaction-info">
-                        <span class="transaction-title">${item.description || 'Expense'}</span>
+                        <span class="transaction-title" style="${isUnhandled ? 'color: #8e8e93;' : ''}">${item.description || 'Expense'}${extraLabel}</span>
                         <span class="transaction-date">${formatDate(item.expense_date)}</span>
                     </div>
                 </div>
-                <div class="transaction-amount expense-amount-text" style="color: #ff3b30;">
+                <div class="transaction-amount expense-amount-text" style="color: ${textColor};">
                     -€${parseFloat(item.amount).toFixed(2)}
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
 
     } catch (error) {
         console.error("Error loading expenses:", error);
@@ -836,7 +865,8 @@ async function calculateStatistics() {
 
     try {
         // Fetch Expenses
-        const { data: expenses, error: expError } = await supabase.from('expenses').select('amount');
+        // Fetch Expenses
+        const { data: expenses, error: expError } = await supabase.from('expenses').select('amount, is_handled');
         if (expError) throw expError;
 
         // Fetch Salary (Reply)
@@ -847,9 +877,13 @@ async function calculateStatistics() {
         const { data: various, error: varError } = await supabase.from('various_accreditations').select('total_amount, spendable_amount');
         if (varError) throw varError;
 
-        // Sum Expenses
+        // Sum Expenses (only handled)
         let totalExpenses = 0;
-        if (expenses) totalExpenses = expenses.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+        if (expenses) {
+            totalExpenses = expenses
+                .filter(item => item.is_handled !== false)
+                .reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+        }
         
         // Sum Salary (Reply)
         let replyGross = 0, replySpendable = 0;
@@ -871,6 +905,9 @@ async function calculateStatistics() {
         let totalGross = replyGross + variousGross;
         let totalSaved = replySaved + variousSaved;
         let totalRemaining = (replySpendable + variousSpendable) - totalExpenses;
+        
+        // Save to global state
+        state.totalRemaining = totalRemaining;
 
         // Update DOM Elements
         const updateEl = (id, value) => {
@@ -898,6 +935,49 @@ async function calculateStatistics() {
 
     } catch (error) {
         console.error("Error calculating statistics:", error);
+    }
+}
+
+// Process Unhandled Expenses when new funds are added
+async function processUnhandledExpenses() {
+    if (!state.user) return;
+
+    try {
+        // Fetch all unhandled expenses sorted by oldest first
+        const { data: unhandled, error: fetchErr } = await supabase
+            .from('expenses')
+            .select('id, amount')
+            .eq('is_handled', false)
+            .order('created_at', { ascending: true });
+
+        if (fetchErr) throw fetchErr;
+        
+        if (!unhandled || unhandled.length === 0) return; // No unhandled expenses
+
+        let currentRemaining = state.totalRemaining;
+        
+        for (const expense of unhandled) {
+            const expAmount = parseFloat(expense.amount);
+            
+            // If the budget can cover this oldest expense
+            if (currentRemaining >= expAmount) {
+                // Update DB
+                const { error: updateErr } = await supabase
+                    .from('expenses')
+                    .update({ is_handled: true })
+                    .eq('id', expense.id);
+                
+                if (updateErr) throw updateErr;
+                
+                // Decrement our running total to check the next one
+                currentRemaining -= expAmount;
+            } else {
+                // If we can't afford this one, we break, because we process chronologically
+                break;
+            }
+        }
+    } catch (error) {
+        console.error("Error processing unhandled expenses:", error);
     }
 }
 
