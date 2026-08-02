@@ -868,11 +868,12 @@ async function loadExpenses() {
             return;
         }
 
-        const unhandled = data.filter(item => item.is_handled === false);
+        let unhandled = data.filter(item => item.is_handled === false);
         let handled = data.filter(item => item.is_handled !== false);
 
         if (state.expenseViewMode === 'month' && state.expenseSelectedMonth) {
             handled = handled.filter(item => item.expense_date.startsWith(state.expenseSelectedMonth));
+            unhandled = unhandled.filter(item => item.expense_date.startsWith(state.expenseSelectedMonth));
         }
 
         const renderItem = (item) => {
