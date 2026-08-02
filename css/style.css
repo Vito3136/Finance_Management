@@ -61,6 +61,8 @@ body {
     overflow-x: hidden;
     min-height: 100vh;
     transition: background-color 0.3s ease, color 0.3s ease;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
 }
 
 /* Top Navigation Bar */
@@ -219,7 +221,7 @@ main {
     width: 100%;
     min-height: 100vh;
     position: relative;
-    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 .mode-container {
