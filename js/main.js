@@ -334,6 +334,13 @@ function setupEventListeners() {
         } else {
             // Login Successo
             state.user = data.user;
+            
+            // Leggi il toggle per nascondere le cifre
+            const hideToggle = document.getElementById('hide-amounts-toggle');
+            if (hideToggle) {
+                state.hideValues = hideToggle.checked;
+            }
+            
             updateLastActivity();
             DOM.loginScreen.classList.remove('active');
             submitBtn.innerHTML = 'Sign In';
