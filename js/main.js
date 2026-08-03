@@ -17,7 +17,8 @@ const state = {
     user: null,
     totalRemaining: 0,
     expenseViewMode: 'all', // 'all' or 'month'
-    expenseSelectedMonth: '' // 'YYYY-MM'
+    expenseSelectedMonth: '', // 'YYYY-MM'
+    hideValues: false
 };
 
 // DOM Elements
@@ -148,6 +149,14 @@ async function init() {
     }
 }
 
+// Helper for currency formatting with optional hiding
+function formatCurrency(amount, prefix = '') {
+    if (state.hideValues) {
+        return `${prefix}€***`;
+    }
+    return `${prefix}€${parseFloat(amount).toFixed(2)}`;
+}
+
 // Check if user is already logged in and session hasn't expired
 async function checkSession() {
     const { data: { session }, error } = await supabase.auth.getSession();
@@ -161,6 +170,9 @@ async function checkSession() {
             console.log("Session expired due to inactivity");
             await supabase.auth.signOut();
             state.user = null;
+            state.hideValues = false;
+            const toggleEl = document.getElementById('hide-amounts-toggle');
+            if (toggleEl) toggleEl.checked = false;
             localStorage.removeItem('last_activity');
             DOM.loginScreen.classList.add('active');
             return;
@@ -170,8 +182,17 @@ async function checkSession() {
         updateLastActivity();
         state.user = session.user;
         DOM.loginScreen.classList.remove('active');
+        
+        // Leggi il toggle per la sessione corrente
+        const hideToggle = document.getElementById('hide-amounts-toggle');
+        if (hideToggle) {
+            state.hideValues = hideToggle.checked;
+        }
     } else {
         // Show login screen
+        state.hideValues = false;
+        const toggleEl = document.getElementById('hide-amounts-toggle');
+        if (toggleEl) toggleEl.checked = false;
         DOM.loginScreen.classList.add('active');
     }
 }
@@ -259,6 +280,9 @@ function setupEventListeners() {
             
             // Pulisci lo stato e mostra la schermata di login
             state.user = null;
+            state.hideValues = false;
+            const toggleEl = document.getElementById('hide-amounts-toggle');
+            if (toggleEl) toggleEl.checked = false;
             DOM.loginScreen.classList.add('active');
         });
     }
@@ -718,8 +742,8 @@ async function loadRecentAccreditations() {
                     </div>
                 </div>
                 <div class="transaction-amount" style="text-align: right;">
-                    <div style="font-weight: 600; color: #34c759;">+€${parseFloat(item.total_amount).toFixed(2)}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: €${parseFloat(item.spendable_amount).toFixed(2)}</div>
+                    <div style="font-weight: 600; color: #34c759;">${formatCurrency(item.total_amount, '+')}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: ${formatCurrency(item.spendable_amount)}</div>
                 </div>
             </div>
         `).join('');
@@ -772,8 +796,8 @@ async function loadSalaryCredits() {
                     </div>
                 </div>
                 <div class="transaction-amount" style="text-align: right;">
-                    <div style="font-weight: 600; color: #34c759;">+€${parseFloat(item.total_amount).toFixed(2)}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: €${parseFloat(item.spendable_amount).toFixed(2)}</div>
+                    <div style="font-weight: 600; color: #34c759;">${formatCurrency(item.total_amount, '+')}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: ${formatCurrency(item.spendable_amount)}</div>
                 </div>
             </div>
         `).join('');
@@ -826,8 +850,8 @@ async function loadVariousAccreditations() {
                     </div>
                 </div>
                 <div class="transaction-amount" style="text-align: right;">
-                    <div style="font-weight: 600; color: #34c759;">+€${parseFloat(item.total_amount).toFixed(2)}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: €${parseFloat(item.spendable_amount).toFixed(2)}</div>
+                    <div style="font-weight: 600; color: #34c759;">${formatCurrency(item.total_amount, '+')}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: ${formatCurrency(item.spendable_amount)}</div>
                 </div>
             </div>
         `).join('');
@@ -895,7 +919,7 @@ async function loadExpenses() {
                     </div>
                 </div>
                 <div class="transaction-amount expense-amount-text" style="color: ${textColor};">
-                    -€${parseFloat(item.amount).toFixed(2)}
+                    ${formatCurrency(item.amount, '-')}
                 </div>
             </div>
             `;
@@ -1004,7 +1028,9 @@ async function calculateStatistics() {
         // Update DOM Elements
         const updateEl = (id, value) => {
             const el = document.getElementById(id);
-            if (el) el.innerText = value.toFixed(2);
+            if (el) {
+                el.innerText = state.hideValues ? '***' : value.toFixed(2);
+            }
         };
 
         // Update Statistics Page Widgets
