@@ -46,9 +46,12 @@
                     <input type="password" id="password" required
                         autocomplete="current-password">
                 </div>
-                <div class="input-group" style="flex-direction: row; align-items: center; justify-content: flex-start; gap: 8px;">
-                    <input type="checkbox" id="hide-amounts-toggle" style="width: 18px; height: 18px; margin: 0; cursor: pointer;">
-                    <label for="hide-amounts-toggle" style="margin: 0; font-weight: 500; cursor: pointer; color: var(--text-primary);">Oscura gli importi</label>
+                <div class="input-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                    <label for="hide-amounts-toggle" style="margin: 0; font-weight: 600; color: var(--text-primary); cursor: pointer;">Oscura gli importi</label>
+                    <label class="ios-switch">
+                        <input type="checkbox" id="hide-amounts-toggle">
+                        <span class="ios-slider"></span>
+                    </label>
                 </div>
 
                 <button type="submit" class="primary-btn login-btn" id="submit-login">
