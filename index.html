@@ -183,7 +183,95 @@
             </form>
         </div>
     </div>
+    <!-- Add Bonifico Modal -->
+    <div id="add-bonifico-modal" class="custom-modal">
+        <div class="custom-modal-content form-modal">
+            <div class="modal-header">
+                <h3>Aggiungi Bonifico</h3>
+                <button type="button" id="close-bonifico-modal" class="icon-btn close-btn">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <form id="add-bonifico-form">
+                <div class="input-group">
+                    <label for="bonifico-amount">Cifra (€)</label>
+                    <input type="number" id="bonifico-amount" step="0.01" required placeholder="0.00">
+                </div>
+                <div class="input-group">
+                    <label for="bonifico-date">Data</label>
+                    <input type="date" id="bonifico-date" required>
+                </div>
+                <button type="submit" class="primary-btn submit-btn" style="background-color: var(--accent-investment);">
+                    Salva Bonifico
+                </button>
+            </form>
+        </div>
+    </div>
 
+    <!-- Add Investimento Modal -->
+    <div id="add-investimento-modal" class="custom-modal">
+        <div class="custom-modal-content form-modal">
+            <div class="modal-header">
+                <h3>Aggiungi Investimento</h3>
+                <button type="button" id="close-investimento-modal" class="icon-btn close-btn">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <form id="add-investimento-form">
+                <div class="input-group">
+                    <label for="investimento-amount">Cifra (€)</label>
+                    <input type="number" id="investimento-amount" step="0.01" required placeholder="0.00">
+                </div>
+                <div class="input-group">
+                    <label for="investimento-date">Data</label>
+                    <input type="date" id="investimento-date" required>
+                </div>
+                <div class="input-group">
+                    <label for="investimento-desc">Descrizione (es. ETF S&P 500)</label>
+                    <input type="text" id="investimento-desc" required>
+                </div>
+                <button type="submit" class="primary-btn submit-btn" style="background-color: #5856d6;">
+                    Salva Investimento
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Movimento Modal -->
+    <div id="add-movimento-modal" class="custom-modal">
+        <div class="custom-modal-content form-modal">
+            <div class="modal-header">
+                <h3>Aggiungi Movimento</h3>
+                <button type="button" id="close-movimento-modal" class="icon-btn close-btn">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <form id="add-movimento-form">
+                <div class="input-group">
+                    <label for="movimento-amount">Cifra (€) (Usa - per le spese)</label>
+                    <input type="number" id="movimento-amount" step="0.01" required placeholder="es. 10.50 o -2.99">
+                </div>
+                <div class="input-group">
+                    <label for="movimento-date">Data</label>
+                    <input type="date" id="movimento-date" required>
+                </div>
+                <div class="input-group">
+                    <label for="movimento-desc">Descrizione</label>
+                    <input type="text" id="movimento-desc" required>
+                </div>
+                <div class="input-group" style="flex-direction: row; align-items: center; gap: 12px; margin-top: 16px;">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="movimento-highlighted">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span style="font-size: 14px; font-weight: 500;">Metti in evidenza in Homepage</span>
+                </div>
+                <button type="submit" class="primary-btn submit-btn" style="background-color: #FF9500; margin-top: 16px;">
+                    Salva Movimento
+                </button>
+            </form>
+        </div>
+    </div>
     <!-- Top Navigation Bar -->
     <nav class="top-bar">
         <button id="menu-btn" class="icon-btn" aria-label="Menu">
@@ -465,7 +553,7 @@
                 <button class="action-btn btn-expense" id="btn-add-investimento" style="background-color: rgba(88, 86, 214, 0.1); color: #5856d6;">
                     <i class="ph ph-chart-pie-slice"></i> Aggiungi Investimento
                 </button>
-                <button class="action-btn btn-various" id="btn-add-movimento" style="background-color: #f2f2f7; color: #48484a;">
+                <button class="action-btn btn-various" id="btn-add-movimento" style="background-color: rgba(255, 149, 0, 0.1); color: #FF9500;">
                     <i class="ph ph-receipt"></i> Aggiungi Movimento
                 </button>
             </div>

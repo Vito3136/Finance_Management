@@ -36,12 +36,35 @@ const DOM = {
     salaryContainer: document.getElementById('salary-container'),
     variousContainer: document.getElementById('various-container'),
     
-    // Add Expense Elements
-    btnAddExpense: document.getElementById('btn-add-expense'),
-    btnAddExpensePage: document.getElementById('btn-add-expense-page'),
+    // Modals & Forms
+    addSalaryModal: document.getElementById('add-salary-modal'),
+    closeSalaryModal: document.getElementById('close-salary-modal'),
+    addSalaryForm: document.getElementById('add-salary-form'),
+    addVariousModal: document.getElementById('add-various-modal'),
+    closeVariousModal: document.getElementById('close-various-modal'),
+    addVariousForm: document.getElementById('add-various-form'),
     addExpenseModal: document.getElementById('add-expense-modal'),
     closeExpenseModal: document.getElementById('close-expense-modal'),
     addExpenseForm: document.getElementById('add-expense-form'),
+    btnAddExpense: document.getElementById('btn-add-expense'),
+    btnAddExpensePage: document.getElementById('btn-add-expense-page'),
+    
+    // Investment Modals & Forms
+    btnAddBonifico: document.getElementById('btn-add-bonifico'),
+    addBonificoModal: document.getElementById('add-bonifico-modal'),
+    closeBonificoModal: document.getElementById('close-bonifico-modal'),
+    addBonificoForm: document.getElementById('add-bonifico-form'),
+    
+    btnAddInvestimento: document.getElementById('btn-add-investimento'),
+    addInvestimentoModal: document.getElementById('add-investimento-modal'),
+    closeInvestimentoModal: document.getElementById('close-investimento-modal'),
+    addInvestimentoForm: document.getElementById('add-investimento-form'),
+    
+    btnAddMovimento: document.getElementById('btn-add-movimento'),
+    addMovimentoModal: document.getElementById('add-movimento-modal'),
+    closeMovimentoModal: document.getElementById('close-movimento-modal'),
+    addMovimentoForm: document.getElementById('add-movimento-form'),
+
     expensesList: document.getElementById('expenses-list'),
     expensePageTotal: document.getElementById('expense-page-total'),
     expensePagePending: document.getElementById('expense-page-pending'),
@@ -642,6 +665,148 @@ function setupEventListeners() {
     }
 }
 
+// Investment Modals Logic
+function setupInvestmentModals() {
+    // Bonifico
+    if (DOM.btnAddBonifico && DOM.addBonificoModal && DOM.closeBonificoModal && DOM.addBonificoForm) {
+        DOM.btnAddBonifico.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            document.getElementById('bonifico-date').valueAsDate = new Date();
+            DOM.addBonificoModal.classList.add('active');
+        });
+        
+        DOM.closeBonificoModal.addEventListener('click', () => {
+            DOM.addBonificoModal.classList.remove('active');
+            DOM.addBonificoForm.reset();
+        });
+        
+        DOM.addBonificoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('bonifico-amount').value);
+            const date = document.getElementById('bonifico-date').value;
+            const submitBtn = DOM.addBonificoForm.querySelector('button[type="submit"]');
+            
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Salvataggio...';
+            submitBtn.disabled = true;
+            
+            const { error } = await supabase.from('investment_transfers').insert([{
+                user_id: state.user.id,
+                amount: amount,
+                date: date
+            }]);
+            
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            
+            if (error) {
+                console.error("Errore salvataggio bonifico:", error);
+                alert("Errore salvataggio: " + error.message);
+            } else {
+                DOM.addBonificoModal.classList.remove('active');
+                DOM.addBonificoForm.reset();
+                calculateInvestmentStatistics();
+                loadInvestmentTransfers();
+            }
+        });
+    }
+
+    // Investimento
+    if (DOM.btnAddInvestimento && DOM.addInvestimentoModal && DOM.closeInvestimentoModal && DOM.addInvestimentoForm) {
+        DOM.btnAddInvestimento.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            document.getElementById('investimento-date').valueAsDate = new Date();
+            DOM.addInvestimentoModal.classList.add('active');
+        });
+        
+        DOM.closeInvestimentoModal.addEventListener('click', () => {
+            DOM.addInvestimentoModal.classList.remove('active');
+            DOM.addInvestimentoForm.reset();
+        });
+        
+        DOM.addInvestimentoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('investimento-amount').value);
+            const date = document.getElementById('investimento-date').value;
+            const desc = document.getElementById('investimento-desc').value;
+            const submitBtn = DOM.addInvestimentoForm.querySelector('button[type="submit"]');
+            
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Salvataggio...';
+            submitBtn.disabled = true;
+            
+            const { error } = await supabase.from('investments').insert([{
+                user_id: state.user.id,
+                amount: amount,
+                date: date,
+                description: desc
+            }]);
+            
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            
+            if (error) {
+                console.error("Errore salvataggio investimento:", error);
+                alert("Errore salvataggio: " + error.message);
+            } else {
+                DOM.addInvestimentoModal.classList.remove('active');
+                DOM.addInvestimentoForm.reset();
+                calculateInvestmentStatistics();
+                loadInvestments();
+            }
+        });
+    }
+
+    // Movimento
+    if (DOM.btnAddMovimento && DOM.addMovimentoModal && DOM.closeMovimentoModal && DOM.addMovimentoForm) {
+        DOM.btnAddMovimento.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            document.getElementById('movimento-date').valueAsDate = new Date();
+            DOM.addMovimentoModal.classList.add('active');
+        });
+        
+        DOM.closeMovimentoModal.addEventListener('click', () => {
+            DOM.addMovimentoModal.classList.remove('active');
+            DOM.addMovimentoForm.reset();
+        });
+        
+        DOM.addMovimentoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('movimento-amount').value);
+            const date = document.getElementById('movimento-date').value;
+            const desc = document.getElementById('movimento-desc').value;
+            const highlighted = document.getElementById('movimento-highlighted').checked;
+            const submitBtn = DOM.addMovimentoForm.querySelector('button[type="submit"]');
+            
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Salvataggio...';
+            submitBtn.disabled = true;
+            
+            const { error } = await supabase.from('investment_movements').insert([{
+                user_id: state.user.id,
+                amount: amount,
+                date: date,
+                description: desc,
+                is_highlighted: highlighted
+            }]);
+            
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            
+            if (error) {
+                console.error("Errore salvataggio movimento:", error);
+                alert("Errore salvataggio: " + error.message);
+            } else {
+                DOM.addMovimentoModal.classList.remove('active');
+                DOM.addMovimentoForm.reset();
+                calculateInvestmentStatistics();
+                loadInvestmentMovements();
+                loadInvestmentHighlights();
+            }
+        });
+    }
+}
+
 // Toggle Side Menu
 function toggleMenu() {
     state.isMenuOpen = !state.isMenuOpen;
@@ -714,6 +879,18 @@ function updateUI() {
 function formatDate(dateString) {
     const options = { day: '2-digit', month: 'short', year: 'numeric' };
     return new Date(dateString).toLocaleDateString('en-GB', options);
+}
+
+// Update Element Utility
+function updateEl(id, value) {
+    const el = document.getElementById(id);
+    if (el) {
+        if (state.hideValues) {
+            el.innerHTML = '***';
+        } else {
+            el.innerHTML = formatCurrency(value);
+        }
+    }
 }
 
 // Load Recent Accreditations
@@ -1087,14 +1264,6 @@ async function calculateStatistics() {
         // Save to global state
         state.totalRemaining = totalRemaining;
 
-        // Update DOM Elements
-        const updateEl = (id, value) => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.innerText = state.hideValues ? '***' : value.toFixed(2);
-            }
-        };
-
         // Update Statistics Page Widgets
         updateEl('stat-spent-value', totalExpenses);
         updateEl('stat-remaining-value', totalRemaining);
@@ -1382,6 +1551,7 @@ async function processUnhandledExpenses() {
 
 // Run app
 document.addEventListener('DOMContentLoaded', () => {
+    setupInvestmentModals();
     init();
 
     // Register Service Worker for PWA
