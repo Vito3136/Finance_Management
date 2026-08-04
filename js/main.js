@@ -43,6 +43,8 @@ const DOM = {
     closeExpenseModal: document.getElementById('close-expense-modal'),
     addExpenseForm: document.getElementById('add-expense-form'),
     expensesList: document.getElementById('expenses-list'),
+    expensePageTotal: document.getElementById('expense-page-total'),
+    expensePagePending: document.getElementById('expense-page-pending'),
     
     // Statistics Elements
     statRemainingValue: document.getElementById('stat-remaining-value'),
@@ -931,6 +933,8 @@ async function loadExpenses() {
                     <p>No expenses yet</p>
                 </div>
             `;
+            if (DOM.expensePageTotal) updateEl('expense-page-total', 0);
+            if (DOM.expensePagePending) updateEl('expense-page-pending', 0);
             return;
         }
 
@@ -941,6 +945,13 @@ async function loadExpenses() {
             handled = handled.filter(item => item.expense_date.startsWith(state.expenseSelectedMonth));
             unhandled = unhandled.filter(item => item.expense_date.startsWith(state.expenseSelectedMonth));
         }
+
+        // Calcolo totali
+        const totalHandled = handled.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+        const totalUnhandled = unhandled.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+        
+        if (DOM.expensePageTotal) updateEl('expense-page-total', totalHandled);
+        if (DOM.expensePagePending) updateEl('expense-page-pending', totalUnhandled);
 
         const renderItem = (item) => {
             const isUnhandled = item.is_handled === false;
