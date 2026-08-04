@@ -60,6 +60,13 @@ const DOM = {
     statVariousSpendableValue: document.getElementById('stat-various-spendable-value'),
     statVariousSavedValue: document.getElementById('stat-various-saved-value'),
     
+    // Investment Dashboard
+    invStatBonifici: document.getElementById('inv-stat-bonifici'),
+    invStatInvestimenti: document.getElementById('inv-stat-investimenti'),
+    invStatSpese: document.getElementById('inv-stat-spese'),
+    invStatSaldo: document.getElementById('inv-stat-saldo'),
+    investmentHighlightedList: document.getElementById('investment-highlighted-list'),
+    
     // Investment Lists
     investmentTransfersContainer: document.getElementById('investment-transfers-container'),
     investmentsContainer: document.getElementById('investments-container'),
@@ -392,6 +399,8 @@ function setupEventListeners() {
             await loadInvestments();
             await loadInvestmentMovements();
             await calculateStatistics();
+            await calculateInvestmentStatistics();
+            await loadInvestmentHighlights();
         }
     });
 
@@ -1106,6 +1115,86 @@ async function calculateStatistics() {
 
     } catch (error) {
         console.error("Error calculating statistics:", error);
+    }
+}
+
+async function calculateInvestmentStatistics() {
+    if (!state.user) return;
+    try {
+        const [bonificiRes, invRes, movRes] = await Promise.all([
+            supabase.from('investment_transfers').select('amount'),
+            supabase.from('investments').select('amount'),
+            supabase.from('investment_movements').select('amount')
+        ]);
+
+        if (bonificiRes.error) throw bonificiRes.error;
+        if (invRes.error) throw invRes.error;
+        if (movRes.error) throw movRes.error;
+
+        const sumBonifici = bonificiRes.data.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
+        const sumInvestimenti = invRes.data.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
+        const sumMovements = movRes.data.reduce((sum, i) => sum + parseFloat(i.amount || 0), 0);
+        
+        const speseUnicredit = -sumMovements;
+        const saldo = sumBonifici - sumInvestimenti + sumMovements;
+
+        if (DOM.invStatBonifici) updateEl('inv-stat-bonifici', sumBonifici);
+        if (DOM.invStatInvestimenti) updateEl('inv-stat-investimenti', sumInvestimenti);
+        if (DOM.invStatSpese) updateEl('inv-stat-spese', speseUnicredit);
+        if (DOM.invStatSaldo) updateEl('inv-stat-saldo', saldo);
+    } catch (error) {
+        console.error("Error calculating investment statistics:", error);
+    }
+}
+
+async function loadInvestmentHighlights() {
+    if (!state.user || !DOM.investmentHighlightedList) return;
+    try {
+        const { data, error } = await supabase
+            .from('investment_movements')
+            .select('*')
+            .eq('is_highlighted', true)
+            .order('date', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            DOM.investmentHighlightedList.innerHTML = `
+                <div class="empty-state">
+                    <i class="ph ph-star"></i>
+                    <p>Nessun movimento in evidenza</p>
+                </div>
+            `;
+            return;
+        }
+
+        DOM.investmentHighlightedList.innerHTML = data.map(item => {
+            const isPositive = parseFloat(item.amount) >= 0;
+            const icon = isPositive ? 'ph-trend-up' : 'ph-trend-down';
+            const iconClass = isPositive ? 'various' : '';
+            const amountColor = isPositive ? '#34c759' : '#ff3b30';
+            const prefix = isPositive ? '+' : '';
+            const title = item.description || (isPositive ? 'Accredito' : 'Spesa/Commissione');
+            
+            return `
+            <div class="transaction-item highlighted-movement">
+                <div class="transaction-left">
+                    <div class="transaction-icon ${iconClass}">
+                        <i class="ph ${icon}"></i>
+                    </div>
+                    <div class="transaction-info">
+                        <div class="transaction-title">${title}</div>
+                        <div class="transaction-date">${formatDate(item.date)}</div>
+                    </div>
+                </div>
+                <div class="transaction-amount" style="text-align: right;">
+                    <div style="font-weight: 600; color: ${amountColor};">${formatCurrency(item.amount, prefix)}</div>
+                </div>
+            </div>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error("Error loading highlighted movements:", error);
     }
 }
 

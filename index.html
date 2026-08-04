@@ -437,22 +437,46 @@
 
         <!-- Investment Mode Container (Homepage) -->
         <div id="investment-container" class="mode-container">
-            <div class="dashboard-card investment-card">
-                <p class="card-subtitle">Total Portfolio Value</p>
-                <h2 class="card-title">€0.00</h2>
+            
+            <h4 class="statistics-subsection"><i class="ph ph-chart-line-up" style="color: var(--accent-investment);"></i> Riepilogo Portafoglio</h4>
+            <div class="widgets-grid" style="margin-bottom: 24px;">
+                <div class="widget widget-saved">
+                    <h3 class="widget-value" id="inv-stat-bonifici">0.00</h3>
+                    <p class="widget-label">TOTALE BONIFICI INVIATI</p>
+                </div>
+                <div class="widget widget-gross">
+                    <h3 class="widget-value" id="inv-stat-investimenti">0.00</h3>
+                    <p class="widget-label">TOTALE ADDEBITI INVESTIMENTI</p>
+                </div>
+                <div class="widget widget-various-spendable">
+                    <h3 class="widget-value" id="inv-stat-spese">0.00</h3>
+                    <p class="widget-label">TOTALE SPESE UNICREDIT</p>
+                </div>
+                <div class="widget widget-reply-spendable">
+                    <h3 class="widget-value" id="inv-stat-saldo">0.00</h3>
+                    <p class="widget-label">SALDO DISPONIBILE ATTUALE</p>
+                </div>
             </div>
 
-            <div class="action-buttons">
-                <button class="primary-btn investment-btn">
-                    <i class="ph ph-plus"></i> Add Investment
+            <div class="action-buttons-vertical" style="gap: 12px; margin-bottom: 32px;">
+                <button class="action-btn btn-salary" id="btn-add-bonifico" style="background-color: var(--accent-investment-light); color: var(--accent-investment);">
+                    <i class="ph ph-bank"></i> Aggiungi Bonifico
+                </button>
+                <button class="action-btn btn-expense" id="btn-add-investimento" style="background-color: rgba(88, 86, 214, 0.1); color: #5856d6;">
+                    <i class="ph ph-chart-pie-slice"></i> Aggiungi Investimento
+                </button>
+                <button class="action-btn btn-various" id="btn-add-movimento" style="background-color: #f2f2f7; color: #48484a;">
+                    <i class="ph ph-receipt"></i> Aggiungi Movimento
                 </button>
             </div>
 
             <div class="transactions-list">
-                <h3 class="section-title">Current Assets</h3>
-                <div class="empty-state">
-                    <i class="ph ph-chart-line-up"></i>
-                    <p>No investments yet</p>
+                <h3 class="section-title">Movimenti In Evidenza</h3>
+                <div id="investment-highlighted-list" class="transactions-list-container">
+                    <div class="empty-state">
+                        <i class="ph ph-star"></i>
+                        <p>Nessun movimento in evidenza</p>
+                    </div>
                 </div>
             </div>
         </div>
