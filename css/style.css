@@ -520,6 +520,19 @@ main {
     border: 1px solid var(--border-color);
 }
 
+.transaction-item.highlighted-movement {
+    background-color: rgba(52, 199, 89, 0.15);
+    border: 1px solid rgba(52, 199, 89, 0.5);
+}
+
+.transaction-item.highlighted-movement .transaction-title {
+    font-weight: 800 !important;
+}
+
+.transaction-item.highlighted-movement .transaction-amount div {
+    font-weight: 800 !important;
+}
+
 .transaction-left {
     display: flex;
     align-items: center;

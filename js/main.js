@@ -1222,9 +1222,11 @@ async function loadInvestmentMovements() {
             const amountColor = isPositive ? '#34c759' : '#ff3b30';
             const prefix = isPositive ? '+' : '';
             const title = item.description || (isPositive ? 'Accredito' : 'Spesa/Commissione');
+            const isHighlighted = item.is_highlighted === true;
+            const highlightClass = isHighlighted ? 'highlighted-movement' : '';
 
             return `
-            <div class="transaction-item">
+            <div class="transaction-item ${highlightClass}">
                 <div class="transaction-left">
                     <div class="transaction-icon ${iconClass}">
                         <i class="ph ${icon}"></i>
