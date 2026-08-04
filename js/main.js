@@ -207,6 +207,8 @@ async function init() {
         await loadInvestments();
         await loadInvestmentMovements();
         await calculateStatistics();
+        await calculateInvestmentStatistics();
+        await loadInvestmentHighlights();
     }
 }
 
@@ -425,7 +427,6 @@ function setupEventListeners() {
             if (hideToggle) {
                 state.hideValues = hideToggle.checked;
                 applyPrivacyMode();
-                await initData();
             }
             
             updateLastActivity();
