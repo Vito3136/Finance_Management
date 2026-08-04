@@ -374,6 +374,9 @@ function setupEventListeners() {
             DOM.loginScreen.classList.remove('active');
             submitBtn.innerHTML = 'Sign In';
             submitBtn.disabled = false;
+            
+            // Reset scroll position to top
+            window.scrollTo(0, 0);
 
             // Pulisci i campi
             document.getElementById('password').value = '';
