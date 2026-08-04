@@ -164,11 +164,11 @@ const MODE_CONFIG = {
 const GLOBAL_MODE_CONFIG = {
     expense: {
         nextMode: 'investment',
-        iconHTML: '<i class="ph ph-wallet"></i>' // show wallet to switch to investment
+        iconHTML: '<i class="ph ph-chart-line-up"></i>' // show chart to switch to investment
     },
     investment: {
         nextMode: 'expense',
-        iconHTML: '<i class="ph ph-chart-line-up"></i>' // show chart to switch to expense
+        iconHTML: '<i class="ph ph-wallet"></i>' // show wallet to switch to expense
     }
 };
 
