@@ -51,16 +51,19 @@ const DOM = {
     
     // Investment Modals & Forms
     btnAddBonifico: document.getElementById('btn-add-bonifico'),
+    btnAddBonificoPage: document.getElementById('btn-add-bonifico-page'),
     addBonificoModal: document.getElementById('add-bonifico-modal'),
     closeBonificoModal: document.getElementById('close-bonifico-modal'),
     addBonificoForm: document.getElementById('add-bonifico-form'),
     
     btnAddInvestimento: document.getElementById('btn-add-investimento'),
+    btnAddInvestimentoPage: document.getElementById('btn-add-investimento-page'),
     addInvestimentoModal: document.getElementById('add-investimento-modal'),
     closeInvestimentoModal: document.getElementById('close-investimento-modal'),
     addInvestimentoForm: document.getElementById('add-investimento-form'),
     
     btnAddMovimento: document.getElementById('btn-add-movimento'),
+    btnAddMovimentoPage: document.getElementById('btn-add-movimento-page'),
     addMovimentoModal: document.getElementById('add-movimento-modal'),
     closeMovimentoModal: document.getElementById('close-movimento-modal'),
     addMovimentoForm: document.getElementById('add-movimento-form'),
@@ -668,12 +671,14 @@ function setupEventListeners() {
 // Investment Modals Logic
 function setupInvestmentModals() {
     // Bonifico
-    if (DOM.btnAddBonifico && DOM.addBonificoModal && DOM.closeBonificoModal && DOM.addBonificoForm) {
-        DOM.btnAddBonifico.addEventListener('click', () => {
+    if ((DOM.btnAddBonifico || DOM.btnAddBonificoPage) && DOM.addBonificoModal && DOM.closeBonificoModal && DOM.addBonificoForm) {
+        const openBonifico = () => {
             if (navigator.vibrate) navigator.vibrate(50);
             document.getElementById('bonifico-date').valueAsDate = new Date();
             DOM.addBonificoModal.classList.add('active');
-        });
+        };
+        if (DOM.btnAddBonifico) DOM.btnAddBonifico.addEventListener('click', openBonifico);
+        if (DOM.btnAddBonificoPage) DOM.btnAddBonificoPage.addEventListener('click', openBonifico);
         
         DOM.closeBonificoModal.addEventListener('click', () => {
             DOM.addBonificoModal.classList.remove('active');
@@ -712,12 +717,14 @@ function setupInvestmentModals() {
     }
 
     // Investimento
-    if (DOM.btnAddInvestimento && DOM.addInvestimentoModal && DOM.closeInvestimentoModal && DOM.addInvestimentoForm) {
-        DOM.btnAddInvestimento.addEventListener('click', () => {
+    if ((DOM.btnAddInvestimento || DOM.btnAddInvestimentoPage) && DOM.addInvestimentoModal && DOM.closeInvestimentoModal && DOM.addInvestimentoForm) {
+        const openInvestimento = () => {
             if (navigator.vibrate) navigator.vibrate(50);
             document.getElementById('investimento-date').valueAsDate = new Date();
             DOM.addInvestimentoModal.classList.add('active');
-        });
+        };
+        if (DOM.btnAddInvestimento) DOM.btnAddInvestimento.addEventListener('click', openInvestimento);
+        if (DOM.btnAddInvestimentoPage) DOM.btnAddInvestimentoPage.addEventListener('click', openInvestimento);
         
         DOM.closeInvestimentoModal.addEventListener('click', () => {
             DOM.addInvestimentoModal.classList.remove('active');
@@ -758,12 +765,14 @@ function setupInvestmentModals() {
     }
 
     // Movimento
-    if (DOM.btnAddMovimento && DOM.addMovimentoModal && DOM.closeMovimentoModal && DOM.addMovimentoForm) {
-        DOM.btnAddMovimento.addEventListener('click', () => {
+    if ((DOM.btnAddMovimento || DOM.btnAddMovimentoPage) && DOM.addMovimentoModal && DOM.closeMovimentoModal && DOM.addMovimentoForm) {
+        const openMovimento = () => {
             if (navigator.vibrate) navigator.vibrate(50);
             document.getElementById('movimento-date').valueAsDate = new Date();
             DOM.addMovimentoModal.classList.add('active');
-        });
+        };
+        if (DOM.btnAddMovimento) DOM.btnAddMovimento.addEventListener('click', openMovimento);
+        if (DOM.btnAddMovimentoPage) DOM.btnAddMovimentoPage.addEventListener('click', openMovimento);
         
         DOM.closeMovimentoModal.addEventListener('click', () => {
             DOM.addMovimentoModal.classList.remove('active');
