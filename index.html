@@ -237,7 +237,18 @@
                     <i class="ph ph-house"></i>
                     <span>Homepage</span>
                 </button>
-                <!-- Altre voci investment in futuro -->
+                <button class="menu-item nav-link" data-target="investment-transfers-container">
+                    <i class="ph ph-bank"></i>
+                    <span>Bonifici</span>
+                </button>
+                <button class="menu-item nav-link" data-target="investments-container">
+                    <i class="ph ph-chart-line-up"></i>
+                    <span>Investimenti</span>
+                </button>
+                <button class="menu-item nav-link" data-target="investment-movements-container">
+                    <i class="ph ph-receipt"></i>
+                    <span>Spese e Movimenti</span>
+                </button>
             </div>
             
             <hr class="menu-divider">
@@ -412,7 +423,7 @@
             </div>
         </div>
 
-        <!-- Investment Mode Container -->
+        <!-- Investment Mode Container (Homepage) -->
         <div id="investment-container" class="mode-container">
             <div class="dashboard-card investment-card">
                 <p class="card-subtitle">Total Portfolio Value</p>
@@ -425,9 +436,19 @@
                 </button>
             </div>
 
-            <!-- Bonifici Section -->
             <div class="transactions-list">
-                <h3 class="section-title">Bonifici</h3>
+                <h3 class="section-title">Current Assets</h3>
+                <div class="empty-state">
+                    <i class="ph ph-chart-line-up"></i>
+                    <p>No investments yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bonifici Container -->
+        <div id="investment-transfers-container" class="mode-container">
+            <h2 class="section-title">Bonifici in Entrata</h2>
+            <div class="transactions-list">
                 <div id="investment-transfers-list" class="transactions-list-container">
                     <div class="empty-state">
                         <i class="ph ph-bank"></i>
@@ -435,10 +456,12 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Investimenti Section -->
-            <div class="transactions-list" style="margin-top: 24px;">
-                <h3 class="section-title">Investimenti</h3>
+        <!-- Investimenti Container -->
+        <div id="investments-container" class="mode-container">
+            <h2 class="section-title">I Miei Investimenti</h2>
+            <div class="transactions-list">
                 <div id="investments-list" class="transactions-list-container">
                     <div class="empty-state">
                         <i class="ph ph-chart-line-up"></i>
@@ -446,10 +469,12 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Spese e Movimenti Section -->
-            <div class="transactions-list" style="margin-top: 24px;">
-                <h3 class="section-title">Spese e Movimenti</h3>
+        <!-- Spese e Movimenti Container -->
+        <div id="investment-movements-container" class="mode-container">
+            <h2 class="section-title">Spese e Movimenti</h2>
+            <div class="transactions-list">
                 <div id="investment-movements-list" class="transactions-list-container">
                     <div class="empty-state">
                         <i class="ph ph-receipt"></i>

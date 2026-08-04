@@ -59,6 +59,9 @@ const DOM = {
     statVariousSavedValue: document.getElementById('stat-various-saved-value'),
     
     // Investment Lists
+    investmentTransfersContainer: document.getElementById('investment-transfers-container'),
+    investmentsContainer: document.getElementById('investments-container'),
+    investmentMovementsContainer: document.getElementById('investment-movements-container'),
     investmentTransfersList: document.getElementById('investment-transfers-list'),
     investmentsList: document.getElementById('investments-list'),
     investmentMovementsList: document.getElementById('investment-movements-list'),
@@ -104,6 +107,21 @@ const MODE_CONFIG = {
         title: 'Various accreditations',
         container: DOM.variousContainer,
         group: 'expense'
+    },
+    investmentTransfers: {
+        title: 'Bonifici in Entrata',
+        container: DOM.investmentTransfersContainer,
+        group: 'investment'
+    },
+    investments: {
+        title: 'I Miei Investimenti',
+        container: DOM.investmentsContainer,
+        group: 'investment'
+    },
+    investmentMovements: {
+        title: 'Spese e Movimenti',
+        container: DOM.investmentMovementsContainer,
+        group: 'investment'
     }
 };
 
@@ -231,6 +249,9 @@ function setupEventListeners() {
             else if (target === 'expense-container') newView = 'expense';
             else if (target === 'statistics-container') newView = 'statistics';
             else if (target === 'investment-container') newView = 'investment';
+            else if (target === 'investment-transfers-container') newView = 'investmentTransfers';
+            else if (target === 'investments-container') newView = 'investments';
+            else if (target === 'investment-movements-container') newView = 'investmentMovements';
             else if (target === 'home-container') newView = 'home';
             
             if (state.views[state.globalMode] !== newView) {
