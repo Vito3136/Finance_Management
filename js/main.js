@@ -58,6 +58,11 @@ const DOM = {
     statVariousSpendableValue: document.getElementById('stat-various-spendable-value'),
     statVariousSavedValue: document.getElementById('stat-various-saved-value'),
     
+    // Investment Lists
+    investmentTransfersList: document.getElementById('investment-transfers-list'),
+    investmentsList: document.getElementById('investments-list'),
+    investmentMovementsList: document.getElementById('investment-movements-list'),
+    
     // Menu Links
     navLinks: document.querySelectorAll('.nav-link'),
 
@@ -145,6 +150,9 @@ async function init() {
         await loadSalaryCredits();
         await loadVariousAccreditations();
         await loadExpenses();
+        await loadInvestmentTransfers();
+        await loadInvestments();
+        await loadInvestmentMovements();
         await calculateStatistics();
     }
 }
@@ -354,6 +362,9 @@ function setupEventListeners() {
             await loadSalaryCredits();
             await loadVariousAccreditations();
             await loadExpenses();
+            await loadInvestmentTransfers();
+            await loadInvestments();
+            await loadInvestmentMovements();
             await calculateStatistics();
         }
     });
@@ -1060,6 +1071,143 @@ async function calculateStatistics() {
 
     } catch (error) {
         console.error("Error calculating statistics:", error);
+    }
+}
+
+// --- INVESTMENT FUNCTIONS ---
+
+async function loadInvestmentTransfers() {
+    if (!state.user || !DOM.investmentTransfersList) return;
+    try {
+        const { data, error } = await supabase
+            .from('investment_transfers')
+            .select('*')
+            .order('date', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            DOM.investmentTransfersList.innerHTML = `
+                <div class="empty-state">
+                    <i class="ph ph-bank"></i>
+                    <p>Nessun bonifico</p>
+                </div>
+            `;
+            return;
+        }
+
+        DOM.investmentTransfersList.innerHTML = data.map(item => `
+            <div class="transaction-item">
+                <div class="transaction-left">
+                    <div class="transaction-icon various">
+                        <i class="ph ph-bank"></i>
+                    </div>
+                    <div class="transaction-info">
+                        <div class="transaction-title">Bonifico in entrata</div>
+                        <div class="transaction-date">${formatDate(item.date)}</div>
+                    </div>
+                </div>
+                <div class="transaction-amount" style="text-align: right;">
+                    <div style="font-weight: 600; color: #34c759;">${formatCurrency(item.amount, '+')}</div>
+                </div>
+            </div>
+        `).join('');
+
+    } catch (error) {
+        console.error("Error loading investment transfers:", error);
+    }
+}
+
+async function loadInvestments() {
+    if (!state.user || !DOM.investmentsList) return;
+    try {
+        const { data, error } = await supabase
+            .from('investments')
+            .select('*')
+            .order('date', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            DOM.investmentsList.innerHTML = `
+                <div class="empty-state">
+                    <i class="ph ph-chart-line-up"></i>
+                    <p>Nessun investimento</p>
+                </div>
+            `;
+            return;
+        }
+
+        DOM.investmentsList.innerHTML = data.map(item => `
+            <div class="transaction-item">
+                <div class="transaction-left">
+                    <div class="transaction-icon" style="background-color: rgba(88, 86, 214, 0.1); color: #5856d6;">
+                        <i class="ph ph-chart-pie-slice"></i>
+                    </div>
+                    <div class="transaction-info">
+                        <div class="transaction-title">${item.description}</div>
+                        <div class="transaction-date">${formatDate(item.date)}</div>
+                    </div>
+                </div>
+                <div class="transaction-amount" style="text-align: right; color: var(--text-primary);">
+                    <div style="font-weight: 600;">${formatCurrency(item.amount)}</div>
+                </div>
+            </div>
+        `).join('');
+
+    } catch (error) {
+        console.error("Error loading investments:", error);
+    }
+}
+
+async function loadInvestmentMovements() {
+    if (!state.user || !DOM.investmentMovementsList) return;
+    try {
+        const { data, error } = await supabase
+            .from('investment_movements')
+            .select('*')
+            .order('date', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            DOM.investmentMovementsList.innerHTML = `
+                <div class="empty-state">
+                    <i class="ph ph-receipt"></i>
+                    <p>Nessun movimento</p>
+                </div>
+            `;
+            return;
+        }
+
+        DOM.investmentMovementsList.innerHTML = data.map(item => {
+            const isPositive = parseFloat(item.amount) >= 0;
+            const icon = isPositive ? 'ph-trend-up' : 'ph-trend-down';
+            const iconClass = isPositive ? 'various' : '';
+            const amountColor = isPositive ? '#34c759' : '#ff3b30';
+            const prefix = isPositive ? '+' : '';
+            const title = item.description || (isPositive ? 'Accredito' : 'Spesa/Commissione');
+
+            return `
+            <div class="transaction-item">
+                <div class="transaction-left">
+                    <div class="transaction-icon ${iconClass}">
+                        <i class="ph ${icon}"></i>
+                    </div>
+                    <div class="transaction-info">
+                        <div class="transaction-title">${title}</div>
+                        <div class="transaction-date">${formatDate(item.date)}</div>
+                    </div>
+                </div>
+                <div class="transaction-amount" style="text-align: right;">
+                    <div style="font-weight: 600; color: ${amountColor};">${formatCurrency(item.amount, prefix)}</div>
+                </div>
+            </div>
+            `;
+        }).join('');
+
+    } catch (error) {
+        console.error("Error loading investment movements:", error);
     }
 }
 
