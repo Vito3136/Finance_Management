@@ -908,7 +908,21 @@ main {
     }
 }
 
-/* Toggle Switch per Modali */
+/* Privacy Mode (Hide amounts) */
+.amounts-hidden .widget-value,
+.amounts-hidden .transaction-amount div {
+    filter: blur(8px);
+    opacity: 0.7;
+    transition: filter 0.3s ease, opacity 0.3s ease;
+    user-select: none;
+}
+
+.widget-value,
+.transaction-amount div {
+    transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+/* Toggle Switch per Modali e Privacy */
 .toggle-switch {
     position: relative;
     display: inline-block;

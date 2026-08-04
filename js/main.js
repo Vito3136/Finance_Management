@@ -212,10 +212,22 @@ async function init() {
 
 // Helper for currency formatting with optional hiding
 function formatCurrency(amount, prefix = '') {
-    if (state.hideValues) {
-        return `${prefix}€***`;
-    }
     return `${prefix}€${parseFloat(amount).toFixed(2)}`;
+}
+
+// Update Privacy Mode visually
+function applyPrivacyMode() {
+    if (state.hideValues) {
+        document.body.classList.add('amounts-hidden');
+    } else {
+        document.body.classList.remove('amounts-hidden');
+    }
+    
+    // Sync toggles
+    const loginToggle = document.getElementById('hide-amounts-toggle');
+    const menuToggle = document.getElementById('privacy-toggle');
+    if (loginToggle) loginToggle.checked = state.hideValues;
+    if (menuToggle) menuToggle.checked = state.hideValues;
 }
 
 // Check if user is already logged in and session hasn't expired
@@ -249,11 +261,11 @@ async function checkSession() {
         if (hideToggle) {
             state.hideValues = hideToggle.checked;
         }
+        applyPrivacyMode();
     } else {
         // Show login screen
         state.hideValues = false;
-        const toggleEl = document.getElementById('hide-amounts-toggle');
-        if (toggleEl) toggleEl.checked = false;
+        applyPrivacyMode();
         DOM.loginScreen.classList.add('active');
     }
 }
@@ -271,6 +283,15 @@ function setupEventListeners() {
     DOM.menuBtn.addEventListener('click', toggleMenu);
     DOM.closeMenuBtn.addEventListener('click', toggleMenu);
     DOM.menuOverlay.addEventListener('click', toggleMenu);
+
+    // Privacy Toggle (Side Menu)
+    const privacyToggle = document.getElementById('privacy-toggle');
+    if (privacyToggle) {
+        privacyToggle.addEventListener('change', (e) => {
+            state.hideValues = e.target.checked;
+            applyPrivacyMode();
+        });
+    }
 
     // Nav Links (Side Menu)
     DOM.navLinks.forEach(link => {
@@ -403,6 +424,8 @@ function setupEventListeners() {
             const hideToggle = document.getElementById('hide-amounts-toggle');
             if (hideToggle) {
                 state.hideValues = hideToggle.checked;
+                applyPrivacyMode();
+                await initData();
             }
             
             updateLastActivity();
