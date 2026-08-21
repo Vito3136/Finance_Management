@@ -193,7 +193,7 @@
     <div id="add-bonifico-modal" class="custom-modal">
         <div class="custom-modal-content form-modal">
             <div class="modal-header">
-                <h3>Aggiungi Bonifico</h3>
+                <h3 id="bonifico-modal-title">Aggiungi Bonifico</h3>
                 <button type="button" id="close-bonifico-modal" class="icon-btn close-btn">
                     <i class="ph ph-x"></i>
                 </button>
@@ -207,7 +207,7 @@
                     <label for="bonifico-date">Data</label>
                     <input type="date" id="bonifico-date" required>
                 </div>
-                <button type="submit" class="primary-btn submit-btn" style="background-color: var(--accent-investment);">
+                <button type="submit" id="bonifico-submit-btn" class="primary-btn submit-btn" style="background-color: var(--accent-investment);">
                     Salva Bonifico
                 </button>
             </form>
@@ -218,7 +218,7 @@
     <div id="add-investimento-modal" class="custom-modal">
         <div class="custom-modal-content form-modal">
             <div class="modal-header">
-                <h3>Aggiungi Investimento</h3>
+                <h3 id="investimento-modal-title">Aggiungi Investimento</h3>
                 <button type="button" id="close-investimento-modal" class="icon-btn close-btn">
                     <i class="ph ph-x"></i>
                 </button>
@@ -236,7 +236,7 @@
                     <label for="investimento-desc">Descrizione</label>
                     <input type="text" id="investimento-desc" required>
                 </div>
-                <button type="submit" class="primary-btn submit-btn" style="background-color: #5856d6;">
+                <button type="submit" id="investimento-submit-btn" class="primary-btn submit-btn" style="background-color: #5856d6;">
                     Salva Investimento
                 </button>
             </form>
@@ -247,7 +247,7 @@
     <div id="add-movimento-modal" class="custom-modal">
         <div class="custom-modal-content form-modal">
             <div class="modal-header">
-                <h3>Aggiungi Movimento</h3>
+                <h3 id="movimento-modal-title">Aggiungi Movimento</h3>
                 <button type="button" id="close-movimento-modal" class="icon-btn close-btn">
                     <i class="ph ph-x"></i>
                 </button>
@@ -272,7 +272,7 @@
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
-                <button type="submit" class="primary-btn submit-btn" style="background-color: #FF9500; margin-top: 16px;">
+                <button type="submit" id="movimento-submit-btn" class="primary-btn submit-btn" style="background-color: #FF9500; margin-top: 16px;">
                     Salva Movimento
                 </button>
             </form>
@@ -618,7 +618,16 @@
                     <i class="ph ph-bank"></i> Aggiungi Bonifico
                 </button>
             </div>
-            <h2 class="section-title">Bonifici in Entrata</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 class="section-title" style="margin-bottom: 0;">Bonifici in Entrata</h2>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="ph ph-pencil-simple" style="color: var(--text-secondary); font-size: 20px;"></i>
+                    <label class="ios-switch" style="transform: scale(0.85); margin: 0;">
+                        <input type="checkbox" class="edit-list-toggle" data-list="bonifico">
+                        <span class="ios-slider"></span>
+                    </label>
+                </div>
+            </div>
             <div class="transactions-list">
                 <div id="investment-transfers-list" class="transactions-list-container">
                     <div class="empty-state">
@@ -636,7 +645,16 @@
                     <i class="ph ph-chart-pie-slice"></i> Aggiungi Investimento
                 </button>
             </div>
-            <h2 class="section-title">I Miei Investimenti</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 class="section-title" style="margin-bottom: 0;">I Miei Investimenti</h2>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="ph ph-pencil-simple" style="color: var(--text-secondary); font-size: 20px;"></i>
+                    <label class="ios-switch" style="transform: scale(0.85); margin: 0;">
+                        <input type="checkbox" class="edit-list-toggle" data-list="investimento">
+                        <span class="ios-slider"></span>
+                    </label>
+                </div>
+            </div>
             <div class="transactions-list">
                 <div id="investments-list" class="transactions-list-container">
                     <div class="empty-state">
@@ -654,7 +672,16 @@
                     <i class="ph ph-receipt"></i> Aggiungi Movimento
                 </button>
             </div>
-            <h2 class="section-title">Spese e Movimenti</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 class="section-title" style="margin-bottom: 0;">Spese e Movimenti</h2>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="ph ph-pencil-simple" style="color: var(--text-secondary); font-size: 20px;"></i>
+                    <label class="ios-switch" style="transform: scale(0.85); margin: 0;">
+                        <input type="checkbox" class="edit-list-toggle" data-list="movimento">
+                        <span class="ios-slider"></span>
+                    </label>
+                </div>
+            </div>
             <div class="transactions-list">
                 <div id="investment-movements-list" class="transactions-list-container">
                     <div class="empty-state">

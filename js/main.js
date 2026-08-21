@@ -22,7 +22,10 @@ const state = {
     listEditModes: {
         salary: false,
         various: false,
-        expense: false
+        expense: false,
+        bonifico: false,
+        investimento: false,
+        movimento: false
     },
     editContext: {
         active: false,
@@ -273,6 +276,21 @@ function resetEditMode(type) {
         document.getElementById('expense-submit-btn').textContent = 'Save Expense';
         const form = document.getElementById('add-expense-form');
         if(form) form.reset();
+    } else if (type === 'bonifico') {
+        document.getElementById('bonifico-modal-title').textContent = 'Aggiungi Bonifico';
+        document.getElementById('bonifico-submit-btn').textContent = 'Salva Bonifico';
+        const form = document.getElementById('add-bonifico-form');
+        if(form) form.reset();
+    } else if (type === 'investimento') {
+        document.getElementById('investimento-modal-title').textContent = 'Aggiungi Investimento';
+        document.getElementById('investimento-submit-btn').textContent = 'Salva Investimento';
+        const form = document.getElementById('add-investimento-form');
+        if(form) form.reset();
+    } else if (type === 'movimento') {
+        document.getElementById('movimento-modal-title').textContent = 'Aggiungi Movimento';
+        document.getElementById('movimento-submit-btn').textContent = 'Salva Movimento';
+        const form = document.getElementById('add-movimento-form');
+        if(form) form.reset();
     }
 }
 
@@ -356,6 +374,9 @@ function setupEventListeners() {
             if (listType === 'salary') listContainer = document.getElementById('salary-credits-list');
             if (listType === 'various') listContainer = document.getElementById('various-accreditations-list');
             if (listType === 'expense') listContainer = document.getElementById('expenses-list');
+            if (listType === 'bonifico') listContainer = document.getElementById('investment-transfers-list');
+            if (listType === 'investimento') listContainer = document.getElementById('investments-list');
+            if (listType === 'movimento') listContainer = document.getElementById('investment-movements-list');
             
             if (listContainer) {
                 if (state.listEditModes[listType]) {
@@ -405,6 +426,33 @@ function setupEventListeners() {
                 document.getElementById('expense-desc').value = itemData.description || '';
                 
                 if (DOM.addExpenseModal) DOM.addExpenseModal.classList.add('active');
+            } else if (listType === 'bonifico') {
+                document.getElementById('bonifico-modal-title').textContent = 'Modifica Bonifico';
+                document.getElementById('bonifico-submit-btn').textContent = 'Aggiorna Bonifico';
+                document.getElementById('bonifico-amount').value = itemData.amount;
+                document.getElementById('bonifico-date').value = itemData.date;
+                
+                const modal = document.getElementById('add-bonifico-modal');
+                if (modal) modal.classList.add('active');
+            } else if (listType === 'investimento') {
+                document.getElementById('investimento-modal-title').textContent = 'Modifica Investimento';
+                document.getElementById('investimento-submit-btn').textContent = 'Aggiorna Investimento';
+                document.getElementById('investimento-amount').value = itemData.amount;
+                document.getElementById('investimento-date').value = itemData.date;
+                document.getElementById('investimento-desc').value = itemData.description || '';
+                
+                const modal = document.getElementById('add-investimento-modal');
+                if (modal) modal.classList.add('active');
+            } else if (listType === 'movimento') {
+                document.getElementById('movimento-modal-title').textContent = 'Modifica Movimento';
+                document.getElementById('movimento-submit-btn').textContent = 'Aggiorna Movimento';
+                document.getElementById('movimento-amount').value = itemData.amount;
+                document.getElementById('movimento-date').value = itemData.date;
+                document.getElementById('movimento-desc').value = itemData.description || '';
+                document.getElementById('movimento-highlighted').checked = itemData.is_highlighted || false;
+                
+                const modal = document.getElementById('add-movimento-modal');
+                if (modal) modal.classList.add('active');
             }
         }
     });
@@ -869,7 +917,7 @@ function setupInvestmentModals() {
         
         DOM.closeBonificoModal.addEventListener('click', () => {
             DOM.addBonificoModal.classList.remove('active');
-            DOM.addBonificoForm.reset();
+            resetEditMode('bonifico');
         });
         
         DOM.addBonificoForm.addEventListener('submit', async (e) => {
@@ -882,11 +930,20 @@ function setupInvestmentModals() {
             submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Salvataggio...';
             submitBtn.disabled = true;
             
-            const { error } = await supabase.from('investment_transfers').insert([{
-                user_id: state.user.id,
-                amount: amount,
-                date: date
-            }]);
+            let res;
+            if (state.editContext.active && state.editContext.type === 'bonifico') {
+                res = await supabase.from('investment_transfers').update({
+                    amount: amount,
+                    date: date
+                }).eq('id', state.editContext.id);
+            } else {
+                res = await supabase.from('investment_transfers').insert([{
+                    user_id: state.user.id,
+                    amount: amount,
+                    date: date
+                }]);
+            }
+            const { error } = res;
             
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
@@ -895,8 +952,9 @@ function setupInvestmentModals() {
                 console.error("Errore salvataggio bonifico:", error);
                 alert("Errore salvataggio: " + error.message);
             } else {
+                alert(state.editContext.active ? "Bonifico aggiornato con successo!" : "Bonifico salvato con successo!");
                 DOM.addBonificoModal.classList.remove('active');
-                DOM.addBonificoForm.reset();
+                resetEditMode('bonifico');
                 calculateInvestmentStatistics();
                 loadInvestmentTransfers();
             }
@@ -915,7 +973,7 @@ function setupInvestmentModals() {
         
         DOM.closeInvestimentoModal.addEventListener('click', () => {
             DOM.addInvestimentoModal.classList.remove('active');
-            DOM.addInvestimentoForm.reset();
+            resetEditMode('investimento');
         });
         
         DOM.addInvestimentoForm.addEventListener('submit', async (e) => {
@@ -929,12 +987,22 @@ function setupInvestmentModals() {
             submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Salvataggio...';
             submitBtn.disabled = true;
             
-            const { error } = await supabase.from('investments').insert([{
-                user_id: state.user.id,
-                amount: amount,
-                date: date,
-                description: desc
-            }]);
+            let res;
+            if (state.editContext.active && state.editContext.type === 'investimento') {
+                res = await supabase.from('investments').update({
+                    amount: amount,
+                    date: date,
+                    description: desc
+                }).eq('id', state.editContext.id);
+            } else {
+                res = await supabase.from('investments').insert([{
+                    user_id: state.user.id,
+                    amount: amount,
+                    date: date,
+                    description: desc
+                }]);
+            }
+            const { error } = res;
             
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
@@ -943,8 +1011,9 @@ function setupInvestmentModals() {
                 console.error("Errore salvataggio investimento:", error);
                 alert("Errore salvataggio: " + error.message);
             } else {
+                alert(state.editContext.active ? "Investimento aggiornato con successo!" : "Investimento salvato con successo!");
                 DOM.addInvestimentoModal.classList.remove('active');
-                DOM.addInvestimentoForm.reset();
+                resetEditMode('investimento');
                 calculateInvestmentStatistics();
                 loadInvestments();
             }
@@ -963,7 +1032,7 @@ function setupInvestmentModals() {
         
         DOM.closeMovimentoModal.addEventListener('click', () => {
             DOM.addMovimentoModal.classList.remove('active');
-            DOM.addMovimentoForm.reset();
+            resetEditMode('movimento');
         });
         
         DOM.addMovimentoForm.addEventListener('submit', async (e) => {
@@ -978,13 +1047,24 @@ function setupInvestmentModals() {
             submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Salvataggio...';
             submitBtn.disabled = true;
             
-            const { error } = await supabase.from('investment_movements').insert([{
-                user_id: state.user.id,
-                amount: amount,
-                date: date,
-                description: desc,
-                is_highlighted: highlighted
-            }]);
+            let res;
+            if (state.editContext.active && state.editContext.type === 'movimento') {
+                res = await supabase.from('investment_movements').update({
+                    amount: amount,
+                    date: date,
+                    description: desc,
+                    is_highlighted: highlighted
+                }).eq('id', state.editContext.id);
+            } else {
+                res = await supabase.from('investment_movements').insert([{
+                    user_id: state.user.id,
+                    amount: amount,
+                    date: date,
+                    description: desc,
+                    is_highlighted: highlighted
+                }]);
+            }
+            const { error } = res;
             
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
@@ -993,8 +1073,9 @@ function setupInvestmentModals() {
                 console.error("Errore salvataggio movimento:", error);
                 alert("Errore salvataggio: " + error.message);
             } else {
+                alert(state.editContext.active ? "Movimento aggiornato con successo!" : "Movimento salvato con successo!");
                 DOM.addMovimentoModal.classList.remove('active');
-                DOM.addMovimentoForm.reset();
+                resetEditMode('movimento');
                 calculateInvestmentStatistics();
                 loadInvestmentMovements();
                 loadInvestmentHighlights();
@@ -1608,6 +1689,9 @@ async function loadInvestmentTransfers() {
                 <div class="transaction-amount" style="text-align: right;">
                     <div style="font-weight: 600; color: #34c759;">${formatCurrency(item.amount, '+')}</div>
                 </div>
+                <div class="edit-icon-item" data-id="${item.id}" data-type="bonifico" data-json='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+                    <i class="ph ph-pencil-simple"></i>
+                </div>
             </div>
         `).join('');
 
@@ -1649,6 +1733,9 @@ async function loadInvestments() {
                 </div>
                 <div class="transaction-amount" style="text-align: right; color: var(--text-primary);">
                     <div style="font-weight: 600;">${formatCurrency(item.amount)}</div>
+                </div>
+                <div class="edit-icon-item" data-id="${item.id}" data-type="investimento" data-json='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+                    <i class="ph ph-pencil-simple"></i>
                 </div>
             </div>
         `).join('');
@@ -1701,6 +1788,9 @@ async function loadInvestmentMovements() {
                 </div>
                 <div class="transaction-amount" style="text-align: right;">
                     <div style="font-weight: 600; color: ${amountColor};">${formatCurrency(item.amount, prefix)}</div>
+                </div>
+                <div class="edit-icon-item" data-id="${item.id}" data-type="movimento" data-json='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+                    <i class="ph ph-pencil-simple"></i>
                 </div>
             </div>
             `;
