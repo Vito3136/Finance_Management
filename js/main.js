@@ -232,6 +232,20 @@ function applyPrivacyMode() {
     if (menuToggle) menuToggle.checked = state.hideValues;
 }
 
+function hideSplashScreen() {
+    const splash = document.getElementById('splash-screen');
+    if (splash && splash.style.display !== 'none') {
+        splash.style.opacity = '0';
+        setTimeout(() => splash.style.display = 'none', 300);
+    }
+}
+
+function showLoginScreen() {
+    document.getElementById('email').removeAttribute('disabled');
+    document.getElementById('password').removeAttribute('disabled');
+    DOM.loginScreen.classList.add('active');
+}
+
 // Check if user is already logged in and session hasn't expired
 async function checkSession() {
     const { data: { session }, error } = await supabase.auth.getSession();
@@ -249,7 +263,8 @@ async function checkSession() {
             const toggleEl = document.getElementById('hide-amounts-toggle');
             if (toggleEl) toggleEl.checked = false;
             localStorage.removeItem('last_activity');
-            DOM.loginScreen.classList.add('active');
+            showLoginScreen();
+            hideSplashScreen();
             return;
         }
 
@@ -268,8 +283,11 @@ async function checkSession() {
         // Show login screen
         state.hideValues = false;
         applyPrivacyMode();
-        DOM.loginScreen.classList.add('active');
+        showLoginScreen();
     }
+    
+    // Hide splash screen after session check is done
+    hideSplashScreen();
 }
 
 // Setup Event Listeners
@@ -370,7 +388,7 @@ function setupEventListeners() {
             state.hideValues = false;
             const toggleEl = document.getElementById('hide-amounts-toggle');
             if (toggleEl) toggleEl.checked = false;
-            DOM.loginScreen.classList.add('active');
+            showLoginScreen();
         });
     }
 

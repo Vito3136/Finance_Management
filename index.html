@@ -25,6 +25,12 @@
 </head>
 
 <body>
+    <!-- Splash Screen -->
+    <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: var(--bg-primary, #f0f2f5); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s ease;">
+        <i class="ph ph-wallet" style="font-size: 72px; color: var(--primary-color, #007aff); margin-bottom: 16px;"></i>
+        <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: var(--text-primary, #1c1c1e);">Finance Management</h2>
+    </div>
+
     <!-- Login Screen Overlay -->
     <div id="login-screen" class="login-screen">
         <div class="login-card">
@@ -39,12 +45,12 @@
             <form id="login-form">
                 <div class="input-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" required autocomplete="email">
+                    <input type="email" id="email" required autocomplete="email" disabled>
                 </div>
                 <div class="input-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" required
-                        autocomplete="current-password">
+                        autocomplete="current-password" disabled>
                 </div>
                 <div class="input-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 24px;">
                     <label for="hide-amounts-toggle" style="margin: 0; font-weight: 600; color: var(--text-primary); cursor: pointer;">Oscura gli importi</label>
