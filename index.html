@@ -91,7 +91,7 @@
     <div id="add-salary-modal" class="custom-modal">
         <div class="custom-modal-content form-modal">
             <div class="modal-header">
-                <h3>Add Salary Credit</h3>
+                <h3 id="salary-modal-title">Add Salary Credit</h3>
                 <button type="button" id="close-salary-modal" class="icon-btn close-btn">
                     <i class="ph ph-x"></i>
                 </button>
@@ -116,7 +116,7 @@
                     <input type="text" id="salary-desc" placeholder="e.g. October Salary">
                 </div>
                 
-                <button type="submit" class="primary-btn btn-salary submit-btn">
+                <button type="submit" class="primary-btn btn-salary submit-btn" id="salary-submit-btn">
                     Save Credit
                 </button>
             </form>
@@ -127,7 +127,7 @@
     <div id="add-various-modal" class="custom-modal">
         <div class="custom-modal-content form-modal">
             <div class="modal-header">
-                <h3>Add Various Accreditation</h3>
+                <h3 id="various-modal-title">Add Various Accreditation</h3>
                 <button type="button" id="close-various-modal" class="icon-btn close-btn">
                     <i class="ph ph-x"></i>
                 </button>
@@ -152,7 +152,7 @@
                     <input type="text" id="various-desc" placeholder="e.g. Refund or Gift">
                 </div>
                 
-                <button type="submit" class="primary-btn btn-salary submit-btn">
+                <button type="submit" class="primary-btn btn-salary submit-btn" id="various-submit-btn">
                     Save Credit
                 </button>
             </form>
@@ -163,7 +163,7 @@
     <div id="add-expense-modal" class="custom-modal">
         <div class="custom-modal-content form-modal">
             <div class="modal-header">
-                <h3>Add Expense</h3>
+                <h3 id="expense-modal-title">Add Expense</h3>
                 <button type="button" id="close-expense-modal" class="icon-btn close-btn">
                     <i class="ph ph-x"></i>
                 </button>
@@ -183,7 +183,7 @@
                     <input type="text" id="expense-desc" required>
                 </div>
                 
-                <button type="submit" class="primary-btn btn-expense submit-btn">
+                <button type="submit" class="primary-btn btn-expense submit-btn" id="expense-submit-btn">
                     Save Expense
                 </button>
             </form>
@@ -412,7 +412,12 @@
                 </button>
             </div>
             <div class="transactions-list">
-                <h3 class="section-title">Salary Credits History</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 class="section-title" style="margin-bottom: 0;">Salary Credits History</h3>
+                    <button class="icon-btn edit-list-toggle" data-list="salary">
+                        <i class="ph ph-pencil-simple"></i>
+                    </button>
+                </div>
                 <div id="salary-credits-list" class="transactions-list-container">
                     <div class="empty-state">
                         <i class="ph ph-money"></i>
@@ -430,7 +435,12 @@
                 </button>
             </div>
             <div class="transactions-list">
-                <h3 class="section-title">Various Accreditations</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 class="section-title" style="margin-bottom: 0;">Various Accreditations</h3>
+                    <button class="icon-btn edit-list-toggle" data-list="various">
+                        <i class="ph ph-pencil-simple"></i>
+                    </button>
+                </div>
                 <div id="various-accreditations-list" class="transactions-list-container">
                     <div class="empty-state">
                         <i class="ph ph-piggy-bank"></i>
@@ -462,6 +472,9 @@
             <div class="transactions-list">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                     <h3 class="section-title" style="margin-bottom: 0;">Expenses History</h3>
+                    <button class="icon-btn edit-list-toggle" data-list="expense">
+                        <i class="ph ph-pencil-simple"></i>
+                    </button>
                 </div>
                 
                 <div class="expense-controls">

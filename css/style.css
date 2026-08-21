@@ -917,6 +917,37 @@ main {
     user-select: none;
 }
 
+/* Modalità Modifica Liste */
+.edit-list-toggle {
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 18px;
+    transition: all 0.3s ease;
+}
+.edit-list-toggle.active {
+    background: var(--primary-color);
+    color: white;
+}
+.transaction-item .edit-icon-item {
+    display: none;
+    color: var(--primary-color);
+    padding: 8px;
+    font-size: 20px;
+    cursor: pointer;
+    margin-left: auto;
+    animation: fadeIn 0.3s ease;
+}
+.transactions-list-container.list-edit-mode .transaction-item .edit-icon-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.transactions-list-container.list-edit-mode .transaction-amount {
+    margin-left: 0;
+}
+
 .widget-value,
 .transaction-amount div {
     transition: filter 0.3s ease, opacity 0.3s ease;

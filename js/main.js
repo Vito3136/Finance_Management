@@ -18,7 +18,17 @@ const state = {
     totalRemaining: 0,
     expenseViewMode: 'all', // 'all' or 'month'
     expenseSelectedMonth: '', // 'YYYY-MM'
-    hideValues: false
+    hideValues: false,
+    listEditModes: {
+        salary: false,
+        various: false,
+        expense: false
+    },
+    editContext: {
+        active: false,
+        type: null,
+        id: null
+    }
 };
 
 // DOM Elements
@@ -246,6 +256,26 @@ function showLoginScreen() {
     DOM.loginScreen.classList.add('active');
 }
 
+function resetEditMode(type) {
+    state.editContext = { active: false, type: null, id: null };
+    if (type === 'salary') {
+        document.getElementById('salary-modal-title').textContent = 'Add Salary Credit';
+        document.getElementById('salary-submit-btn').textContent = 'Save Credit';
+        const form = document.getElementById('add-salary-form');
+        if(form) form.reset();
+    } else if (type === 'various') {
+        document.getElementById('various-modal-title').textContent = 'Add Various Accreditation';
+        document.getElementById('various-submit-btn').textContent = 'Save Credit';
+        const form = document.getElementById('add-various-form');
+        if(form) form.reset();
+    } else if (type === 'expense') {
+        document.getElementById('expense-modal-title').textContent = 'Add Expense';
+        document.getElementById('expense-submit-btn').textContent = 'Save Expense';
+        const form = document.getElementById('add-expense-form');
+        if(form) form.reset();
+    }
+}
+
 // Check if user is already logged in and session hasn't expired
 async function checkSession() {
     const { data: { session }, error } = await supabase.auth.getSession();
@@ -312,6 +342,79 @@ function setupEventListeners() {
             applyPrivacyMode();
         });
     }
+
+    // List Edit Mode Toggles
+    const editToggles = document.querySelectorAll('.edit-list-toggle');
+    editToggles.forEach(toggle => {
+        toggle.addEventListener('click', (e) => {
+            const btn = e.currentTarget;
+            const listType = btn.getAttribute('data-list');
+            state.listEditModes[listType] = !state.listEditModes[listType];
+            
+            // Toggle visual state of the button
+            if (state.listEditModes[listType]) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+            
+            // Find the associated list container
+            let listContainer;
+            if (listType === 'salary') listContainer = document.getElementById('salary-credits-list');
+            if (listType === 'various') listContainer = document.getElementById('various-accreditations-list');
+            if (listType === 'expense') listContainer = document.getElementById('expenses-list');
+            
+            if (listContainer) {
+                if (state.listEditModes[listType]) {
+                    listContainer.classList.add('list-edit-mode');
+                } else {
+                    listContainer.classList.remove('list-edit-mode');
+                }
+            }
+        });
+    });
+
+    // List item edit click delegation
+    document.addEventListener('click', (e) => {
+        const editBtn = e.target.closest('.edit-icon-item');
+        if (editBtn) {
+            const listType = editBtn.getAttribute('data-type');
+            const itemId = editBtn.getAttribute('data-id');
+            const itemData = JSON.parse(editBtn.getAttribute('data-json'));
+            
+            state.editContext = { active: true, type: listType, id: itemId };
+            
+            if (listType === 'salary') {
+                document.getElementById('salary-modal-title').textContent = 'Edit Salary Credit';
+                document.getElementById('salary-submit-btn').textContent = 'Update Credit';
+                document.getElementById('salary-amount').value = itemData.total_amount;
+                document.getElementById('salary-spendable').value = itemData.spendable_amount;
+                document.getElementById('salary-date').value = itemData.credit_date;
+                document.getElementById('salary-desc').value = itemData.description || '';
+                
+                const modal = document.getElementById('add-salary-modal');
+                if (modal) modal.classList.add('active');
+            } else if (listType === 'various') {
+                document.getElementById('various-modal-title').textContent = 'Edit Various Accreditation';
+                document.getElementById('various-submit-btn').textContent = 'Update Credit';
+                document.getElementById('various-amount').value = itemData.total_amount;
+                document.getElementById('various-spendable').value = itemData.spendable_amount;
+                document.getElementById('various-date').value = itemData.credit_date;
+                document.getElementById('various-desc').value = itemData.description || '';
+                
+                const modal = document.getElementById('add-various-modal');
+                if (modal) modal.classList.add('active');
+            } else if (listType === 'expense') {
+                document.getElementById('expense-modal-title').textContent = 'Edit Expense';
+                document.getElementById('expense-submit-btn').textContent = 'Update Expense';
+                document.getElementById('expense-amount').value = itemData.amount;
+                document.getElementById('expense-date').value = itemData.expense_date;
+                document.getElementById('expense-desc').value = itemData.description || '';
+                
+                if (DOM.addExpenseModal) DOM.addExpenseModal.classList.add('active');
+            }
+        }
+    });
 
     // Nav Links (Side Menu)
     DOM.navLinks.forEach(link => {
@@ -512,7 +615,7 @@ function setupEventListeners() {
         // Close modal
         closeSalaryModal.addEventListener('click', () => {
             addSalaryModal.classList.remove('active');
-            addSalaryForm.reset();
+            resetEditMode('salary');
         });
 
         // Submit form
@@ -535,18 +638,32 @@ function setupEventListeners() {
             submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Saving...';
             submitBtn.disabled = true;
 
-            // Insert into Supabase
-            const { data, error } = await supabase
-                .from('salary_credits')
-                .insert([
-                    { 
-                        user_id: state.user.id,
+            // Insert or Update into Supabase
+            let res;
+            if (state.editContext.active && state.editContext.type === 'salary') {
+                res = await supabase
+                    .from('salary_credits')
+                    .update({ 
                         total_amount: amount, 
                         spendable_amount: spendable, 
                         credit_date: date, 
                         description: description 
-                    }
-                ]);
+                    })
+                    .eq('id', state.editContext.id);
+            } else {
+                res = await supabase
+                    .from('salary_credits')
+                    .insert([
+                        { 
+                            user_id: state.user.id,
+                            total_amount: amount, 
+                            spendable_amount: spendable, 
+                            credit_date: date, 
+                            description: description 
+                        }
+                    ]);
+            }
+            const { data, error } = res;
 
             submitBtn.innerHTML = originalBtnText;
             submitBtn.disabled = false;
@@ -555,9 +672,9 @@ function setupEventListeners() {
                 console.error("Error saving salary:", error);
                 alert("Error saving data: " + error.message);
             } else {
-                alert("Salary credit saved successfully!");
+                alert(state.editContext.active ? "Salary credit updated successfully!" : "Salary credit saved successfully!");
                 addSalaryModal.classList.remove('active');
-                addSalaryForm.reset();
+                resetEditMode('salary');
                 
                 // Important: Calculate statistics first to update state.totalRemaining
                 await calculateStatistics();
@@ -591,7 +708,7 @@ function setupEventListeners() {
         // Close modal
         closeVariousModal.addEventListener('click', () => {
             addVariousModal.classList.remove('active');
-            addVariousForm.reset();
+            resetEditMode('various');
         });
 
         // Submit form
@@ -614,18 +731,32 @@ function setupEventListeners() {
             submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Saving...';
             submitBtn.disabled = true;
 
-            // Insert into Supabase
-            const { data, error } = await supabase
-                .from('various_accreditations')
-                .insert([
-                    { 
-                        user_id: state.user.id,
+            // Insert or Update into Supabase
+            let res;
+            if (state.editContext.active && state.editContext.type === 'various') {
+                res = await supabase
+                    .from('various_accreditations')
+                    .update({ 
                         total_amount: amount, 
                         spendable_amount: spendable, 
                         credit_date: date, 
                         description: description 
-                    }
-                ]);
+                    })
+                    .eq('id', state.editContext.id);
+            } else {
+                res = await supabase
+                    .from('various_accreditations')
+                    .insert([
+                        { 
+                            user_id: state.user.id,
+                            total_amount: amount, 
+                            spendable_amount: spendable, 
+                            credit_date: date, 
+                            description: description 
+                        }
+                    ]);
+            }
+            const { data, error } = res;
 
             submitBtn.innerHTML = originalBtnText;
             submitBtn.disabled = false;
@@ -634,9 +765,9 @@ function setupEventListeners() {
                 console.error("Error saving various accreditation:", error);
                 alert("Error saving data: " + error.message);
             } else {
-                alert("Various accreditation saved successfully!");
+                alert(state.editContext.active ? "Various accreditation updated successfully!" : "Various accreditation saved successfully!");
                 addVariousModal.classList.remove('active');
-                addVariousForm.reset();
+                resetEditMode('various');
                 
                 // Calculate stats to get updated totalRemaining
                 await calculateStatistics();
@@ -664,7 +795,7 @@ function setupEventListeners() {
 
         DOM.closeExpenseModal.addEventListener('click', () => {
             DOM.addExpenseModal.classList.remove('active');
-            DOM.addExpenseForm.reset();
+            resetEditMode('expense');
         });
 
         DOM.addExpenseForm.addEventListener('submit', async (e) => {
@@ -681,17 +812,31 @@ function setupEventListeners() {
 
             const isHandled = state.totalRemaining >= amount;
 
-            const { data, error } = await supabase
-                .from('expenses')
-                .insert([
-                    { 
-                        user_id: state.user.id,
+            let res;
+            if (state.editContext.active && state.editContext.type === 'expense') {
+                // Durante la modifica, per ora non ricalcoliamo is_handled (o potremmo farlo)
+                res = await supabase
+                    .from('expenses')
+                    .update({ 
                         amount: amount, 
                         expense_date: date, 
-                        description: description,
-                        is_handled: isHandled
-                    }
-                ]);
+                        description: description
+                    })
+                    .eq('id', state.editContext.id);
+            } else {
+                res = await supabase
+                    .from('expenses')
+                    .insert([
+                        { 
+                            user_id: state.user.id,
+                            amount: amount, 
+                            expense_date: date, 
+                            description: description,
+                            is_handled: isHandled
+                        }
+                    ]);
+            }
+            const { data, error } = res;
 
             submitBtn.innerHTML = originalBtnText;
             submitBtn.disabled = false;
@@ -700,9 +845,16 @@ function setupEventListeners() {
                 console.error("Error saving expense:", error);
                 alert("Error saving data: " + error.message);
             } else {
-                alert("Expense saved successfully!");
+                alert(state.editContext.active ? "Expense updated successfully!" : "Expense saved successfully!");
                 DOM.addExpenseModal.classList.remove('active');
-                DOM.addExpenseForm.reset();
+                resetEditMode('expense');
+                
+                // Ricalcola se era un update che cambia gli importi
+                if (state.editContext.active) {
+                    await calculateStatistics();
+                    await processUnhandledExpenses();
+                }
+                
                 loadExpenses(); // Update dedicated list
                 calculateStatistics(); // Update total spent
             }
@@ -1080,6 +1232,9 @@ async function loadSalaryCredits() {
                     <div style="font-weight: 600; color: #34c759;">${formatCurrency(item.total_amount, '+')}</div>
                     <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: ${formatCurrency(item.spendable_amount)}</div>
                 </div>
+                <div class="edit-icon-item" data-id="${item.id}" data-type="salary" data-json='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+                    <i class="ph ph-pencil-simple"></i>
+                </div>
             </div>
         `).join('');
 
@@ -1133,6 +1288,9 @@ async function loadVariousAccreditations() {
                 <div class="transaction-amount" style="text-align: right;">
                     <div style="font-weight: 600; color: #34c759;">${formatCurrency(item.total_amount, '+')}</div>
                     <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: ${formatCurrency(item.spendable_amount)}</div>
+                </div>
+                <div class="edit-icon-item" data-id="${item.id}" data-type="various" data-json='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+                    <i class="ph ph-pencil-simple"></i>
                 </div>
             </div>
         `).join('');
@@ -1210,6 +1368,9 @@ async function loadExpenses() {
                 </div>
                 <div class="transaction-amount expense-amount-text" style="color: ${textColor};">
                     ${formatCurrency(item.amount, '-')}
+                </div>
+                <div class="edit-icon-item" data-id="${item.id}" data-type="expense" data-json='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+                    <i class="ph ph-pencil-simple"></i>
                 </div>
             </div>
             `;
