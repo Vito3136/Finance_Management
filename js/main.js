@@ -225,6 +225,21 @@ async function init() {
     }
 }
 
+// Utility per prevenire XSS
+function escapeHTML(str) {
+    if (typeof str !== 'string') return str;
+    return str.replace(/[&<>'"]/g, function(tag) {
+        const charsToReplace = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;'
+        };
+        return charsToReplace[tag] || tag;
+    });
+}
+
 // Helper for currency formatting with optional hiding
 function formatCurrency(amount, prefix = '') {
     return `${prefix}€${parseFloat(amount).toFixed(2)}`;
@@ -394,7 +409,7 @@ function setupEventListeners() {
         if (editBtn) {
             const listType = editBtn.getAttribute('data-type');
             const itemId = editBtn.getAttribute('data-id');
-            const itemData = JSON.parse(editBtn.getAttribute('data-json'));
+            const itemData = JSON.parse(decodeURIComponent(editBtn.getAttribute('data-json')));
             
             state.editContext = { active: true, type: listType, id: itemId };
             
@@ -1200,14 +1215,14 @@ async function loadRecentAccreditations() {
         const salaries = (salaryData || []).map(item => ({
             ...item,
             type: 'salary',
-            title: item.description || 'Salary Credit',
+            title: escapeHTML(item.description) || 'Salary Credit',
             icon: 'ph-money'
         }));
 
         const various = (variousData || []).map(item => ({
             ...item,
             type: 'various',
-            title: item.description || 'Various Accreditation',
+            title: escapeHTML(item.description) || 'Various Accreditation',
             icon: 'ph-piggy-bank'
         }));
 
@@ -1298,7 +1313,7 @@ async function loadSalaryCredits() {
                         <i class="ph ph-money"></i>
                     </div>
                     <div class="transaction-info">
-                        <span class="transaction-title">${item.description || 'Salary Credit'}</span>
+                        <span class="transaction-title">${escapeHTML(item.description) || 'Salary Credit'}</span>
                         <span class="transaction-date">${formatDate(item.credit_date)}</span>
                     </div>
                 </div>
@@ -1306,7 +1321,7 @@ async function loadSalaryCredits() {
                     <div style="font-weight: 600; color: #34c759;">${formatCurrency(item.total_amount, '+')}</div>
                     <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: ${formatCurrency(item.spendable_amount)}</div>
                 </div>
-                <div class="edit-icon-item" data-id="${item.id}" data-type="salary" data-json='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+                <div class="edit-icon-item" data-id="${item.id}" data-type="salary" data-json="${encodeURIComponent(JSON.stringify(item))}">
                     <i class="ph ph-pencil-simple"></i>
                 </div>
             </div>
@@ -1355,7 +1370,7 @@ async function loadVariousAccreditations() {
                         <i class="ph ph-piggy-bank"></i>
                     </div>
                     <div class="transaction-info">
-                        <span class="transaction-title">${item.description || 'Various Accreditation'}</span>
+                        <span class="transaction-title">${escapeHTML(item.description) || 'Various Accreditation'}</span>
                         <span class="transaction-date">${formatDate(item.credit_date)}</span>
                     </div>
                 </div>
@@ -1363,7 +1378,7 @@ async function loadVariousAccreditations() {
                     <div style="font-weight: 600; color: #34c759;">${formatCurrency(item.total_amount, '+')}</div>
                     <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: ${formatCurrency(item.spendable_amount)}</div>
                 </div>
-                <div class="edit-icon-item" data-id="${item.id}" data-type="various" data-json='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+                <div class="edit-icon-item" data-id="${item.id}" data-type="various" data-json="${encodeURIComponent(JSON.stringify(item))}">
                     <i class="ph ph-pencil-simple"></i>
                 </div>
             </div>
@@ -1436,14 +1451,14 @@ async function loadExpenses() {
                         <i class="ph ph-shopping-cart"></i>
                     </div>
                     <div class="transaction-info">
-                        <span class="transaction-title" style="${isUnhandled ? 'color: #8e8e93;' : ''}">${item.description || 'Expense'}${extraLabel}</span>
+                        <span class="transaction-title" style="${isUnhandled ? 'color: #8e8e93;' : ''}">${escapeHTML(item.description) || 'Expense'}${extraLabel}</span>
                         <span class="transaction-date">${formatDate(item.expense_date)}</span>
                     </div>
                 </div>
                 <div class="transaction-amount expense-amount-text" style="color: ${textColor};">
                     ${formatCurrency(item.amount, '-')}
                 </div>
-                <div class="edit-icon-item" data-id="${item.id}" data-type="expense" data-json='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+                <div class="edit-icon-item" data-id="${item.id}" data-type="expense" data-json="${encodeURIComponent(JSON.stringify(item))}">
                     <i class="ph ph-pencil-simple"></i>
                 </div>
             </div>
@@ -1629,7 +1644,7 @@ async function loadInvestmentHighlights() {
             const iconClass = isPositive ? 'various' : '';
             const amountColor = isPositive ? '#34c759' : '#ff3b30';
             const prefix = isPositive ? '+' : '';
-            const title = item.description || (isPositive ? 'Accredito' : 'Spesa/Commissione');
+            const title = escapeHTML(item.description) || (isPositive ? 'Accredito' : 'Spesa/Commissione');
             
             return `
             <div class="transaction-item highlighted-movement">
@@ -1689,7 +1704,7 @@ async function loadInvestmentTransfers() {
                 <div class="transaction-amount" style="text-align: right;">
                     <div style="font-weight: 600; color: #34c759;">${formatCurrency(item.amount, '+')}</div>
                 </div>
-                <div class="edit-icon-item" data-id="${item.id}" data-type="bonifico" data-json='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+                <div class="edit-icon-item" data-id="${item.id}" data-type="bonifico" data-json="${encodeURIComponent(JSON.stringify(item))}">
                     <i class="ph ph-pencil-simple"></i>
                 </div>
             </div>
@@ -1727,14 +1742,14 @@ async function loadInvestments() {
                         <i class="ph ph-chart-pie-slice"></i>
                     </div>
                     <div class="transaction-info">
-                        <div class="transaction-title">${item.description}</div>
+                        <div class="transaction-title">${escapeHTML(item.description)}</div>
                         <div class="transaction-date">${formatDate(item.date)}</div>
                     </div>
                 </div>
                 <div class="transaction-amount" style="text-align: right; color: var(--text-primary);">
                     <div style="font-weight: 600;">${formatCurrency(item.amount)}</div>
                 </div>
-                <div class="edit-icon-item" data-id="${item.id}" data-type="investimento" data-json='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+                <div class="edit-icon-item" data-id="${item.id}" data-type="investimento" data-json="${encodeURIComponent(JSON.stringify(item))}">
                     <i class="ph ph-pencil-simple"></i>
                 </div>
             </div>
@@ -1771,7 +1786,7 @@ async function loadInvestmentMovements() {
             const iconClass = isPositive ? 'various' : '';
             const amountColor = isPositive ? '#34c759' : '#ff3b30';
             const prefix = isPositive ? '+' : '';
-            const title = item.description || (isPositive ? 'Accredito' : 'Spesa/Commissione');
+            const title = escapeHTML(item.description) || (isPositive ? 'Accredito' : 'Spesa/Commissione');
             const isHighlighted = item.is_highlighted === true;
             const highlightClass = isHighlighted ? 'highlighted-movement' : '';
 
@@ -1789,7 +1804,7 @@ async function loadInvestmentMovements() {
                 <div class="transaction-amount" style="text-align: right;">
                     <div style="font-weight: 600; color: ${amountColor};">${formatCurrency(item.amount, prefix)}</div>
                 </div>
-                <div class="edit-icon-item" data-id="${item.id}" data-type="movimento" data-json='${JSON.stringify(item).replace(/'/g, "&apos;")}'>
+                <div class="edit-icon-item" data-id="${item.id}" data-type="movimento" data-json="${encodeURIComponent(JSON.stringify(item))}">
                     <i class="ph ph-pencil-simple"></i>
                 </div>
             </div>
