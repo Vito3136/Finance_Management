@@ -346,17 +346,10 @@ function setupEventListeners() {
     // List Edit Mode Toggles
     const editToggles = document.querySelectorAll('.edit-list-toggle');
     editToggles.forEach(toggle => {
-        toggle.addEventListener('click', (e) => {
-            const btn = e.currentTarget;
+        toggle.addEventListener('change', (e) => {
+            const btn = e.target;
             const listType = btn.getAttribute('data-list');
-            state.listEditModes[listType] = !state.listEditModes[listType];
-            
-            // Toggle visual state of the button
-            if (state.listEditModes[listType]) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
+            state.listEditModes[listType] = btn.checked;
             
             // Find the associated list container
             let listContainer;
