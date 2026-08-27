@@ -684,6 +684,10 @@ function setupEventListeners() {
             const description = document.getElementById('salary-desc').value;
             const submitBtn = addSalaryForm.querySelector('button[type="submit"]');
 
+            if (amount <= 0) {
+                alert("L'importo deve essere maggiore di zero!");
+                return;
+            }
             if (spendable > amount) {
                 alert("Spendable amount cannot be greater than the total amount!");
                 return;
@@ -777,6 +781,10 @@ function setupEventListeners() {
             const description = document.getElementById('various-desc').value;
             const submitBtn = addVariousForm.querySelector('button[type="submit"]');
 
+            if (amount <= 0) {
+                alert("L'importo deve essere maggiore di zero!");
+                return;
+            }
             if (spendable > amount) {
                 alert("Spendable amount cannot be greater than the total amount!");
                 return;
@@ -862,6 +870,11 @@ function setupEventListeners() {
             const description = document.getElementById('expense-desc').value;
             const submitBtn = DOM.addExpenseForm.querySelector('button[type="submit"]');
 
+            if (amount <= 0) {
+                alert("L'importo della spesa deve essere maggiore di zero!");
+                return;
+            }
+
             const originalBtnText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Saving...';
             submitBtn.disabled = true;
@@ -941,6 +954,11 @@ function setupInvestmentModals() {
             const date = document.getElementById('bonifico-date').value;
             const submitBtn = DOM.addBonificoForm.querySelector('button[type="submit"]');
             
+            if (amount <= 0) {
+                alert("L'importo del bonifico deve essere maggiore di zero!");
+                return;
+            }
+
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Salvataggio...';
             submitBtn.disabled = true;
@@ -998,6 +1016,11 @@ function setupInvestmentModals() {
             const desc = document.getElementById('investimento-desc').value;
             const submitBtn = DOM.addInvestimentoForm.querySelector('button[type="submit"]');
             
+            if (amount <= 0) {
+                alert("L'importo dell'investimento deve essere maggiore di zero!");
+                return;
+            }
+
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Salvataggio...';
             submitBtn.disabled = true;
@@ -1177,11 +1200,7 @@ function formatDate(dateString) {
 function updateEl(id, value) {
     const el = document.getElementById(id);
     if (el) {
-        if (state.hideValues) {
-            el.innerHTML = '***';
-        } else {
-            el.innerHTML = formatCurrency(value);
-        }
+        el.innerHTML = formatCurrency(value);
     }
 }
 
