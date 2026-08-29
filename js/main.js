@@ -220,8 +220,8 @@ async function init() {
         await loadInvestments();
         await loadInvestmentMovements();
         await calculateStatistics();
-        await processUnhandledExpenses();
-        // If processUnhandledExpenses handled anything, it will automatically update UI.
+        await syncLedgerStatus();
+        // If syncLedgerStatus handled anything, it will automatically update UI.
         await calculateInvestmentStatistics();
         await loadInvestmentHighlights();
     }
@@ -472,7 +472,50 @@ function setupEventListeners() {
                 if (modal) modal.classList.add('active');
             }
         }
+
+        const deleteBtn = e.target.closest('.delete-icon-item');
+        if (deleteBtn) {
+            const listType = deleteBtn.getAttribute('data-type');
+            const itemId = deleteBtn.getAttribute('data-id');
+            if (confirm("Sei sicuro di voler eliminare questa voce? L'operazione non è reversibile.")) {
+                deleteItem(listType, itemId);
+            }
+        }
     });
+
+    // List Item Delete Handler
+    async function deleteItem(type, id) {
+        if (!state.user) return;
+        
+        let table = '';
+        if (type === 'salary') table = 'salary_credits';
+        else if (type === 'various') table = 'various_accreditations';
+        else if (type === 'expense') table = 'expenses';
+        else if (type === 'bonifico') table = 'investment_transfers';
+        else if (type === 'investimento') table = 'investments';
+        else if (type === 'movimento') table = 'investment_movements';
+
+        try {
+            const { error } = await supabase.from(table).delete().eq('id', id);
+            if (error) throw error;
+            
+            // Aggiorna lo stato globale ed UI
+            if (['bonifico', 'investimento', 'movimento'].includes(type)) {
+                await calculateInvestmentStatistics();
+                loadInvestmentMovements();
+                loadInvestmentHighlights();
+            } else {
+                await calculateStatistics();
+                await syncLedgerStatus();
+                loadSalaryCredits();
+                loadRecentAccreditations();
+                loadExpenses();
+            }
+        } catch (error) {
+            console.error("Error deleting item:", error);
+            alert("Errore durante l'eliminazione: " + error.message);
+        }
+    }
 
     // Nav Links (Side Menu)
     DOM.navLinks.forEach(link => {
@@ -740,8 +783,8 @@ function setupEventListeners() {
                 
                 // Important: Calculate statistics first to update state.totalRemaining
                 await calculateStatistics();
-                // Then process unhandled expenses if the budget allows
-                await processUnhandledExpenses();
+                // Then sync ledger if the budget allows or drops
+                await syncLedgerStatus();
                 
                 // Finally reload UI elements to reflect new data
                 loadRecentAccreditations(); 
@@ -838,7 +881,7 @@ function setupEventListeners() {
                 // Calculate stats to get updated totalRemaining
                 await calculateStatistics();
                 // Process unhandled expenses
-                await processUnhandledExpenses();
+                await syncLedgerStatus();
                 
                 loadRecentAccreditations(); // Update list
                 loadVariousAccreditations(); // Update dedicated list
@@ -923,7 +966,7 @@ function setupEventListeners() {
                 // Ricalcola se era un update che cambia gli importi
                 if (state.editContext.active) {
                     await calculateStatistics();
-                    await processUnhandledExpenses();
+                    await syncLedgerStatus();
                 }
                 
                 loadExpenses(); // Update dedicated list
@@ -1345,6 +1388,9 @@ async function loadSalaryCredits() {
                 <div class="edit-icon-item" data-id="${item.id}" data-type="salary" data-json="${encodeURIComponent(JSON.stringify(item))}">
                     <i class="ph ph-pencil-simple"></i>
                 </div>
+                <div class="delete-icon-item" data-id="${item.id}" data-type="salary" data-json="${encodeURIComponent(JSON.stringify(item))}">
+                    <i class="ph ph-trash"></i>
+                </div>
             </div>
         `).join('');
 
@@ -1401,6 +1447,9 @@ async function loadVariousAccreditations() {
                 </div>
                 <div class="edit-icon-item" data-id="${item.id}" data-type="various" data-json="${encodeURIComponent(JSON.stringify(item))}">
                     <i class="ph ph-pencil-simple"></i>
+                </div>
+                <div class="delete-icon-item" data-id="${item.id}" data-type="various" data-json="${encodeURIComponent(JSON.stringify(item))}">
+                    <i class="ph ph-trash"></i>
                 </div>
             </div>
         `).join('');
@@ -1481,6 +1530,9 @@ async function loadExpenses() {
                 </div>
                 <div class="edit-icon-item" data-id="${item.id}" data-type="expense" data-json="${encodeURIComponent(JSON.stringify(item))}">
                     <i class="ph ph-pencil-simple"></i>
+                </div>
+                <div class="delete-icon-item" data-id="${item.id}" data-type="expense" data-json="${encodeURIComponent(JSON.stringify(item))}">
+                    <i class="ph ph-trash"></i>
                 </div>
             </div>
             `;
@@ -1728,6 +1780,9 @@ async function loadInvestmentTransfers() {
                 <div class="edit-icon-item" data-id="${item.id}" data-type="bonifico" data-json="${encodeURIComponent(JSON.stringify(item))}">
                     <i class="ph ph-pencil-simple"></i>
                 </div>
+                <div class="delete-icon-item" data-id="${item.id}" data-type="bonifico" data-json="${encodeURIComponent(JSON.stringify(item))}">
+                    <i class="ph ph-trash"></i>
+                </div>
             </div>
         `).join('');
 
@@ -1772,6 +1827,9 @@ async function loadInvestments() {
                 </div>
                 <div class="edit-icon-item" data-id="${item.id}" data-type="investimento" data-json="${encodeURIComponent(JSON.stringify(item))}">
                     <i class="ph ph-pencil-simple"></i>
+                </div>
+                <div class="delete-icon-item" data-id="${item.id}" data-type="investimento" data-json="${encodeURIComponent(JSON.stringify(item))}">
+                    <i class="ph ph-trash"></i>
                 </div>
             </div>
         `).join('');
@@ -1828,6 +1886,9 @@ async function loadInvestmentMovements() {
                 <div class="edit-icon-item" data-id="${item.id}" data-type="movimento" data-json="${encodeURIComponent(JSON.stringify(item))}">
                     <i class="ph ph-pencil-simple"></i>
                 </div>
+                <div class="delete-icon-item" data-id="${item.id}" data-type="movimento" data-json="${encodeURIComponent(JSON.stringify(item))}">
+                    <i class="ph ph-trash"></i>
+                </div>
             </div>
             `;
         }).join('');
@@ -1838,53 +1899,63 @@ async function loadInvestmentMovements() {
 }
 
 // Process Unhandled Expenses when new funds are added
-async function processUnhandledExpenses() {
+async function syncLedgerStatus() {
     if (!state.user) return;
 
     try {
-        // Fetch all unhandled expenses sorted by oldest first
-        const { data: unhandled, error: fetchErr } = await supabase
-            .from('expenses')
-            .select('id, amount')
-            .eq('is_handled', false)
-            .order('created_at', { ascending: true });
-
-        if (fetchErr) throw fetchErr;
+        // 1. Get all spendable money
+        const { data: salaries, error: salErr } = await supabase.from('salary_credits').select('spendable_amount');
+        if (salErr) throw salErr;
         
-        if (!unhandled || unhandled.length === 0) return; // No unhandled expenses
+        const { data: various, error: varErr } = await supabase.from('various_accreditations').select('spendable_amount');
+        if (varErr) throw varErr;
+        
+        const totalSpendable = 
+            (salaries ? salaries.reduce((sum, item) => sum + parseFloat(item.spendable_amount || 0), 0) : 0) +
+            (various ? various.reduce((sum, item) => sum + parseFloat(item.spendable_amount || 0), 0) : 0);
 
-        let currentRemaining = state.totalRemaining;
+        // 2. Fetch all expenses ordered by date (oldest first)
+        const { data: allExpenses, error: expErr } = await supabase
+            .from('expenses')
+            .select('id, amount, is_handled')
+            .order('expense_date', { ascending: true })
+            .order('created_at', { ascending: true }); // secondary sort
+
+        if (expErr) throw expErr;
+
+        let currentBudget = totalSpendable;
         let handledAny = false;
         
-        for (const expense of unhandled) {
-            const expAmount = parseFloat(expense.amount);
-            
-            // If the budget can cover this oldest expense
-            if (currentRemaining >= expAmount) {
-                // Update DB
-                const { error: updateErr } = await supabase
-                    .from('expenses')
-                    .update({ is_handled: true })
-                    .eq('id', expense.id);
+        if (allExpenses && allExpenses.length > 0) {
+            for (const expense of allExpenses) {
+                const expAmount = parseFloat(expense.amount);
                 
-                if (updateErr) throw updateErr;
-                
-                // Decrement our running total to check the next one
-                currentRemaining -= expAmount;
-                handledAny = true;
-            } else {
-                // If we can't afford this one, we break, because we process chronologically
-                break;
+                if (currentBudget >= expAmount) {
+                    // Should be handled
+                    if (!expense.is_handled) {
+                        await supabase.from('expenses').update({ is_handled: true }).eq('id', expense.id);
+                        handledAny = true;
+                    }
+                    currentBudget -= expAmount;
+                } else {
+                    // Cannot be handled
+                    if (expense.is_handled) {
+                        await supabase.from('expenses').update({ is_handled: false }).eq('id', expense.id);
+                        handledAny = true;
+                    }
+                    // we don't decrement budget since it wasn't handled
+                }
             }
         }
         
+        // 3. Refresh UI
         if (handledAny) {
             await calculateStatistics();
             loadExpenses();
-            loadRecentAccreditations(); // also refresh homepage latest movements if any changed
+            loadRecentAccreditations();
         }
     } catch (error) {
-        console.error("Error processing unhandled expenses:", error);
+        console.error("Error syncing ledger:", error);
     }
 }
 

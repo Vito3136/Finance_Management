@@ -930,16 +930,24 @@ main {
     background: var(--primary-color);
     color: white;
 }
-.transaction-item .edit-icon-item {
+.transaction-item .edit-icon-item,
+.transaction-item .delete-icon-item {
     display: none;
-    color: var(--primary-color);
     padding: 8px;
     font-size: 20px;
     cursor: pointer;
-    margin-left: auto;
     animation: fadeIn 0.3s ease;
 }
-.transactions-list-container.list-edit-mode .transaction-item .edit-icon-item {
+.transaction-item .edit-icon-item {
+    color: var(--primary-color);
+    margin-left: auto;
+}
+.transaction-item .delete-icon-item {
+    color: #ff3b30;
+    margin-left: 4px;
+}
+.transactions-list-container.list-edit-mode .transaction-item .edit-icon-item,
+.transactions-list-container.list-edit-mode .transaction-item .delete-icon-item {
     display: flex;
     align-items: center;
     justify-content: center;
