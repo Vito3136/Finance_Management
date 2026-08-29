@@ -220,6 +220,8 @@ async function init() {
         await loadInvestments();
         await loadInvestmentMovements();
         await calculateStatistics();
+        await processUnhandledExpenses();
+        // If processUnhandledExpenses handled anything, it will automatically update UI.
         await calculateInvestmentStatistics();
         await loadInvestmentHighlights();
     }
@@ -1852,6 +1854,7 @@ async function processUnhandledExpenses() {
         if (!unhandled || unhandled.length === 0) return; // No unhandled expenses
 
         let currentRemaining = state.totalRemaining;
+        let handledAny = false;
         
         for (const expense of unhandled) {
             const expAmount = parseFloat(expense.amount);
@@ -1868,10 +1871,17 @@ async function processUnhandledExpenses() {
                 
                 // Decrement our running total to check the next one
                 currentRemaining -= expAmount;
+                handledAny = true;
             } else {
                 // If we can't afford this one, we break, because we process chronologically
                 break;
             }
+        }
+        
+        if (handledAny) {
+            await calculateStatistics();
+            loadExpenses();
+            loadRecentAccreditations(); // also refresh homepage latest movements if any changed
         }
     } catch (error) {
         console.error("Error processing unhandled expenses:", error);
