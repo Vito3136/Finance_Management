@@ -1,15 +1,27 @@
 import { translations } from './translations.js';
+import { getInitialDemoData, createDemoQueryBuilder } from './demo_data.js';
 
 // --- SUPABASE CONFIGURATION ---
 // INSERISCI QUI LE TUE CHIAVI (Puoi trovarle in Project Settings -> API su Supabase)
 const SUPABASE_URL = 'https://hcvktcdrgrsnmxqtvfeg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhjdmt0Y2RyZ3Jzbm14cXR2ZmVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1NjkwNTYsImV4cCI6MjA5ODE0NTA1Nn0.Mj-xmxF6zTXxquVhVyPYkM45gb5R8sw_ftmKy7Oo7e0';
 
-// Inizializza il client Supabase
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Inizializza il client Supabase con intercettazione per la modalità Demo
+const rawSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = {
+    auth: rawSupabase.auth,
+    from(table) {
+        if (state.isDemo) {
+            return createDemoQueryBuilder(() => state.demoData, table);
+        }
+        return rawSupabase.from(table);
+    }
+};
 
 // Application State
 const state = {
+    isDemo: false,
+    demoData: null,
     globalMode: 'expense', // 'expense' or 'investment'
     currentLanguage: localStorage.getItem('finance_app_lang') || 'it',
     views: {
@@ -124,7 +136,9 @@ const DOM = {
     loginScreen: document.getElementById('login-screen'),
     loginForm: document.getElementById('login-form'),
     loginError: document.getElementById('login-error'),
-    logoutBtn: document.getElementById('logout-btn')
+    logoutBtn: document.getElementById('logout-btn'),
+    demoBtn: document.getElementById('demo-btn'),
+    demoBadge: document.getElementById('demo-badge')
 };
 
 // Mode Config
@@ -191,7 +205,7 @@ const GLOBAL_MODE_CONFIG = {
 const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
 
 function updateLastActivity() {
-    if (state.user) {
+    if (state.user && !state.isDemo) {
         localStorage.setItem('last_activity', Date.now().toString());
     }
 }
@@ -660,11 +674,16 @@ function setupEventListeners() {
         });
     }
     
-    // Logout Logic
+    // Logout / Exit Demo Logic
     if (DOM.logoutBtn) {
         DOM.logoutBtn.addEventListener('click', async () => {
             if (navigator.vibrate) navigator.vibrate(50);
             
+            if (state.isDemo) {
+                exitDemoMode();
+                return;
+            }
+
             // Chiudi il menu
             toggleMenu();
             
@@ -682,7 +701,7 @@ function setupEventListeners() {
 
     // Check session again when app comes to foreground
     document.addEventListener('visibilitychange', async () => {
-        if (document.visibilityState === 'visible' && state.user) {
+        if (document.visibilityState === 'visible' && state.user && !state.isDemo) {
             await checkSession();
         }
     });
@@ -690,6 +709,18 @@ function setupEventListeners() {
     // REAL Login Form Submit with Supabase
     DOM.loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        // Ensure demo mode is off for real login
+        state.isDemo = false;
+        state.demoData = null;
+        if (DOM.demoBadge) DOM.demoBadge.style.display = 'none';
+        if (DOM.logoutBtn) {
+            const span = DOM.logoutBtn.querySelector('span');
+            if (span) {
+                span.setAttribute('data-i18n', 'menu_logout');
+                span.textContent = t('menu_logout');
+            }
+        }
 
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -760,19 +791,101 @@ function setupEventListeners() {
         }
     });
 
+    // Demo Mode Handlers
+    async function enterDemoMode() {
+        state.isDemo = true;
+        state.demoData = getInitialDemoData();
+        state.user = {
+            id: 'demo-user-id',
+            email: 'demo@ditrani.finance'
+        };
+
+        // Reset previous login errors & fields
+        DOM.loginError.style.display = 'none';
+        document.getElementById('password').value = '';
+
+        // Read privacy toggle state
+        const hideToggle = document.getElementById('hide-amounts-toggle');
+        if (hideToggle) {
+            state.hideValues = hideToggle.checked;
+            applyPrivacyMode();
+        }
+
+        // Hide login screen
+        DOM.loginScreen.classList.remove('active');
+
+        // Show DEMO badge
+        if (DOM.demoBadge) {
+            DOM.demoBadge.style.display = 'inline-block';
+        }
+
+        // Update logout button to "Esci dalla demo"
+        if (DOM.logoutBtn) {
+            const span = DOM.logoutBtn.querySelector('span');
+            if (span) {
+                span.setAttribute('data-i18n', 'menu_exit_demo');
+                span.textContent = t('menu_exit_demo');
+            }
+        }
+
+        // Reset view to Homepage
+        state.globalMode = 'expense';
+        state.views.expense = 'home';
+        updateUI();
+
+        window.scrollTo(0, 0);
+
+        // Load all mock demo data
+        await loadRecentAccreditations();
+        await loadSalaryCredits();
+        await loadVariousAccreditations();
+        await loadExpenses();
+        await loadInvestmentTransfers();
+        await loadInvestments();
+        await loadInvestmentMovements();
+        await calculateStatistics();
+        await syncLedgerStatus();
+        await calculateInvestmentStatistics();
+        await loadInvestmentHighlights();
+    }
+
+    function exitDemoMode() {
+        if (state.isMenuOpen) {
+            toggleMenu();
+        }
+
+        state.isDemo = false;
+        state.demoData = null;
+        state.user = null;
+        state.hideValues = false;
+
+        // Restore logout button label
+        if (DOM.logoutBtn) {
+            const span = DOM.logoutBtn.querySelector('span');
+            if (span) {
+                span.setAttribute('data-i18n', 'menu_logout');
+                span.textContent = t('menu_logout');
+            }
+        }
+
+        // Hide DEMO badge
+        if (DOM.demoBadge) {
+            DOM.demoBadge.style.display = 'none';
+        }
+
+        // Reset privacy toggle
+        const toggleEl = document.getElementById('hide-amounts-toggle');
+        if (toggleEl) toggleEl.checked = false;
+        applyPrivacyMode();
+
+        showLoginScreen();
+    }
+
     // Demo Button Logic
-    const demoBtn = document.getElementById('demo-btn');
-    const demoModal = document.getElementById('demo-modal');
-    const closeDemoModal = document.getElementById('close-demo-modal');
-    
-    if (demoBtn && demoModal && closeDemoModal) {
-        demoBtn.addEventListener('click', () => {
+    if (DOM.demoBtn) {
+        DOM.demoBtn.addEventListener('click', async () => {
             if (navigator.vibrate) navigator.vibrate(50);
-            demoModal.classList.add('active');
-        });
-        
-        closeDemoModal.addEventListener('click', () => {
-            demoModal.classList.remove('active');
+            await enterDemoMode();
         });
     }
 

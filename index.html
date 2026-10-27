@@ -78,15 +78,6 @@
         </div>
     </div>
 
-    <!-- Custom Modal for Demo Alert -->
-    <div id="demo-modal" class="custom-modal">
-        <div class="custom-modal-content">
-            <h3 data-i18n="demo_modal_title">Avviso</h3>
-            <p data-i18n="demo_modal_text">La versione demo non è ancora disponibile.</p>
-            <button id="close-demo-modal" class="primary-btn" data-i18n="btn_close">Chiudi</button>
-        </div>
-    </div>
-
     <!-- Add Salary Modal -->
     <div id="add-salary-modal" class="custom-modal">
         <div class="custom-modal-content form-modal">
@@ -286,7 +277,10 @@
             <i class="ph ph-list"></i>
         </button>
 
-        <h1 id="app-title" data-i18n="view_home_title">Gestione Spese</h1>
+        <div class="top-bar-center">
+            <h1 id="app-title" data-i18n="view_home_title">Gestione Spese</h1>
+            <span id="demo-badge" class="demo-badge" style="display: none;" data-i18n="demo_badge">DEMO</span>
+        </div>
 
         <button id="toggle-mode-btn" class="icon-btn" aria-label="Switch Mode">
             <!-- Default mode icon: showing investment icon as it's the target to switch to from expenses -->

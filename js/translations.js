@@ -40,6 +40,8 @@ export const translations = {
         menu_language: "Lingua",
         menu_hide_values: "Nascondi Cifre",
         menu_logout: "Logout",
+        menu_exit_demo: "Esci dalla demo",
+        demo_badge: "DEMO",
 
         // Action Buttons
         btn_add_salary_action: "+ Aggiungi stipendio",
@@ -224,6 +226,8 @@ export const translations = {
         menu_language: "Language",
         menu_hide_values: "Hide Amounts",
         menu_logout: "Logout",
+        menu_exit_demo: "Exit demo",
+        demo_badge: "DEMO",
 
         // Action Buttons
         btn_add_salary_action: "+ Add salary credit",
