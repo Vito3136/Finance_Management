@@ -1,3 +1,5 @@
+import { translations } from './translations.js';
+
 // --- SUPABASE CONFIGURATION ---
 // INSERISCI QUI LE TUE CHIAVI (Puoi trovarle in Project Settings -> API su Supabase)
 const SUPABASE_URL = 'https://hcvktcdrgrsnmxqtvfeg.supabase.co';
@@ -9,6 +11,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Application State
 const state = {
     globalMode: 'expense', // 'expense' or 'investment'
+    currentLanguage: localStorage.getItem('finance_app_lang') || 'it',
     views: {
         expense: 'home',
         investment: 'investment'
@@ -127,47 +130,47 @@ const DOM = {
 // Mode Config
 const MODE_CONFIG = {
     home: {
-        title: 'Finance Management',
+        titleKey: 'view_home_title',
         container: DOM.homeContainer,
         group: 'expense'
     },
     expense: {
-        title: 'Expenses History',
+        titleKey: 'view_expense_title',
         container: DOM.expenseContainer,
         group: 'expense'
     },
     statistics: {
-        title: 'Statistics',
+        titleKey: 'view_statistics_title',
         container: DOM.statisticsContainer,
         group: 'expense'
     },
     investment: {
-        title: 'Investment management',
+        titleKey: 'view_investment_title',
         container: DOM.investmentContainer,
         group: 'investment'
     },
     salary: {
-        title: 'Salary credits',
+        titleKey: 'view_salary_title',
         container: DOM.salaryContainer,
         group: 'expense'
     },
     various: {
-        title: 'Various accreditations',
+        titleKey: 'view_various_title',
         container: DOM.variousContainer,
         group: 'expense'
     },
     investmentTransfers: {
-        title: 'Bonifici in Entrata',
+        titleKey: 'view_transfers_title',
         container: DOM.investmentTransfersContainer,
         group: 'investment'
     },
     investments: {
-        title: 'I Miei Investimenti',
+        titleKey: 'view_investments_title',
         container: DOM.investmentsContainer,
         group: 'investment'
     },
     investmentMovements: {
-        title: 'Spese e Movimenti',
+        titleKey: 'view_movements_title',
         container: DOM.investmentMovementsContainer,
         group: 'investment'
     }
@@ -197,9 +200,77 @@ function updateLastActivity() {
 document.addEventListener('click', updateLastActivity);
 document.addEventListener('touchstart', updateLastActivity);
 
+// --- TRANSLATION UTILITIES ---
+function t(key) {
+    const lang = state.currentLanguage || 'it';
+    if (translations[lang] && translations[lang][key] !== undefined) {
+        return translations[lang][key];
+    }
+    if (translations['it'] && translations['it'][key] !== undefined) {
+        return translations['it'][key];
+    }
+    return key;
+}
+
+function applyLanguage(lang) {
+    if (lang !== 'it' && lang !== 'en') lang = 'it';
+    state.currentLanguage = lang;
+    document.documentElement.lang = lang;
+    
+    // Update language buttons active state in menu
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        if (btn.getAttribute('data-lang') === lang) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    // Translate all [data-i18n]
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const text = t(key);
+        if (text) el.innerHTML = text;
+    });
+
+    // Translate all [data-i18n-placeholder]
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        const text = t(key);
+        if (text) el.placeholder = text;
+    });
+
+    // Update Top App Title
+    const currentViewKey = state.views[state.globalMode];
+    const viewConfig = MODE_CONFIG[currentViewKey];
+    if (viewConfig && DOM.appTitle) {
+        DOM.appTitle.textContent = t(viewConfig.titleKey);
+    }
+
+    // Refresh dynamic lists if user is logged in
+    if (state.user) {
+        loadRecentAccreditations();
+        loadSalaryCredits();
+        loadVariousAccreditations();
+        loadExpenses();
+        loadInvestmentTransfers();
+        loadInvestments();
+        loadInvestmentMovements();
+        loadInvestmentHighlights();
+    }
+}
+
+function setLanguage(lang) {
+    if (lang !== 'it' && lang !== 'en') lang = 'it';
+    state.currentLanguage = lang;
+    localStorage.setItem('finance_app_lang', lang);
+    applyLanguage(lang);
+}
+
 // Initialize App
 async function init() {
     setupEventListeners();
+    applyLanguage(state.currentLanguage);
     await checkSession();
     updateUI();
     
@@ -279,33 +350,33 @@ function showLoginScreen() {
 function resetEditMode(type) {
     state.editContext = { active: false, type: null, id: null };
     if (type === 'salary') {
-        document.getElementById('salary-modal-title').textContent = 'Add Salary Credit';
-        document.getElementById('salary-submit-btn').textContent = 'Save Credit';
+        document.getElementById('salary-modal-title').textContent = t('modal_add_salary_title');
+        document.getElementById('salary-submit-btn').textContent = t('btn_save_credit');
         const form = document.getElementById('add-salary-form');
         if(form) form.reset();
     } else if (type === 'various') {
-        document.getElementById('various-modal-title').textContent = 'Add Various Accreditation';
-        document.getElementById('various-submit-btn').textContent = 'Save Credit';
+        document.getElementById('various-modal-title').textContent = t('modal_add_various_title');
+        document.getElementById('various-submit-btn').textContent = t('btn_save_various');
         const form = document.getElementById('add-various-form');
         if(form) form.reset();
     } else if (type === 'expense') {
-        document.getElementById('expense-modal-title').textContent = 'Add Expense';
-        document.getElementById('expense-submit-btn').textContent = 'Save Expense';
+        document.getElementById('expense-modal-title').textContent = t('modal_add_expense_title');
+        document.getElementById('expense-submit-btn').textContent = t('btn_save_expense');
         const form = document.getElementById('add-expense-form');
         if(form) form.reset();
     } else if (type === 'bonifico') {
-        document.getElementById('bonifico-modal-title').textContent = 'Aggiungi Bonifico';
-        document.getElementById('bonifico-submit-btn').textContent = 'Salva Bonifico';
+        document.getElementById('bonifico-modal-title').textContent = t('modal_add_bonifico_title');
+        document.getElementById('bonifico-submit-btn').textContent = t('btn_save_bonifico');
         const form = document.getElementById('add-bonifico-form');
         if(form) form.reset();
     } else if (type === 'investimento') {
-        document.getElementById('investimento-modal-title').textContent = 'Aggiungi Investimento';
-        document.getElementById('investimento-submit-btn').textContent = 'Salva Investimento';
+        document.getElementById('investimento-modal-title').textContent = t('modal_add_investimento_title');
+        document.getElementById('investimento-submit-btn').textContent = t('btn_save_investimento');
         const form = document.getElementById('add-investimento-form');
         if(form) form.reset();
     } else if (type === 'movimento') {
-        document.getElementById('movimento-modal-title').textContent = 'Aggiungi Movimento';
-        document.getElementById('movimento-submit-btn').textContent = 'Salva Movimento';
+        document.getElementById('movimento-modal-title').textContent = t('modal_add_movimento_title');
+        document.getElementById('movimento-submit-btn').textContent = t('btn_save_movimento');
         const form = document.getElementById('add-movimento-form');
         if(form) form.reset();
     }
@@ -378,6 +449,19 @@ function setupEventListeners() {
         });
     }
 
+    // Language Switcher (Side Menu)
+    const langBtns = document.querySelectorAll('.lang-btn');
+    langBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const selectedLang = btn.getAttribute('data-lang');
+            if (selectedLang && selectedLang !== state.currentLanguage) {
+                setLanguage(selectedLang);
+                if (navigator.vibrate) navigator.vibrate(30);
+            }
+        });
+    });
+
     // List Edit Mode Toggles
     const editToggles = document.querySelectorAll('.edit-list-toggle');
     editToggles.forEach(toggle => {
@@ -416,8 +500,8 @@ function setupEventListeners() {
             state.editContext = { active: true, type: listType, id: itemId };
             
             if (listType === 'salary') {
-                document.getElementById('salary-modal-title').textContent = 'Edit Salary Credit';
-                document.getElementById('salary-submit-btn').textContent = 'Update Credit';
+                document.getElementById('salary-modal-title').textContent = t('modal_edit_salary_title');
+                document.getElementById('salary-submit-btn').textContent = t('btn_update_credit');
                 document.getElementById('salary-amount').value = itemData.total_amount;
                 document.getElementById('salary-spendable').value = itemData.spendable_amount;
                 document.getElementById('salary-date').value = itemData.credit_date;
@@ -426,8 +510,8 @@ function setupEventListeners() {
                 const modal = document.getElementById('add-salary-modal');
                 if (modal) modal.classList.add('active');
             } else if (listType === 'various') {
-                document.getElementById('various-modal-title').textContent = 'Edit Various Accreditation';
-                document.getElementById('various-submit-btn').textContent = 'Update Credit';
+                document.getElementById('various-modal-title').textContent = t('modal_edit_various_title');
+                document.getElementById('various-submit-btn').textContent = t('btn_update_various');
                 document.getElementById('various-amount').value = itemData.total_amount;
                 document.getElementById('various-spendable').value = itemData.spendable_amount;
                 document.getElementById('various-date').value = itemData.credit_date;
@@ -436,24 +520,24 @@ function setupEventListeners() {
                 const modal = document.getElementById('add-various-modal');
                 if (modal) modal.classList.add('active');
             } else if (listType === 'expense') {
-                document.getElementById('expense-modal-title').textContent = 'Edit Expense';
-                document.getElementById('expense-submit-btn').textContent = 'Update Expense';
+                document.getElementById('expense-modal-title').textContent = t('modal_edit_expense_title');
+                document.getElementById('expense-submit-btn').textContent = t('btn_update_expense');
                 document.getElementById('expense-amount').value = itemData.amount;
                 document.getElementById('expense-date').value = itemData.expense_date;
                 document.getElementById('expense-desc').value = itemData.description || '';
                 
                 if (DOM.addExpenseModal) DOM.addExpenseModal.classList.add('active');
             } else if (listType === 'bonifico') {
-                document.getElementById('bonifico-modal-title').textContent = 'Modifica Bonifico';
-                document.getElementById('bonifico-submit-btn').textContent = 'Aggiorna Bonifico';
+                document.getElementById('bonifico-modal-title').textContent = t('modal_edit_bonifico_title');
+                document.getElementById('bonifico-submit-btn').textContent = t('btn_update_bonifico');
                 document.getElementById('bonifico-amount').value = itemData.amount;
                 document.getElementById('bonifico-date').value = itemData.date;
                 
                 const modal = document.getElementById('add-bonifico-modal');
                 if (modal) modal.classList.add('active');
             } else if (listType === 'investimento') {
-                document.getElementById('investimento-modal-title').textContent = 'Modifica Investimento';
-                document.getElementById('investimento-submit-btn').textContent = 'Aggiorna Investimento';
+                document.getElementById('investimento-modal-title').textContent = t('modal_edit_investimento_title');
+                document.getElementById('investimento-submit-btn').textContent = t('btn_update_investimento');
                 document.getElementById('investimento-amount').value = itemData.amount;
                 document.getElementById('investimento-date').value = itemData.date;
                 document.getElementById('investimento-desc').value = itemData.description || '';
@@ -461,8 +545,8 @@ function setupEventListeners() {
                 const modal = document.getElementById('add-investimento-modal');
                 if (modal) modal.classList.add('active');
             } else if (listType === 'movimento') {
-                document.getElementById('movimento-modal-title').textContent = 'Modifica Movimento';
-                document.getElementById('movimento-submit-btn').textContent = 'Aggiorna Movimento';
+                document.getElementById('movimento-modal-title').textContent = t('modal_edit_movimento_title');
+                document.getElementById('movimento-submit-btn').textContent = t('btn_update_movimento');
                 document.getElementById('movimento-amount').value = itemData.amount;
                 document.getElementById('movimento-date').value = itemData.date;
                 document.getElementById('movimento-desc').value = itemData.description || '';
@@ -477,7 +561,7 @@ function setupEventListeners() {
         if (deleteBtn) {
             const listType = deleteBtn.getAttribute('data-type');
             const itemId = deleteBtn.getAttribute('data-id');
-            if (confirm("Sei sicuro di voler eliminare questa voce? L'operazione non è reversibile.")) {
+            if (confirm(t('confirm_delete'))) {
                 deleteItem(listType, itemId);
             }
         }
@@ -513,7 +597,7 @@ function setupEventListeners() {
             }
         } catch (error) {
             console.error("Error deleting item:", error);
-            alert("Errore durante l'eliminazione: " + error.message);
+            alert(t('alert_delete_error') + error.message);
         }
     }
 
@@ -625,7 +709,7 @@ function setupEventListeners() {
         DOM.loginError.style.display = 'none';
 
         // Loading state
-        submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Signing in...';
+        submitBtn.innerHTML = t('btn_signing_in');
         submitBtn.disabled = true;
 
         // Chiamata reale a Supabase per il login
@@ -638,7 +722,7 @@ function setupEventListeners() {
             // Login Fallito
             DOM.loginError.textContent = error.message;
             DOM.loginError.style.display = 'block';
-            submitBtn.innerHTML = 'Sign In';
+            submitBtn.innerHTML = t('btn_signin');
             submitBtn.disabled = false;
         } else {
             // Login Successo
@@ -653,7 +737,7 @@ function setupEventListeners() {
             
             updateLastActivity();
             DOM.loginScreen.classList.remove('active');
-            submitBtn.innerHTML = 'Sign In';
+            submitBtn.innerHTML = t('btn_signin');
             submitBtn.disabled = false;
             
             // Reset scroll position to top
@@ -730,17 +814,17 @@ function setupEventListeners() {
             const submitBtn = addSalaryForm.querySelector('button[type="submit"]');
 
             if (amount <= 0) {
-                alert("L'importo deve essere maggiore di zero!");
+                alert(t('alert_amount_greater_zero'));
                 return;
             }
             if (spendable > amount) {
-                alert("Spendable amount cannot be greater than the total amount!");
+                alert(t('alert_spendable_greater_total'));
                 return;
             }
 
             // Loading state
             const originalBtnText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Saving...';
+            submitBtn.innerHTML = t('btn_saving');
             submitBtn.disabled = true;
 
             // Insert or Update into Supabase
@@ -775,9 +859,9 @@ function setupEventListeners() {
 
             if (error) {
                 console.error("Error saving salary:", error);
-                alert("Error saving data: " + error.message);
+                alert(t('alert_save_error') + error.message);
             } else {
-                alert(state.editContext.active ? "Salary credit updated successfully!" : "Salary credit saved successfully!");
+                alert(state.editContext.active ? t('alert_salary_updated') : t('alert_salary_saved'));
                 addSalaryModal.classList.remove('active');
                 resetEditMode('salary');
                 
@@ -827,17 +911,17 @@ function setupEventListeners() {
             const submitBtn = addVariousForm.querySelector('button[type="submit"]');
 
             if (amount <= 0) {
-                alert("L'importo deve essere maggiore di zero!");
+                alert(t('alert_amount_greater_zero'));
                 return;
             }
             if (spendable > amount) {
-                alert("Spendable amount cannot be greater than the total amount!");
+                alert(t('alert_spendable_greater_total'));
                 return;
             }
 
             // Loading state
             const originalBtnText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Saving...';
+            submitBtn.innerHTML = t('btn_saving');
             submitBtn.disabled = true;
 
             // Insert or Update into Supabase
@@ -872,9 +956,9 @@ function setupEventListeners() {
 
             if (error) {
                 console.error("Error saving various accreditation:", error);
-                alert("Error saving data: " + error.message);
+                alert(t('alert_save_error') + error.message);
             } else {
-                alert(state.editContext.active ? "Various accreditation updated successfully!" : "Various accreditation saved successfully!");
+                alert(state.editContext.active ? t('alert_various_updated') : t('alert_various_saved'));
                 addVariousModal.classList.remove('active');
                 resetEditMode('various');
                 
@@ -916,12 +1000,12 @@ function setupEventListeners() {
             const submitBtn = DOM.addExpenseForm.querySelector('button[type="submit"]');
 
             if (amount <= 0) {
-                alert("L'importo della spesa deve essere maggiore di zero!");
+                alert(t('alert_expense_amount_greater_zero'));
                 return;
             }
 
             const originalBtnText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Saving...';
+            submitBtn.innerHTML = t('btn_saving');
             submitBtn.disabled = true;
 
             const isHandled = state.totalRemaining >= amount;
@@ -957,9 +1041,9 @@ function setupEventListeners() {
 
             if (error) {
                 console.error("Error saving expense:", error);
-                alert("Error saving data: " + error.message);
+                alert(t('alert_save_error') + error.message);
             } else {
-                alert(state.editContext.active ? "Expense updated successfully!" : "Expense saved successfully!");
+                alert(state.editContext.active ? t('alert_expense_updated') : t('alert_expense_saved'));
                 DOM.addExpenseModal.classList.remove('active');
                 resetEditMode('expense');
                 
@@ -1000,12 +1084,12 @@ function setupInvestmentModals() {
             const submitBtn = DOM.addBonificoForm.querySelector('button[type="submit"]');
             
             if (amount <= 0) {
-                alert("L'importo del bonifico deve essere maggiore di zero!");
+                alert(t('alert_bonifico_amount_greater_zero'));
                 return;
             }
 
             const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Salvataggio...';
+            submitBtn.innerHTML = t('btn_saving');
             submitBtn.disabled = true;
             
             let res;
@@ -1028,9 +1112,9 @@ function setupInvestmentModals() {
             
             if (error) {
                 console.error("Errore salvataggio bonifico:", error);
-                alert("Errore salvataggio: " + error.message);
+                alert(t('alert_save_error') + error.message);
             } else {
-                alert(state.editContext.active ? "Bonifico aggiornato con successo!" : "Bonifico salvato con successo!");
+                alert(state.editContext.active ? t('alert_bonifico_updated') : t('alert_bonifico_saved'));
                 DOM.addBonificoModal.classList.remove('active');
                 resetEditMode('bonifico');
                 calculateInvestmentStatistics();
@@ -1062,12 +1146,12 @@ function setupInvestmentModals() {
             const submitBtn = DOM.addInvestimentoForm.querySelector('button[type="submit"]');
             
             if (amount <= 0) {
-                alert("L'importo dell'investimento deve essere maggiore di zero!");
+                alert(t('alert_investimento_amount_greater_zero'));
                 return;
             }
 
             const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Salvataggio...';
+            submitBtn.innerHTML = t('btn_saving');
             submitBtn.disabled = true;
             
             let res;
@@ -1092,9 +1176,9 @@ function setupInvestmentModals() {
             
             if (error) {
                 console.error("Errore salvataggio investimento:", error);
-                alert("Errore salvataggio: " + error.message);
+                alert(t('alert_save_error') + error.message);
             } else {
-                alert(state.editContext.active ? "Investimento aggiornato con successo!" : "Investimento salvato con successo!");
+                alert(state.editContext.active ? t('alert_investimento_updated') : t('alert_investimento_saved'));
                 DOM.addInvestimentoModal.classList.remove('active');
                 resetEditMode('investimento');
                 calculateInvestmentStatistics();
@@ -1127,7 +1211,7 @@ function setupInvestmentModals() {
             const submitBtn = DOM.addMovimentoForm.querySelector('button[type="submit"]');
             
             const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="ph ph-spinner ph-spin"></i> Salvataggio...';
+            submitBtn.innerHTML = t('btn_saving');
             submitBtn.disabled = true;
             
             let res;
@@ -1154,9 +1238,9 @@ function setupInvestmentModals() {
             
             if (error) {
                 console.error("Errore salvataggio movimento:", error);
-                alert("Errore salvataggio: " + error.message);
+                alert(t('alert_save_error') + error.message);
             } else {
-                alert(state.editContext.active ? "Movimento aggiornato con successo!" : "Movimento salvato con successo!");
+                alert(state.editContext.active ? t('alert_movimento_updated') : t('alert_movimento_saved'));
                 DOM.addMovimentoModal.classList.remove('active');
                 resetEditMode('movimento');
                 calculateInvestmentStatistics();
@@ -1197,7 +1281,7 @@ function updateUI() {
     if (containerTimeout) clearTimeout(containerTimeout);
 
     // Update title immediately (prevents Safari ghosting bug)
-    DOM.appTitle.textContent = viewConfig.title;
+    DOM.appTitle.textContent = t(viewConfig.titleKey);
 
     // Animate button change
     DOM.toggleModeBtn.style.transform = 'scale(0.8) rotate(180deg)';
@@ -1238,7 +1322,8 @@ function updateUI() {
 // Format Date Utility
 function formatDate(dateString) {
     const options = { day: '2-digit', month: 'short', year: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-GB', options);
+    const locale = state.currentLanguage === 'en' ? 'en-GB' : 'it-IT';
+    return new Date(dateString).toLocaleDateString(locale, options);
 }
 
 // Update Element Utility
@@ -1279,14 +1364,14 @@ async function loadRecentAccreditations() {
         const salaries = (salaryData || []).map(item => ({
             ...item,
             type: 'salary',
-            title: escapeHTML(item.description) || 'Salary Credit',
+            title: escapeHTML(item.description) || t('label_salary_credit_fallback'),
             icon: 'ph-money'
         }));
 
         const various = (variousData || []).map(item => ({
             ...item,
             type: 'various',
-            title: escapeHTML(item.description) || 'Various Accreditation',
+            title: escapeHTML(item.description) || t('label_various_credit_fallback'),
             icon: 'ph-piggy-bank'
         }));
 
@@ -1309,7 +1394,7 @@ async function loadRecentAccreditations() {
             listContainer.innerHTML = `
                 <div class="empty-state">
                     <i class="ph ph-clock-counter-clockwise"></i>
-                    <p>No recent accreditations</p>
+                    <p>${t('empty_recent')}</p>
                 </div>
             `;
             return;
@@ -1329,7 +1414,7 @@ async function loadRecentAccreditations() {
                 </div>
                 <div class="transaction-amount" style="text-align: right;">
                     <div style="font-weight: 600; color: #34c759;">${formatCurrency(item.total_amount, '+')}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: ${formatCurrency(item.spendable_amount)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${t('label_for_me')}${formatCurrency(item.spendable_amount)}</div>
                 </div>
             </div>
         `).join('');
@@ -1339,7 +1424,7 @@ async function loadRecentAccreditations() {
         listContainer.innerHTML = `
             <div class="empty-state" style="color: #ff3b30; text-align: center;">
                 <i class="ph ph-warning"></i>
-                <p>Failed to load data: ${error.message || JSON.stringify(error)}</p>
+                <p>${t('empty_failed_load')}${error.message || JSON.stringify(error)}</p>
             </div>
         `;
     }
@@ -1364,7 +1449,7 @@ async function loadSalaryCredits() {
             listContainer.innerHTML = `
                 <div class="empty-state">
                     <i class="ph ph-money"></i>
-                    <p>No salary credits yet</p>
+                    <p>${t('empty_salary')}</p>
                 </div>
             `;
             return;
@@ -1377,13 +1462,13 @@ async function loadSalaryCredits() {
                         <i class="ph ph-money"></i>
                     </div>
                     <div class="transaction-info">
-                        <span class="transaction-title">${escapeHTML(item.description) || 'Salary Credit'}</span>
+                        <span class="transaction-title">${escapeHTML(item.description) || t('label_salary_credit_fallback')}</span>
                         <span class="transaction-date">${formatDate(item.credit_date)}</span>
                     </div>
                 </div>
                 <div class="transaction-amount" style="text-align: right;">
                     <div style="font-weight: 600; color: #34c759;">${formatCurrency(item.total_amount, '+')}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: ${formatCurrency(item.spendable_amount)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${t('label_for_me')}${formatCurrency(item.spendable_amount)}</div>
                 </div>
                 <div class="edit-icon-item" data-id="${item.id}" data-type="salary" data-json="${encodeURIComponent(JSON.stringify(item))}">
                     <i class="ph ph-pencil-simple"></i>
@@ -1399,7 +1484,7 @@ async function loadSalaryCredits() {
         listContainer.innerHTML = `
             <div class="empty-state" style="color: #ff3b30; text-align: center;">
                 <i class="ph ph-warning"></i>
-                <p>Failed to load data: ${error.message || JSON.stringify(error)}</p>
+                <p>${t('empty_failed_load')}${error.message || JSON.stringify(error)}</p>
             </div>
         `;
     }
@@ -1424,7 +1509,7 @@ async function loadVariousAccreditations() {
             listContainer.innerHTML = `
                 <div class="empty-state">
                     <i class="ph ph-piggy-bank"></i>
-                    <p>No various accreditations yet</p>
+                    <p>${t('empty_various')}</p>
                 </div>
             `;
             return;
@@ -1437,13 +1522,13 @@ async function loadVariousAccreditations() {
                         <i class="ph ph-piggy-bank"></i>
                     </div>
                     <div class="transaction-info">
-                        <span class="transaction-title">${escapeHTML(item.description) || 'Various Accreditation'}</span>
+                        <span class="transaction-title">${escapeHTML(item.description) || t('label_various_credit_fallback')}</span>
                         <span class="transaction-date">${formatDate(item.credit_date)}</span>
                     </div>
                 </div>
                 <div class="transaction-amount" style="text-align: right;">
                     <div style="font-weight: 600; color: #34c759;">${formatCurrency(item.total_amount, '+')}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Me: ${formatCurrency(item.spendable_amount)}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${t('label_for_me')}${formatCurrency(item.spendable_amount)}</div>
                 </div>
                 <div class="edit-icon-item" data-id="${item.id}" data-type="various" data-json="${encodeURIComponent(JSON.stringify(item))}">
                     <i class="ph ph-pencil-simple"></i>
@@ -1459,7 +1544,7 @@ async function loadVariousAccreditations() {
         listContainer.innerHTML = `
             <div class="empty-state" style="color: #ff3b30; text-align: center;">
                 <i class="ph ph-warning"></i>
-                <p>Failed to load data: ${error.message || JSON.stringify(error)}</p>
+                <p>${t('empty_failed_load')}${error.message || JSON.stringify(error)}</p>
             </div>
         `;
     }
@@ -1484,7 +1569,7 @@ async function loadExpenses() {
             listContainer.innerHTML = `
                 <div class="empty-state">
                     <i class="ph ph-shopping-cart"></i>
-                    <p>No expenses yet</p>
+                    <p>${t('empty_expenses')}</p>
                 </div>
             `;
             if (DOM.expensePageTotal) updateEl('expense-page-total', 0);
@@ -1512,7 +1597,7 @@ async function loadExpenses() {
             const iconBg = isUnhandled ? '#e5e5ea' : '#ff3b3020';
             const iconColor = isUnhandled ? '#8e8e93' : '#ff3b30';
             const textColor = isUnhandled ? '#8e8e93' : '#ff3b30';
-            const extraLabel = isUnhandled ? ' <span style="font-size: 0.7rem; color: #8e8e93; font-weight: normal; margin-left: 4px;">(In attesa)</span>' : '';
+            const extraLabel = isUnhandled ? ` <span style="font-size: 0.7rem; color: #8e8e93; font-weight: normal; margin-left: 4px;">${t('label_pending_badge')}</span>` : '';
 
             return `
             <div class="transaction-item" style="${isUnhandled ? 'opacity: 0.8;' : ''}">
@@ -1521,7 +1606,7 @@ async function loadExpenses() {
                         <i class="ph ph-shopping-cart"></i>
                     </div>
                     <div class="transaction-info">
-                        <span class="transaction-title" style="${isUnhandled ? 'color: #8e8e93;' : ''}">${escapeHTML(item.description) || 'Expense'}${extraLabel}</span>
+                        <span class="transaction-title" style="${isUnhandled ? 'color: #8e8e93;' : ''}">${escapeHTML(item.description) || t('label_expense_fallback')}${extraLabel}</span>
                         <span class="transaction-date">${formatDate(item.expense_date)}</span>
                     </div>
                 </div>
@@ -1554,7 +1639,8 @@ async function loadExpenses() {
                     if (itemMonth !== currentMonth) {
                         currentMonth = itemMonth;
                         const dateObj = new Date(item.expense_date);
-                        const monthName = dateObj.toLocaleString('it-IT', { month: 'long', year: 'numeric' });
+                        const locale = state.currentLanguage === 'en' ? 'en-US' : 'it-IT';
+                        const monthName = dateObj.toLocaleString(locale, { month: 'long', year: 'numeric' });
                         const capitalized = monthName.charAt(0).toUpperCase() + monthName.slice(1);
                         html += `<div class="month-divider">${capitalized}</div>`;
                     }
@@ -1570,7 +1656,7 @@ async function loadExpenses() {
             html = `
                 <div class="empty-state">
                     <i class="ph ph-shopping-cart"></i>
-                    <p>No expenses to show</p>
+                    <p>${t('empty_expenses')}</p>
                 </div>
             `;
         }
@@ -1705,7 +1791,7 @@ async function loadInvestmentHighlights() {
             DOM.investmentHighlightedList.innerHTML = `
                 <div class="empty-state">
                     <i class="ph ph-star"></i>
-                    <p>Nessun movimento in evidenza</p>
+                    <p>${t('empty_highlighted')}</p>
                 </div>
             `;
             return;
@@ -1717,7 +1803,7 @@ async function loadInvestmentHighlights() {
             const iconClass = isPositive ? 'various' : '';
             const amountColor = isPositive ? '#34c759' : '#ff3b30';
             const prefix = isPositive ? '+' : '';
-            const title = escapeHTML(item.description) || (isPositive ? 'Accredito' : 'Spesa/Commissione');
+            const title = escapeHTML(item.description) || (isPositive ? t('label_credit_movement') : t('label_expense_movement'));
             
             return `
             <div class="transaction-item highlighted-movement">
@@ -1757,7 +1843,7 @@ async function loadInvestmentTransfers() {
             DOM.investmentTransfersList.innerHTML = `
                 <div class="empty-state">
                     <i class="ph ph-bank"></i>
-                    <p>Nessun bonifico</p>
+                    <p>${t('empty_transfers')}</p>
                 </div>
             `;
             return;
@@ -1770,7 +1856,7 @@ async function loadInvestmentTransfers() {
                         <i class="ph ph-bank"></i>
                     </div>
                     <div class="transaction-info">
-                        <div class="transaction-title">Bonifico in entrata</div>
+                        <div class="transaction-title">${t('label_transfer_title')}</div>
                         <div class="transaction-date">${formatDate(item.date)}</div>
                     </div>
                 </div>
@@ -1805,7 +1891,7 @@ async function loadInvestments() {
             DOM.investmentsList.innerHTML = `
                 <div class="empty-state">
                     <i class="ph ph-chart-line-up"></i>
-                    <p>Nessun investimento</p>
+                    <p>${t('empty_investments')}</p>
                 </div>
             `;
             return;
@@ -1853,7 +1939,7 @@ async function loadInvestmentMovements() {
             DOM.investmentMovementsList.innerHTML = `
                 <div class="empty-state">
                     <i class="ph ph-receipt"></i>
-                    <p>Nessun movimento</p>
+                    <p>${t('empty_movements')}</p>
                 </div>
             `;
             return;
@@ -1865,7 +1951,7 @@ async function loadInvestmentMovements() {
             const iconClass = isPositive ? 'various' : '';
             const amountColor = isPositive ? '#34c759' : '#ff3b30';
             const prefix = isPositive ? '+' : '';
-            const title = escapeHTML(item.description) || (isPositive ? 'Accredito' : 'Spesa/Commissione');
+            const title = escapeHTML(item.description) || (isPositive ? t('label_credit_movement') : t('label_expense_movement'));
             const isHighlighted = item.is_highlighted === true;
             const highlightClass = isHighlighted ? 'highlighted-movement' : '';
 

@@ -1011,3 +1011,35 @@ main {
 .toggle-switch input:checked + .toggle-slider:before {
     transform: translateX(22px);
 }
+
+/* Language Selector in Menu */
+.lang-selector {
+    display: inline-flex;
+    background-color: var(--input-bg, rgba(120, 120, 128, 0.12));
+    border-radius: 9px;
+    padding: 2px;
+    gap: 2px;
+    border: 1px solid var(--border-color);
+}
+
+.lang-btn {
+    border: none;
+    background: transparent;
+    padding: 5px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lang-btn.active {
+    background-color: var(--surface-color, #ffffff);
+    color: var(--text-primary);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.lang-btn:active {
+    transform: scale(0.95);
+}

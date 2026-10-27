@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 
 <head>
     <meta charset="UTF-8">
@@ -28,7 +28,7 @@
     <!-- Splash Screen -->
     <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: var(--bg-primary, #f0f2f5); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s ease;">
         <i class="ph ph-wallet" style="font-size: 72px; color: var(--primary-color, #007aff); margin-bottom: 16px;"></i>
-        <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: var(--text-primary, #1c1c1e);">Finance Management</h2>
+        <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: var(--text-primary, #1c1c1e);" data-i18n="app_title">Gestione Finanze</h2>
     </div>
 
     <!-- Login Screen Overlay -->
@@ -38,41 +38,41 @@
                 <div class="login-icon">
                     <i class="ph ph-lock-key"></i>
                 </div>
-                <h2>Finance Management</h2>
-                <p>Developed by Vito Ditrani</p>
+                <h2 data-i18n="app_title">Gestione Finanze</h2>
+                <p data-i18n="author">Sviluppato da Vito Ditrani</p>
             </div>
 
             <form id="login-form">
                 <div class="input-group">
-                    <label for="email">Email</label>
+                    <label for="email" data-i18n="label_email">Email</label>
                     <input type="email" id="email" required autocomplete="email" disabled>
                 </div>
                 <div class="input-group">
-                    <label for="password">Password</label>
+                    <label for="password" data-i18n="label_password">Password</label>
                     <input type="password" id="password" required
                         autocomplete="current-password" disabled>
                 </div>
                 <div class="input-group" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; margin-bottom: 24px;">
-                    <label for="hide-amounts-toggle" style="margin: 0; font-weight: 600; color: var(--text-primary); cursor: pointer;">Oscura gli importi</label>
+                    <label for="hide-amounts-toggle" data-i18n="label_hide_amounts" style="margin: 0; font-weight: 600; color: var(--text-primary); cursor: pointer;">Oscura gli importi</label>
                     <label class="ios-switch">
                         <input type="checkbox" id="hide-amounts-toggle">
                         <span class="ios-slider"></span>
                     </label>
                 </div>
 
-                <button type="submit" class="primary-btn login-btn" id="submit-login">
-                    Sign In
+                <button type="submit" class="primary-btn login-btn" id="submit-login" data-i18n="btn_signin">
+                    Accedi
                 </button>
             </form>
             <div id="login-error" class="login-error" style="display: none;"></div>
 
             <div class="demo-section">
-                <p class="demo-text">
-                    App designed for mobile experience.<br>
-                    Not Vito Ditrani? You can try a demo.
+                <p class="demo-text" data-i18n="demo_text">
+                    App progettata per dispositivi mobili.<br>
+                    Non sei Vito Ditrani? Puoi provare la demo.
                 </p>
-                <button type="button" id="demo-btn" class="secondary-btn">
-                    Try Demo Version
+                <button type="button" id="demo-btn" class="secondary-btn" data-i18n="btn_demo">
+                    Prova versione demo
                 </button>
             </div>
         </div>
@@ -81,9 +81,9 @@
     <!-- Custom Modal for Demo Alert -->
     <div id="demo-modal" class="custom-modal">
         <div class="custom-modal-content">
-            <h3>Notice</h3>
-            <p>Demo version is not yet available.</p>
-            <button id="close-demo-modal" class="primary-btn">Close</button>
+            <h3 data-i18n="demo_modal_title">Avviso</h3>
+            <p data-i18n="demo_modal_text">La versione demo non è ancora disponibile.</p>
+            <button id="close-demo-modal" class="primary-btn" data-i18n="btn_close">Chiudi</button>
         </div>
     </div>
 
@@ -91,7 +91,7 @@
     <div id="add-salary-modal" class="custom-modal">
         <div class="custom-modal-content form-modal">
             <div class="modal-header">
-                <h3 id="salary-modal-title">Add Salary Credit</h3>
+                <h3 id="salary-modal-title" data-i18n="modal_add_salary_title">Aggiungi Stipendio</h3>
                 <button type="button" id="close-salary-modal" class="icon-btn close-btn">
                     <i class="ph ph-x"></i>
                 </button>
@@ -99,25 +99,25 @@
             
             <form id="add-salary-form">
                 <div class="input-group">
-                    <label for="salary-amount">Total Amount (€)</label>
+                    <label for="salary-amount" data-i18n="label_total_amount">Importo Totale (€)</label>
                     <input type="number" id="salary-amount" step="0.01" required placeholder="0.00">
                 </div>
                 <div class="input-group">
-                    <label for="salary-spendable">Spendable Amount (€)</label>
+                    <label for="salary-spendable" data-i18n="label_spendable_amount">Importo Spendibile (€)</label>
                     <input type="number" id="salary-spendable" step="0.01" required placeholder="0.00">
-                    <span class="input-hint">Amount you can spend from this salary</span>
+                    <span class="input-hint" data-i18n="hint_salary_spendable">Importo che puoi spendere da questo stipendio</span>
                 </div>
                 <div class="input-group">
-                    <label for="salary-date">Date</label>
+                    <label for="salary-date" data-i18n="label_date">Data</label>
                     <input type="date" id="salary-date" required>
                 </div>
                 <div class="input-group">
-                    <label for="salary-desc">Description (Optional)</label>
-                    <input type="text" id="salary-desc" placeholder="e.g. October Salary">
+                    <label for="salary-desc" data-i18n="label_description_opt">Descrizione (Opzionale)</label>
+                    <input type="text" id="salary-desc" data-i18n-placeholder="placeholder_salary_desc" placeholder="es. Stipendio Ottobre">
                 </div>
                 
-                <button type="submit" class="primary-btn btn-salary submit-btn" id="salary-submit-btn">
-                    Save Credit
+                <button type="submit" class="primary-btn btn-salary submit-btn" id="salary-submit-btn" data-i18n="btn_save_credit">
+                    Salva Stipendio
                 </button>
             </form>
         </div>
@@ -127,7 +127,7 @@
     <div id="add-various-modal" class="custom-modal">
         <div class="custom-modal-content form-modal">
             <div class="modal-header">
-                <h3 id="various-modal-title">Add Various Accreditation</h3>
+                <h3 id="various-modal-title" data-i18n="modal_add_various_title">Aggiungi Accredito Vario</h3>
                 <button type="button" id="close-various-modal" class="icon-btn close-btn">
                     <i class="ph ph-x"></i>
                 </button>
@@ -135,25 +135,25 @@
             
             <form id="add-various-form">
                 <div class="input-group">
-                    <label for="various-amount">Total Amount (€)</label>
+                    <label for="various-amount" data-i18n="label_total_amount">Importo Totale (€)</label>
                     <input type="number" id="various-amount" step="0.01" required placeholder="0.00">
                 </div>
                 <div class="input-group">
-                    <label for="various-spendable">Spendable Amount (€)</label>
+                    <label for="various-spendable" data-i18n="label_spendable_amount">Importo Spendibile (€)</label>
                     <input type="number" id="various-spendable" step="0.01" required placeholder="0.00">
-                    <span class="input-hint">Amount you can spend from this accreditation</span>
+                    <span class="input-hint" data-i18n="hint_various_spendable">Importo che puoi spendere da questo accredito</span>
                 </div>
                 <div class="input-group">
-                    <label for="various-date">Date</label>
+                    <label for="various-date" data-i18n="label_date">Data</label>
                     <input type="date" id="various-date" required>
                 </div>
                 <div class="input-group">
-                    <label for="various-desc">Description (Optional)</label>
-                    <input type="text" id="various-desc" placeholder="e.g. Refund or Gift">
+                    <label for="various-desc" data-i18n="label_description_opt">Descrizione (Opzionale)</label>
+                    <input type="text" id="various-desc" data-i18n-placeholder="placeholder_various_desc" placeholder="es. Rimborso o Regalo">
                 </div>
                 
-                <button type="submit" class="primary-btn btn-salary submit-btn" id="various-submit-btn">
-                    Save Credit
+                <button type="submit" class="primary-btn btn-salary submit-btn" id="various-submit-btn" data-i18n="btn_save_various">
+                    Salva Accredito
                 </button>
             </form>
         </div>
@@ -163,7 +163,7 @@
     <div id="add-expense-modal" class="custom-modal">
         <div class="custom-modal-content form-modal">
             <div class="modal-header">
-                <h3 id="expense-modal-title">Add Expense</h3>
+                <h3 id="expense-modal-title" data-i18n="modal_add_expense_title">Aggiungi Spesa</h3>
                 <button type="button" id="close-expense-modal" class="icon-btn close-btn">
                     <i class="ph ph-x"></i>
                 </button>
@@ -171,43 +171,44 @@
             
             <form id="add-expense-form">
                 <div class="input-group">
-                    <label for="expense-amount">Amount (€)</label>
+                    <label for="expense-amount" data-i18n="label_amount">Importo (€)</label>
                     <input type="number" id="expense-amount" step="0.01" required placeholder="0.00">
                 </div>
                 <div class="input-group">
-                    <label for="expense-date">Date</label>
+                    <label for="expense-date" data-i18n="label_date">Data</label>
                     <input type="date" id="expense-date" required>
                 </div>
                 <div class="input-group">
-                    <label for="expense-desc">Description</label>
+                    <label for="expense-desc" data-i18n="label_description">Descrizione</label>
                     <input type="text" id="expense-desc" required>
                 </div>
                 
-                <button type="submit" class="primary-btn btn-expense submit-btn" id="expense-submit-btn">
-                    Save Expense
+                <button type="submit" class="primary-btn btn-expense submit-btn" id="expense-submit-btn" data-i18n="btn_save_expense">
+                    Salva Spesa
                 </button>
             </form>
         </div>
     </div>
+
     <!-- Add Bonifico Modal -->
     <div id="add-bonifico-modal" class="custom-modal">
         <div class="custom-modal-content form-modal">
             <div class="modal-header">
-                <h3 id="bonifico-modal-title">Aggiungi Bonifico</h3>
+                <h3 id="bonifico-modal-title" data-i18n="modal_add_bonifico_title">Aggiungi Bonifico</h3>
                 <button type="button" id="close-bonifico-modal" class="icon-btn close-btn">
                     <i class="ph ph-x"></i>
                 </button>
             </div>
             <form id="add-bonifico-form">
                 <div class="input-group">
-                    <label for="bonifico-amount">Cifra (€)</label>
+                    <label for="bonifico-amount" data-i18n="label_cifra">Cifra (€)</label>
                     <input type="number" id="bonifico-amount" step="0.01" required placeholder="0.00">
                 </div>
                 <div class="input-group">
-                    <label for="bonifico-date">Data</label>
+                    <label for="bonifico-date" data-i18n="label_date">Data</label>
                     <input type="date" id="bonifico-date" required>
                 </div>
-                <button type="submit" id="bonifico-submit-btn" class="primary-btn submit-btn" style="background-color: var(--accent-investment);">
+                <button type="submit" id="bonifico-submit-btn" class="primary-btn submit-btn" style="background-color: var(--accent-investment);" data-i18n="btn_save_bonifico">
                     Salva Bonifico
                 </button>
             </form>
@@ -218,25 +219,25 @@
     <div id="add-investimento-modal" class="custom-modal">
         <div class="custom-modal-content form-modal">
             <div class="modal-header">
-                <h3 id="investimento-modal-title">Aggiungi Investimento</h3>
+                <h3 id="investimento-modal-title" data-i18n="modal_add_investimento_title">Aggiungi Investimento</h3>
                 <button type="button" id="close-investimento-modal" class="icon-btn close-btn">
                     <i class="ph ph-x"></i>
                 </button>
             </div>
             <form id="add-investimento-form">
                 <div class="input-group">
-                    <label for="investimento-amount">Cifra (€)</label>
+                    <label for="investimento-amount" data-i18n="label_cifra">Cifra (€)</label>
                     <input type="number" id="investimento-amount" step="0.01" required placeholder="0.00">
                 </div>
                 <div class="input-group">
-                    <label for="investimento-date">Data</label>
+                    <label for="investimento-date" data-i18n="label_date">Data</label>
                     <input type="date" id="investimento-date" required>
                 </div>
                 <div class="input-group">
-                    <label for="investimento-desc">Descrizione</label>
+                    <label for="investimento-desc" data-i18n="label_description">Descrizione</label>
                     <input type="text" id="investimento-desc" required>
                 </div>
-                <button type="submit" id="investimento-submit-btn" class="primary-btn submit-btn" style="background-color: #5856d6;">
+                <button type="submit" id="investimento-submit-btn" class="primary-btn submit-btn" style="background-color: #5856d6;" data-i18n="btn_save_investimento">
                     Salva Investimento
                 </button>
             </form>
@@ -247,44 +248,45 @@
     <div id="add-movimento-modal" class="custom-modal">
         <div class="custom-modal-content form-modal">
             <div class="modal-header">
-                <h3 id="movimento-modal-title">Aggiungi Movimento</h3>
+                <h3 id="movimento-modal-title" data-i18n="modal_add_movimento_title">Aggiungi Movimento</h3>
                 <button type="button" id="close-movimento-modal" class="icon-btn close-btn">
                     <i class="ph ph-x"></i>
                 </button>
             </div>
             <form id="add-movimento-form">
                 <div class="input-group">
-                    <label for="movimento-amount">Cifra (€) (Usa - per le spese)</label>
-                    <input type="number" id="movimento-amount" step="0.01" required placeholder="es. 10.50 o -2.99">
+                    <label for="movimento-amount" data-i18n="label_movimento_amount">Cifra (€) (Usa - per le spese)</label>
+                    <input type="number" id="movimento-amount" step="0.01" required data-i18n-placeholder="placeholder_movimento_amount" placeholder="es. 10.50 o -2.99">
                 </div>
                 <div class="input-group">
-                    <label for="movimento-date">Data</label>
+                    <label for="movimento-date" data-i18n="label_date">Data</label>
                     <input type="date" id="movimento-date" required>
                 </div>
                 <div class="input-group">
-                    <label for="movimento-desc">Descrizione</label>
+                    <label for="movimento-desc" data-i18n="label_description">Descrizione</label>
                     <input type="text" id="movimento-desc" required>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
-                    <span style="font-size: 14px; font-weight: 500;">Metti in evidenza</span>
+                    <span style="font-size: 14px; font-weight: 500;" data-i18n="label_highlight">Metti in evidenza</span>
                     <label class="toggle-switch" style="margin: 0; transform: scale(0.8);">
                         <input type="checkbox" id="movimento-highlighted">
                         <span class="toggle-slider"></span>
                     </label>
                 </div>
-                <button type="submit" id="movimento-submit-btn" class="primary-btn submit-btn" style="background-color: #FF9500; margin-top: 16px;">
+                <button type="submit" id="movimento-submit-btn" class="primary-btn submit-btn" style="background-color: #FF9500; margin-top: 16px;" data-i18n="btn_save_movimento">
                     Salva Movimento
                 </button>
             </form>
         </div>
     </div>
+
     <!-- Top Navigation Bar -->
     <nav class="top-bar">
         <button id="menu-btn" class="icon-btn" aria-label="Menu">
             <i class="ph ph-list"></i>
         </button>
 
-        <h1 id="app-title">Expense management</h1>
+        <h1 id="app-title" data-i18n="view_home_title">Gestione Spese</h1>
 
         <button id="toggle-mode-btn" class="icon-btn" aria-label="Switch Mode">
             <!-- Default mode icon: showing investment icon as it's the target to switch to from expenses -->
@@ -295,7 +297,7 @@
     <!-- Side Menu (Hidden by default) -->
     <div id="side-menu" class="side-menu">
         <div class="menu-header">
-            <h2>Menu</h2>
+            <h2 data-i18n="menu_header">Menu</h2>
             <button id="close-menu-btn" class="icon-btn">
                 <i class="ph ph-x"></i>
             </button>
@@ -305,23 +307,23 @@
             <div id="expense-menu-group" class="menu-group">
                 <button class="menu-item nav-link active" data-target="home-container">
                     <i class="ph ph-house"></i>
-                    <span>Homepage</span>
+                    <span data-i18n="menu_home">Homepage</span>
                 </button>
                 <button class="menu-item nav-link" data-target="salary-container">
                     <i class="ph ph-money"></i>
-                    <span>Salary credits</span>
+                    <span data-i18n="menu_salary">Stipendi</span>
                 </button>
                 <button class="menu-item nav-link" data-target="various-container">
                     <i class="ph ph-piggy-bank"></i>
-                    <span>Various accreditations</span>
+                    <span data-i18n="menu_various">Accrediti vari</span>
                 </button>
                 <button class="menu-item nav-link" data-target="expense-container">
                     <i class="ph ph-shopping-cart"></i>
-                    <span>Expenses</span>
+                    <span data-i18n="menu_expenses">Spese</span>
                 </button>
                 <button class="menu-item nav-link" data-target="statistics-container">
                     <i class="ph ph-chart-bar"></i>
-                    <span>Statistics</span>
+                    <span data-i18n="menu_statistics">Statistiche</span>
                 </button>
             </div>
 
@@ -329,19 +331,19 @@
             <div id="investment-menu-group" class="menu-group" style="display: none;">
                 <button class="menu-item nav-link" data-target="investment-container">
                     <i class="ph ph-house"></i>
-                    <span>Homepage</span>
+                    <span data-i18n="menu_home">Homepage</span>
                 </button>
                 <button class="menu-item nav-link" data-target="investment-transfers-container">
                     <i class="ph ph-bank"></i>
-                    <span>Bonifici</span>
+                    <span data-i18n="menu_transfers">Bonifici</span>
                 </button>
                 <button class="menu-item nav-link" data-target="investments-container">
                     <i class="ph ph-chart-line-up"></i>
-                    <span>Investimenti</span>
+                    <span data-i18n="menu_investments">Investimenti</span>
                 </button>
                 <button class="menu-item nav-link" data-target="investment-movements-container">
                     <i class="ph ph-receipt"></i>
-                    <span>Spese e Movimenti</span>
+                    <span data-i18n="menu_movements">Spese e Movimenti</span>
                 </button>
             </div>
             
@@ -349,8 +351,19 @@
 
             <div class="menu-item" style="display: flex; justify-content: space-between; align-items: center; cursor: default;">
                 <div style="display: flex; align-items: center; gap: 12px; color: var(--text-secondary);">
+                    <i class="ph ph-translate"></i>
+                    <span data-i18n="menu_language">Lingua</span>
+                </div>
+                <div class="lang-selector" id="lang-selector">
+                    <button type="button" class="lang-btn active" data-lang="it">IT</button>
+                    <button type="button" class="lang-btn" data-lang="en">EN</button>
+                </div>
+            </div>
+
+            <div class="menu-item" style="display: flex; justify-content: space-between; align-items: center; cursor: default;">
+                <div style="display: flex; align-items: center; gap: 12px; color: var(--text-secondary);">
                     <i class="ph ph-eye-slash"></i>
-                    <span>Nascondi Cifre</span>
+                    <span data-i18n="menu_hide_values">Nascondi Cifre</span>
                 </div>
                 <label class="toggle-switch" style="transform: scale(0.8); margin: 0;">
                     <input type="checkbox" id="privacy-toggle">
@@ -360,7 +373,7 @@
 
             <button id="logout-btn" class="menu-item text-danger">
                 <i class="ph ph-sign-out"></i>
-                <span>Logout</span>
+                <span data-i18n="menu_logout">Logout</span>
             </button>
         </div>
     </div>
@@ -374,31 +387,31 @@
         <div id="home-container" class="mode-container active">
             
             <div class="action-buttons-vertical">
-                <button class="action-btn btn-salary" id="btn-add-salary">
-                    + Add salary credit
+                <button class="action-btn btn-salary" id="btn-add-salary" data-i18n="btn_add_salary_action">
+                    + Aggiungi stipendio
                 </button>
-                <button class="action-btn btn-expense" id="btn-add-expense">
-                    + Add expense
+                <button class="action-btn btn-expense" id="btn-add-expense" data-i18n="btn_add_expense_action">
+                    + Aggiungi spesa
                 </button>
             </div>
 
             <div class="widgets-grid">
                 <div class="widget widget-remaining">
                     <h3 class="widget-value" id="home-remaining-value">0.00</h3>
-                    <p class="widget-label">RIMANENTI DA SPENDERE</p>
+                    <p class="widget-label" data-i18n="widget_remaining">RIMANENTI DA SPENDERE</p>
                 </div>
                 <div class="widget widget-saved">
                     <h3 class="widget-value" id="home-saved-value">0.00</h3>
-                    <p class="widget-label">RISPARMIATI TOTALE</p>
+                    <p class="widget-label" data-i18n="widget_saved">RISPARMIATI TOTALE</p>
                 </div>
             </div>
 
             <div class="transactions-list">
-                <h3 class="section-title">Recent accreditations</h3>
+                <h3 class="section-title" data-i18n="section_recent_accreditations">Accrediti recenti</h3>
                 <div id="recent-accreditations-list" class="transactions-list-container">
                     <div class="empty-state">
                         <i class="ph ph-clock-counter-clockwise"></i>
-                        <p>No recent accreditations</p>
+                        <p data-i18n="empty_recent">Nessun accredito recente</p>
                     </div>
                 </div>
             </div>
@@ -407,13 +420,13 @@
         <!-- Salary Credits Container -->
         <div id="salary-container" class="mode-container">
             <div class="action-buttons-vertical">
-                <button class="action-btn btn-salary" id="btn-add-salary-page">
-                    + Add salary credit
+                <button class="action-btn btn-salary" id="btn-add-salary-page" data-i18n="btn_add_salary_action">
+                    + Aggiungi stipendio
                 </button>
             </div>
             <div class="transactions-list">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h3 class="section-title" style="margin-bottom: 0;">Salary Credits History</h3>
+                    <h3 class="section-title" style="margin-bottom: 0;" data-i18n="section_salary_history">Cronologia Stipendi</h3>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <i class="ph ph-pencil-simple" style="color: var(--text-secondary); font-size: 20px;"></i>
                         <label class="ios-switch" style="transform: scale(0.85); margin: 0;">
@@ -425,7 +438,7 @@
                 <div id="salary-credits-list" class="transactions-list-container">
                     <div class="empty-state">
                         <i class="ph ph-money"></i>
-                        <p>No salary credits yet</p>
+                        <p data-i18n="empty_salary">Nessuno stipendio presente</p>
                     </div>
                 </div>
             </div>
@@ -434,13 +447,13 @@
         <!-- Various Accreditations Container -->
         <div id="various-container" class="mode-container">
             <div class="action-buttons-vertical">
-                <button class="action-btn btn-salary" id="btn-add-various">
-                    + Add various accreditation
+                <button class="action-btn btn-salary" id="btn-add-various" data-i18n="btn_add_various_action">
+                    + Aggiungi accredito vario
                 </button>
             </div>
             <div class="transactions-list">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h3 class="section-title" style="margin-bottom: 0;">Various Accreditations</h3>
+                    <h3 class="section-title" style="margin-bottom: 0;" data-i18n="section_various_history">Accrediti Vari</h3>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <i class="ph ph-pencil-simple" style="color: var(--text-secondary); font-size: 20px;"></i>
                         <label class="ios-switch" style="transform: scale(0.85); margin: 0;">
@@ -452,7 +465,7 @@
                 <div id="various-accreditations-list" class="transactions-list-container">
                     <div class="empty-state">
                         <i class="ph ph-piggy-bank"></i>
-                        <p>No various accreditations yet</p>
+                        <p data-i18n="empty_various">Nessun accredito vario presente</p>
                     </div>
                 </div>
             </div>
@@ -461,25 +474,25 @@
         <!-- Expenses Container -->
         <div id="expense-container" class="mode-container">
             <div class="action-buttons-vertical">
-                <button class="action-btn btn-expense" id="btn-add-expense-page">
-                    + Add expense
+                <button class="action-btn btn-expense" id="btn-add-expense-page" data-i18n="btn_add_expense_action">
+                    + Aggiungi spesa
                 </button>
             </div>
             
             <div class="widgets-grid" style="margin-bottom: 24px;">
                 <div class="widget widget-spent">
                     <h3 class="widget-value" id="expense-page-total">0.00</h3>
-                    <p class="widget-label">TOTALE SPESE</p>
+                    <p class="widget-label" data-i18n="widget_expenses_total">TOTALE SPESE</p>
                 </div>
                 <div class="widget widget-neutral" style="background: linear-gradient(135deg, #e5e5ea 0%, #d1d1d6 100%);">
                     <h3 class="widget-value" id="expense-page-pending" style="color: #48484a;">0.00</h3>
-                    <p class="widget-label" style="color: #48484a; font-weight: 600;">SPESE IN ATTESA</p>
+                    <p class="widget-label" style="color: #48484a; font-weight: 600;" data-i18n="widget_expenses_pending">SPESE IN ATTESA</p>
                 </div>
             </div>
             
             <div class="transactions-list">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h3 class="section-title" style="margin-bottom: 0;">Expenses History</h3>
+                    <h3 class="section-title" style="margin-bottom: 0;" data-i18n="section_expenses_history">Cronologia Spese</h3>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <i class="ph ph-pencil-simple" style="color: var(--text-secondary); font-size: 20px;"></i>
                         <label class="ios-switch" style="transform: scale(0.85); margin: 0;">
@@ -491,8 +504,8 @@
                 
                 <div class="expense-controls">
                     <div class="view-toggle">
-                        <button id="toggle-all-expenses" class="toggle-btn active">All</button>
-                        <button id="toggle-month-expenses" class="toggle-btn">By Month</button>
+                        <button id="toggle-all-expenses" class="toggle-btn active" data-i18n="filter_all">Tutte</button>
+                        <button id="toggle-month-expenses" class="toggle-btn" data-i18n="filter_by_month">Per Mese</button>
                     </div>
                     <div id="month-selector-container" class="month-selector" style="display: none;">
                         <input type="month" id="expense-month-input" class="modern-input">
@@ -502,7 +515,7 @@
                 <div id="expenses-list" class="transactions-list-container">
                     <div class="empty-state">
                         <i class="ph ph-shopping-cart"></i>
-                        <p>No expenses yet</p>
+                        <p data-i18n="empty_expenses">Nessuna spesa presente</p>
                     </div>
                 </div>
             </div>
@@ -510,57 +523,57 @@
 
         <!-- Statistics Container -->
         <div id="statistics-container" class="mode-container">
-            <h3 class="section-title">Statistics</h3>
+            <h3 class="section-title" data-i18n="section_statistics">Statistiche</h3>
             
-            <h4 class="statistics-subsection"><i class="ph ph-globe" style="color: var(--primary-color);"></i> Global Totals</h4>
+            <h4 class="statistics-subsection" data-i18n="section_global_totals"><i class="ph ph-globe" style="color: var(--primary-color);"></i> Totali Generali</h4>
             <div class="widgets-grid" style="margin-bottom: 24px;">
                 <div class="widget widget-remaining">
                     <h3 class="widget-value" id="stat-remaining-value">0.00</h3>
-                    <p class="widget-label">RIMANENTI DA SPENDERE</p>
+                    <p class="widget-label" data-i18n="widget_remaining">RIMANENTI DA SPENDERE</p>
                 </div>
                 <div class="widget widget-spent">
                     <h3 class="widget-value" id="stat-spent-value">0.00</h3>
-                    <p class="widget-label">TOTALE SPESI</p>
+                    <p class="widget-label" data-i18n="widget_spent_total">TOTALE SPESI</p>
                 </div>
                 <div class="widget widget-saved">
                     <h3 class="widget-value" id="stat-saved-value">0.00</h3>
-                    <p class="widget-label">RISPARMIATI TOTALE</p>
+                    <p class="widget-label" data-i18n="widget_saved">RISPARMIATI TOTALE</p>
                 </div>
                 <div class="widget widget-gross">
                     <h3 class="widget-value" id="stat-gross-value">0.00</h3>
-                    <p class="widget-label">LORDO TOTALE</p>
+                    <p class="widget-label" data-i18n="widget_gross_total">LORDO TOTALE</p>
                 </div>
             </div>
 
-            <h4 class="statistics-subsection"><i class="ph ph-briefcase" style="color: #FF9500;"></i> Reply Salary</h4>
+            <h4 class="statistics-subsection" data-i18n="section_reply_salary"><i class="ph ph-briefcase" style="color: #FF9500;"></i> Stipendio Reply</h4>
             <div class="widgets-grid" style="margin-bottom: 24px;">
                 <div class="widget widget-reply-gross">
                     <h3 class="widget-value" id="stat-reply-gross-value">0.00</h3>
-                    <p class="widget-label">LORDO STIPENDIO REPLY</p>
+                    <p class="widget-label" data-i18n="widget_reply_gross">LORDO STIPENDIO REPLY</p>
                 </div>
                 <div class="widget widget-reply-spendable">
                     <h3 class="widget-value" id="stat-reply-spendable-value">0.00</h3>
-                    <p class="widget-label">TOTALE PER ME STIPENDIO REPLY</p>
+                    <p class="widget-label" data-i18n="widget_reply_spendable">TOTALE PER ME STIPENDIO REPLY</p>
                 </div>
                 <div class="widget widget-reply-saved">
                     <h3 class="widget-value" id="stat-reply-saved-value">0.00</h3>
-                    <p class="widget-label">RISPARMIATI STIPENDIO REPLY</p>
+                    <p class="widget-label" data-i18n="widget_reply_saved">RISPARMIATI STIPENDIO REPLY</p>
                 </div>
             </div>
 
-            <h4 class="statistics-subsection"><i class="ph ph-gift" style="color: #AF52DE;"></i> Various Accreditations</h4>
+            <h4 class="statistics-subsection" data-i18n="section_various_accreditations"><i class="ph ph-gift" style="color: #AF52DE;"></i> Accrediti Vari</h4>
             <div class="widgets-grid">
                 <div class="widget widget-various-gross">
                     <h3 class="widget-value" id="stat-various-gross-value">0.00</h3>
-                    <p class="widget-label">LORDO ACCREDITI VARI</p>
+                    <p class="widget-label" data-i18n="widget_various_gross">LORDO ACCREDITI VARI</p>
                 </div>
                 <div class="widget widget-various-spendable">
                     <h3 class="widget-value" id="stat-various-spendable-value">0.00</h3>
-                    <p class="widget-label">TOTALE PER ME ACCREDITI VARI</p>
+                    <p class="widget-label" data-i18n="widget_various_spendable">TOTALE PER ME ACCREDITI VARI</p>
                 </div>
                 <div class="widget widget-various-saved">
                     <h3 class="widget-value" id="stat-various-saved-value">0.00</h3>
-                    <p class="widget-label">ACCREDITI VARI RISPARMIATI</p>
+                    <p class="widget-label" data-i18n="widget_various_saved">ACCREDITI VARI RISPARMIATI</p>
                 </div>
             </div>
         </div>
@@ -568,44 +581,44 @@
         <!-- Investment Mode Container (Homepage) -->
         <div id="investment-container" class="mode-container">
             
-            <h4 class="statistics-subsection"><i class="ph ph-chart-line-up" style="color: var(--accent-investment);"></i> Riepilogo Portafoglio</h4>
+            <h4 class="statistics-subsection" data-i18n="section_portfolio_summary"><i class="ph ph-chart-line-up" style="color: var(--accent-investment);"></i> Riepilogo Portafoglio</h4>
             <div class="widgets-grid" style="margin-bottom: 24px;">
                 <div class="widget widget-saved">
                     <h3 class="widget-value" id="inv-stat-bonifici">0.00</h3>
-                    <p class="widget-label">TOTALE BONIFICI INVIATI</p>
+                    <p class="widget-label" data-i18n="widget_inv_transfers">TOTALE BONIFICI INVIATI</p>
                 </div>
                 <div class="widget widget-gross">
                     <h3 class="widget-value" id="inv-stat-investimenti">0.00</h3>
-                    <p class="widget-label">TOTALE ADDEBITI INVESTIMENTI</p>
+                    <p class="widget-label" data-i18n="widget_inv_debits">TOTALE ADDEBITI INVESTIMENTI</p>
                 </div>
                 <div class="widget widget-various-spendable">
                     <h3 class="widget-value" id="inv-stat-spese">0.00</h3>
-                    <p class="widget-label">TOTALE SPESE UNICREDIT</p>
+                    <p class="widget-label" data-i18n="widget_inv_spese">TOTALE SPESE UNICREDIT</p>
                 </div>
                 <div class="widget widget-reply-spendable">
                     <h3 class="widget-value" id="inv-stat-saldo">0.00</h3>
-                    <p class="widget-label">SALDO DISPONIBILE ATTUALE</p>
+                    <p class="widget-label" data-i18n="widget_inv_saldo">SALDO DISPONIBILE ATTUALE</p>
                 </div>
             </div>
 
             <div class="action-buttons-vertical" style="gap: 12px; margin-bottom: 32px;">
-                <button class="action-btn btn-salary" id="btn-add-bonifico" style="background-color: var(--accent-investment-light); color: var(--accent-investment);">
+                <button class="action-btn btn-salary" id="btn-add-bonifico" style="background-color: var(--accent-investment-light); color: var(--accent-investment);" data-i18n="btn_add_bonifico_action">
                     <i class="ph ph-bank"></i> Aggiungi Bonifico
                 </button>
-                <button class="action-btn btn-expense" id="btn-add-investimento" style="background-color: rgba(88, 86, 214, 0.1); color: #5856d6;">
+                <button class="action-btn btn-expense" id="btn-add-investimento" style="background-color: rgba(88, 86, 214, 0.1); color: #5856d6;" data-i18n="btn_add_investimento_action">
                     <i class="ph ph-chart-pie-slice"></i> Aggiungi Investimento
                 </button>
-                <button class="action-btn btn-various" id="btn-add-movimento" style="background-color: rgba(255, 149, 0, 0.1); color: #FF9500;">
+                <button class="action-btn btn-various" id="btn-add-movimento" style="background-color: rgba(255, 149, 0, 0.1); color: #FF9500;" data-i18n="btn_add_movimento_action">
                     <i class="ph ph-receipt"></i> Aggiungi Movimento
                 </button>
             </div>
 
             <div class="transactions-list">
-                <h3 class="section-title">Movimenti In Evidenza</h3>
+                <h3 class="section-title" data-i18n="section_highlighted_movements">Movimenti In Evidenza</h3>
                 <div id="investment-highlighted-list" class="transactions-list-container">
                     <div class="empty-state">
                         <i class="ph ph-star"></i>
-                        <p>Nessun movimento in evidenza</p>
+                        <p data-i18n="empty_highlighted">Nessun movimento in evidenza</p>
                     </div>
                 </div>
             </div>
@@ -614,12 +627,12 @@
         <!-- Bonifici Container -->
         <div id="investment-transfers-container" class="mode-container">
             <div class="action-buttons-vertical" style="margin-bottom: 24px;">
-                <button class="action-btn btn-salary" id="btn-add-bonifico-page" style="background-color: var(--accent-investment-light); color: var(--accent-investment);">
+                <button class="action-btn btn-salary" id="btn-add-bonifico-page" style="background-color: var(--accent-investment-light); color: var(--accent-investment);" data-i18n="btn_add_bonifico_action">
                     <i class="ph ph-bank"></i> Aggiungi Bonifico
                 </button>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h2 class="section-title" style="margin-bottom: 0;">Bonifici in Entrata</h2>
+                <h2 class="section-title" style="margin-bottom: 0;" data-i18n="section_incoming_transfers">Bonifici in Entrata</h2>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <i class="ph ph-pencil-simple" style="color: var(--text-secondary); font-size: 20px;"></i>
                     <label class="ios-switch" style="transform: scale(0.85); margin: 0;">
@@ -632,7 +645,7 @@
                 <div id="investment-transfers-list" class="transactions-list-container">
                     <div class="empty-state">
                         <i class="ph ph-bank"></i>
-                        <p>Nessun bonifico</p>
+                        <p data-i18n="empty_transfers">Nessun bonifico</p>
                     </div>
                 </div>
             </div>
@@ -641,12 +654,12 @@
         <!-- Investimenti Container -->
         <div id="investments-container" class="mode-container">
             <div class="action-buttons-vertical" style="margin-bottom: 24px;">
-                <button class="action-btn btn-expense" id="btn-add-investimento-page" style="background-color: rgba(88, 86, 214, 0.1); color: #5856d6;">
+                <button class="action-btn btn-expense" id="btn-add-investimento-page" style="background-color: rgba(88, 86, 214, 0.1); color: #5856d6;" data-i18n="btn_add_investimento_action">
                     <i class="ph ph-chart-pie-slice"></i> Aggiungi Investimento
                 </button>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h2 class="section-title" style="margin-bottom: 0;">I Miei Investimenti</h2>
+                <h2 class="section-title" style="margin-bottom: 0;" data-i18n="section_my_investments">I Miei Investimenti</h2>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <i class="ph ph-pencil-simple" style="color: var(--text-secondary); font-size: 20px;"></i>
                     <label class="ios-switch" style="transform: scale(0.85); margin: 0;">
@@ -659,7 +672,7 @@
                 <div id="investments-list" class="transactions-list-container">
                     <div class="empty-state">
                         <i class="ph ph-chart-line-up"></i>
-                        <p>Nessun investimento</p>
+                        <p data-i18n="empty_investments">Nessun investimento</p>
                     </div>
                 </div>
             </div>
@@ -668,12 +681,12 @@
         <!-- Spese e Movimenti Container -->
         <div id="investment-movements-container" class="mode-container">
             <div class="action-buttons-vertical" style="margin-bottom: 24px;">
-                <button class="action-btn btn-various" id="btn-add-movimento-page" style="background-color: rgba(255, 149, 0, 0.1); color: #FF9500;">
+                <button class="action-btn btn-various" id="btn-add-movimento-page" style="background-color: rgba(255, 149, 0, 0.1); color: #FF9500;" data-i18n="btn_add_movimento_action">
                     <i class="ph ph-receipt"></i> Aggiungi Movimento
                 </button>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h2 class="section-title" style="margin-bottom: 0;">Spese e Movimenti</h2>
+                <h2 class="section-title" style="margin-bottom: 0;" data-i18n="section_expenses_movements">Spese e Movimenti</h2>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <i class="ph ph-pencil-simple" style="color: var(--text-secondary); font-size: 20px;"></i>
                     <label class="ios-switch" style="transform: scale(0.85); margin: 0;">
@@ -686,7 +699,7 @@
                 <div id="investment-movements-list" class="transactions-list-container">
                     <div class="empty-state">
                         <i class="ph ph-receipt"></i>
-                        <p>Nessun movimento</p>
+                        <p data-i18n="empty_movements">Nessun movimento</p>
                     </div>
                 </div>
             </div>
