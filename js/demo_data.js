@@ -20,7 +20,7 @@ export function getInitialDemoData() {
                 total_amount: 2450.00,
                 spendable_amount: 1600.00,
                 credit_date: `${currYear}-${currMonth}-27`,
-                description: 'Stipendio Reply',
+                description: 'Stipendio',
                 created_at: new Date(currYear, now.getMonth(), 27, 8, 30, 0).toISOString()
             },
             {
@@ -29,7 +29,7 @@ export function getInitialDemoData() {
                 total_amount: 2450.00,
                 spendable_amount: 1600.00,
                 credit_date: `${prevYear}-${prevMonth}-27`,
-                description: 'Stipendio Reply',
+                description: 'Stipendio',
                 created_at: new Date(prevYear, prevDate.getMonth(), 27, 8, 30, 0).toISOString()
             }
         ],

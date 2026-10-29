@@ -242,7 +242,13 @@ function applyLanguage(lang) {
 
     // Translate all [data-i18n]
     document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
+        let key = el.getAttribute('data-i18n');
+        if (state.isDemo) {
+            if (key === 'section_reply_salary') key = 'section_demo_salary';
+            else if (key === 'widget_reply_gross') key = 'widget_demo_salary_gross';
+            else if (key === 'widget_reply_spendable') key = 'widget_demo_salary_spendable';
+            else if (key === 'widget_reply_saved') key = 'widget_demo_salary_saved';
+        }
         const text = t(key);
         if (text) el.innerHTML = text;
     });
@@ -714,13 +720,7 @@ function setupEventListeners() {
         state.isDemo = false;
         state.demoData = null;
         if (DOM.demoBadge) DOM.demoBadge.style.display = 'none';
-        if (DOM.logoutBtn) {
-            const span = DOM.logoutBtn.querySelector('span');
-            if (span) {
-                span.setAttribute('data-i18n', 'menu_logout');
-                span.textContent = t('menu_logout');
-            }
-        }
+        applyLanguage(state.currentLanguage);
 
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -819,6 +819,9 @@ function setupEventListeners() {
             DOM.demoBadge.style.display = 'inline-block';
         }
 
+        // Apply translations for demo mode (e.g. generic salary labels)
+        applyLanguage(state.currentLanguage);
+
         // Update logout button to "Esci dalla demo"
         if (DOM.logoutBtn) {
             const span = DOM.logoutBtn.querySelector('span');
@@ -858,6 +861,9 @@ function setupEventListeners() {
         state.demoData = null;
         state.user = null;
         state.hideValues = false;
+
+        // Restore normal translations (e.g. Reply salary labels)
+        applyLanguage(state.currentLanguage);
 
         // Restore logout button label
         if (DOM.logoutBtn) {

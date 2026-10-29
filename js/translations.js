@@ -1,7 +1,7 @@
 export const translations = {
     it: {
         // App / Meta
-        app_title: "Gestione Finanze",
+        app_title: "Finance Management",
         author: "Sviluppato da Vito Ditrani",
 
         // Login
@@ -61,6 +61,9 @@ export const translations = {
         widget_reply_gross: "LORDO STIPENDIO REPLY",
         widget_reply_spendable: "TOTALE PER ME STIPENDIO REPLY",
         widget_reply_saved: "RISPARMIATI STIPENDIO REPLY",
+        widget_demo_salary_gross: "LORDO STIPENDIO",
+        widget_demo_salary_spendable: "TOTALE PER ME STIPENDIO",
+        widget_demo_salary_saved: "RISPARMIATI STIPENDIO",
         widget_various_gross: "LORDO ACCREDITI VARI",
         widget_various_spendable: "TOTALE PER ME ACCREDITI VARI",
         widget_various_saved: "ACCREDITI VARI RISPARMIATI",
@@ -76,8 +79,9 @@ export const translations = {
         section_expenses_history: "Cronologia Spese",
         section_statistics: "Statistiche",
         section_global_totals: '<i class="ph ph-globe" style="color: var(--primary-color);"></i> Totali Generali',
-        section_reply_salary: '<i class="ph ph-briefcase" style="color: #FF9500;"></i> Reply Salary',
-        section_various_accreditations: '<i class="ph ph-gift" style="color: #AF52DE;"></i> Various Accreditations',
+        section_reply_salary: '<i class="ph ph-briefcase" style="color: #FF9500;"></i> Stipendio Reply',
+        section_demo_salary: '<i class="ph ph-briefcase" style="color: #FF9500;"></i> Stipendio',
+        section_various_accreditations: '<i class="ph ph-gift" style="color: #AF52DE;"></i> Accrediti Vari',
         section_portfolio_summary: '<i class="ph ph-chart-line-up" style="color: var(--accent-investment);"></i> Riepilogo Portafoglio',
         section_highlighted_movements: "Movimenti In Evidenza",
         section_incoming_transfers: "Bonifici in Entrata",
@@ -247,6 +251,9 @@ export const translations = {
         widget_reply_gross: "REPLY SALARY GROSS",
         widget_reply_spendable: "TOTAL FOR ME REPLY SALARY",
         widget_reply_saved: "SAVED REPLY SALARY",
+        widget_demo_salary_gross: "SALARY GROSS",
+        widget_demo_salary_spendable: "TOTAL FOR ME SALARY",
+        widget_demo_salary_saved: "SAVED SALARY",
         widget_various_gross: "VARIOUS ACCREDITATIONS GROSS",
         widget_various_spendable: "TOTAL FOR ME VARIOUS ACCREDITATIONS",
         widget_various_saved: "SAVED VARIOUS ACCREDITATIONS",
@@ -263,6 +270,7 @@ export const translations = {
         section_statistics: "Statistics",
         section_global_totals: '<i class="ph ph-globe" style="color: var(--primary-color);"></i> Global Totals',
         section_reply_salary: '<i class="ph ph-briefcase" style="color: #FF9500;"></i> Reply Salary',
+        section_demo_salary: '<i class="ph ph-briefcase" style="color: #FF9500;"></i> Salary',
         section_various_accreditations: '<i class="ph ph-gift" style="color: #AF52DE;"></i> Various Accreditations',
         section_portfolio_summary: '<i class="ph ph-chart-line-up" style="color: var(--accent-investment);"></i> Portfolio Summary',
         section_highlighted_movements: "Highlighted Movements",
