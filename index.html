@@ -63,6 +63,16 @@
                 <button type="submit" class="primary-btn login-btn" id="submit-login" data-i18n="btn_signin">
                     Accedi
                 </button>
+
+                <button type="button" class="faceid-btn" id="faceid-login-btn" style="display: none;">
+                    <svg class="faceid-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+                        <path d="M7 3H5a2 2 0 0 0-2 2v2m0 10v2a2 2 0 0 0 2 2h2m10 0h2a2 2 0 0 0 2-2v-2m0-10V5a2 2 0 0 0-2-2h-2"/>
+                        <path d="M9 10h.01M15 10h.01"/>
+                        <path d="M10 14c.5 1 1.5 1.5 2 1.5s1.5-.5 2-1.5"/>
+                        <path d="M12 11v2"/>
+                    </svg>
+                    <span data-i18n="btn_signin_faceid">Accedi con Face ID</span>
+                </button>
             </form>
             <div id="login-error" class="login-error" style="display: none;"></div>
 
@@ -73,6 +83,32 @@
                 </p>
                 <button type="button" id="demo-btn" class="secondary-btn" data-i18n="btn_demo">
                     Prova versione demo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Face ID Setup Modal -->
+    <div id="faceid-setup-modal" class="custom-modal">
+        <div class="custom-modal-content" style="text-align: center; padding: 28px 22px;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(0, 122, 255, 0.1); color: var(--primary-color, #007aff); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="34" height="34">
+                    <path d="M7 3H5a2 2 0 0 0-2 2v2m0 10v2a2 2 0 0 0 2 2h2m10 0h2a2 2 0 0 0 2-2v-2m0-10V5a2 2 0 0 0-2-2h-2"/>
+                    <path d="M9 10h.01M15 10h.01"/>
+                    <path d="M10 14c.5 1 1.5 1.5 2 1.5s1.5-.5 2-1.5"/>
+                    <path d="M12 11v2"/>
+                </svg>
+            </div>
+            <h3 data-i18n="faceid_modal_title" style="margin-bottom: 8px;">Attiva Face ID</h3>
+            <p data-i18n="faceid_modal_desc" style="color: var(--text-secondary); font-size: 14px; line-height: 1.5; margin-bottom: 24px;">
+                Vuoi abilitare l'accesso con Face ID su questo dispositivo per accedere istantaneamente senza inserire la password?
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button type="button" id="enable-faceid-btn" class="primary-btn" data-i18n="btn_enable_faceid">
+                    Attiva Face ID
+                </button>
+                <button type="button" id="skip-faceid-btn" class="secondary-btn" data-i18n="btn_skip_faceid">
+                    Non ora
                 </button>
             </div>
         </div>
@@ -361,6 +397,22 @@
                 </div>
                 <label class="toggle-switch" style="transform: scale(0.8); margin: 0;">
                     <input type="checkbox" id="privacy-toggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <div id="faceid-menu-item" class="menu-item" style="display: none; justify-content: space-between; align-items: center; cursor: default;">
+                <div style="display: flex; align-items: center; gap: 12px; color: var(--text-secondary);">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                        <path d="M7 3H5a2 2 0 0 0-2 2v2m0 10v2a2 2 0 0 0 2 2h2m10 0h2a2 2 0 0 0 2-2v-2m0-10V5a2 2 0 0 0-2-2h-2"/>
+                        <path d="M9 10h.01M15 10h.01"/>
+                        <path d="M10 14c.5 1 1.5 1.5 2 1.5s1.5-.5 2-1.5"/>
+                        <path d="M12 11v2"/>
+                    </svg>
+                    <span data-i18n="menu_faceid">Accesso Face ID</span>
+                </div>
+                <label class="toggle-switch" style="transform: scale(0.8); margin: 0;">
+                    <input type="checkbox" id="faceid-toggle">
                     <span class="toggle-slider"></span>
                 </label>
             </div>

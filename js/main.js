@@ -1,5 +1,6 @@
 import { translations } from './translations.js';
 import { getInitialDemoData, createDemoQueryBuilder } from './demo_data.js';
+import { isFaceIdAvailable, isFaceIdEnrolled, registerFaceId, authenticateWithFaceId, removeFaceId } from './faceid.js';
 
 // --- SUPABASE CONFIGURATION ---
 // INSERISCI QUI LE TUE CHIAVI (Puoi trovarle in Project Settings -> API su Supabase)
@@ -132,13 +133,20 @@ const DOM = {
     // Menu Links
     navLinks: document.querySelectorAll('.nav-link'),
 
-    // Login Elements
     loginScreen: document.getElementById('login-screen'),
     loginForm: document.getElementById('login-form'),
     loginError: document.getElementById('login-error'),
     logoutBtn: document.getElementById('logout-btn'),
     demoBtn: document.getElementById('demo-btn'),
-    demoBadge: document.getElementById('demo-badge')
+    demoBadge: document.getElementById('demo-badge'),
+    
+    // Face ID Elements
+    faceIdLoginBtn: document.getElementById('faceid-login-btn'),
+    faceIdSetupModal: document.getElementById('faceid-setup-modal'),
+    enableFaceIdBtn: document.getElementById('enable-faceid-btn'),
+    skipFaceIdBtn: document.getElementById('skip-faceid-btn'),
+    faceIdToggle: document.getElementById('faceid-toggle'),
+    faceIdMenuItem: document.getElementById('faceid-menu-item')
 };
 
 // Mode Config
@@ -293,6 +301,7 @@ async function init() {
     applyLanguage(state.currentLanguage);
     await checkSession();
     updateUI();
+    await updateFaceIdUI();
     
     // Set current month string (YYYY-MM) as default
     const now = new Date();
@@ -361,10 +370,30 @@ function hideSplashScreen() {
     }
 }
 
+let pendingFaceIdEnrollment = null;
+
+async function updateFaceIdUI() {
+    const isAvail = await isFaceIdAvailable();
+    const isEnrolled = isFaceIdEnrolled();
+
+    if (DOM.faceIdLoginBtn) {
+        DOM.faceIdLoginBtn.style.display = (isAvail && isEnrolled) ? 'flex' : 'none';
+    }
+
+    if (DOM.faceIdMenuItem) {
+        DOM.faceIdMenuItem.style.display = isAvail ? 'flex' : 'none';
+    }
+
+    if (DOM.faceIdToggle) {
+        DOM.faceIdToggle.checked = isEnrolled;
+    }
+}
+
 function showLoginScreen() {
     document.getElementById('email').removeAttribute('disabled');
     document.getElementById('password').removeAttribute('disabled');
     DOM.loginScreen.classList.add('active');
+    updateFaceIdUI();
 }
 
 function resetEditMode(type) {
@@ -481,6 +510,36 @@ function setupEventListeners() {
             }
         });
     });
+
+    // Face ID Toggle (Side Menu)
+    if (DOM.faceIdToggle) {
+        DOM.faceIdToggle.addEventListener('change', async (e) => {
+            if (navigator.vibrate) navigator.vibrate(30);
+            if (!e.target.checked) {
+                removeFaceId();
+                await updateFaceIdUI();
+                alert(t('alert_faceid_disabled'));
+            } else {
+                const promptMsg = state.currentLanguage === 'en' 
+                    ? 'Enter your current password to enable Face ID on this device:' 
+                    : 'Inserisci la tua password attuale per attivare Face ID su questo dispositivo:';
+                const pwd = prompt(promptMsg);
+                if (pwd && state.user && state.user.email) {
+                    try {
+                        await registerFaceId(state.user.email, pwd);
+                        await updateFaceIdUI();
+                        alert(t('alert_faceid_enabled'));
+                    } catch (err) {
+                        console.error("Face ID toggle enable error:", err);
+                        e.target.checked = false;
+                        alert(t('alert_faceid_failed'));
+                    }
+                } else {
+                    e.target.checked = false;
+                }
+            }
+        });
+    }
 
     // List Edit Mode Toggles
     const editToggles = document.querySelectorAll('.edit-list-toggle');
@@ -774,9 +833,6 @@ function setupEventListeners() {
             // Reset scroll position to top
             window.scrollTo(0, 0);
 
-            // Pulisci i campi
-            document.getElementById('password').value = '';
-            
             // Carica i dati iniziali
             await loadRecentAccreditations();
             await loadSalaryCredits();
@@ -788,8 +844,137 @@ function setupEventListeners() {
             await calculateStatistics();
             await calculateInvestmentStatistics();
             await loadInvestmentHighlights();
+
+            // Proponi l'attivazione di Face ID se supportato e non ancora configurato
+            try {
+                const isAvail = await isFaceIdAvailable();
+                const isEnrolled = isFaceIdEnrolled();
+                const dismissed = sessionStorage.getItem('faceid_prompt_dismissed');
+
+                if (isAvail && !isEnrolled && !dismissed && DOM.faceIdSetupModal) {
+                    pendingFaceIdEnrollment = { email, password };
+                    DOM.faceIdSetupModal.classList.add('active');
+                }
+            } catch (faceIdCheckErr) {
+                console.warn("Face ID check warning:", faceIdCheckErr);
+            }
+
+            // Pulisci il campo password
+            document.getElementById('password').value = '';
         }
     });
+
+    // Face ID Direct Login Button Logic
+    function resetFaceIdLoginBtn() {
+        if (!DOM.faceIdLoginBtn) return;
+        DOM.faceIdLoginBtn.disabled = false;
+        DOM.faceIdLoginBtn.innerHTML = `
+            <svg class="faceid-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+                <path d="M7 3H5a2 2 0 0 0-2 2v2m0 10v2a2 2 0 0 0 2 2h2m10 0h2a2 2 0 0 0 2-2v-2m0-10V5a2 2 0 0 0-2-2h-2"/>
+                <path d="M9 10h.01M15 10h.01"/>
+                <path d="M10 14c.5 1 1.5 1.5 2 1.5s1.5-.5 2-1.5"/>
+                <path d="M12 11v2"/>
+            </svg>
+            <span data-i18n="btn_signin_faceid">${t('btn_signin_faceid')}</span>
+        `;
+    }
+
+    if (DOM.faceIdLoginBtn) {
+        DOM.faceIdLoginBtn.addEventListener('click', async () => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            DOM.loginError.style.display = 'none';
+
+            DOM.faceIdLoginBtn.disabled = true;
+            DOM.faceIdLoginBtn.innerHTML = `<i class="ph ph-spinner ph-spin"></i> ${t('btn_signing_in')}`;
+
+            try {
+                const creds = await authenticateWithFaceId();
+                if (!creds || !creds.email || !creds.password) {
+                    throw new Error("Credenziali biometriche non valide.");
+                }
+
+                // Ensure demo mode is off for real login
+                state.isDemo = false;
+                state.demoData = null;
+                if (DOM.demoBadge) DOM.demoBadge.style.display = 'none';
+                applyLanguage(state.currentLanguage);
+
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: creds.email,
+                    password: creds.password
+                });
+
+                if (error) {
+                    DOM.loginError.textContent = error.message;
+                    DOM.loginError.style.display = 'block';
+                    resetFaceIdLoginBtn();
+                    return;
+                }
+
+                // Login successo con Face ID
+                state.user = data.user;
+                const hideToggle = document.getElementById('hide-amounts-toggle');
+                if (hideToggle) {
+                    state.hideValues = hideToggle.checked;
+                    applyPrivacyMode();
+                }
+
+                updateLastActivity();
+                DOM.loginScreen.classList.remove('active');
+                resetFaceIdLoginBtn();
+
+                window.scrollTo(0, 0);
+
+                await loadRecentAccreditations();
+                await loadSalaryCredits();
+                await loadVariousAccreditations();
+                await loadExpenses();
+                await loadInvestmentTransfers();
+                await loadInvestments();
+                await loadInvestmentMovements();
+                await calculateStatistics();
+                await calculateInvestmentStatistics();
+                await loadInvestmentHighlights();
+
+            } catch (err) {
+                console.warn("Face ID login issue:", err);
+                resetFaceIdLoginBtn();
+
+                if (err && err.name !== 'NotAllowedError') {
+                    DOM.loginError.textContent = t('alert_faceid_failed');
+                    DOM.loginError.style.display = 'block';
+                }
+            }
+        });
+    }
+
+    // Face ID Setup Modal Action Handlers
+    if (DOM.enableFaceIdBtn) {
+        DOM.enableFaceIdBtn.addEventListener('click', async () => {
+            if (!pendingFaceIdEnrollment) return;
+            try {
+                DOM.enableFaceIdBtn.disabled = true;
+                await registerFaceId(pendingFaceIdEnrollment.email, pendingFaceIdEnrollment.password);
+                if (DOM.faceIdSetupModal) DOM.faceIdSetupModal.classList.remove('active');
+                await updateFaceIdUI();
+                alert(t('alert_faceid_enabled'));
+            } catch (err) {
+                console.error("Face ID enrollment error:", err);
+                alert(t('alert_faceid_failed'));
+            } finally {
+                DOM.enableFaceIdBtn.disabled = false;
+                pendingFaceIdEnrollment = null;
+            }
+        });
+    }
+
+    if (DOM.skipFaceIdBtn) {
+        DOM.skipFaceIdBtn.addEventListener('click', () => {
+            sessionStorage.setItem('faceid_prompt_dismissed', '1');
+            if (DOM.faceIdSetupModal) DOM.faceIdSetupModal.classList.remove('active');
+            pendingFaceIdEnrollment = null;
+        });
+    }
 
     // Demo Mode Handlers
     async function enterDemoMode() {

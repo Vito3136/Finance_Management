@@ -9,12 +9,17 @@ export const translations = {
         label_password: "Password",
         label_hide_amounts: "Oscura gli importi",
         btn_signin: "Accedi",
+        btn_signin_faceid: "Accedi con Face ID",
         btn_signing_in: '<i class="ph ph-spinner ph-spin"></i> Accesso in corso...',
         demo_text: "App progettata per dispositivi mobili.<br>Non sei Vito Ditrani? Puoi provare la demo.",
         btn_demo: "Prova versione demo",
         demo_modal_title: "Avviso",
         demo_modal_text: "La versione demo non è ancora disponibile.",
         btn_close: "Chiudi",
+        faceid_modal_title: "Attiva Face ID",
+        faceid_modal_desc: "Vuoi abilitare l'accesso con Face ID su questo dispositivo per accedere istantaneamente senza inserire la password?",
+        btn_enable_faceid: "Attiva Face ID",
+        btn_skip_faceid: "Non ora",
 
         // Navigation Titles (Top Bar)
         view_home_title: "Gestione Spese",
@@ -39,6 +44,7 @@ export const translations = {
         menu_movements: "Spese e Movimenti",
         menu_language: "Lingua",
         menu_hide_values: "Nascondi Cifre",
+        menu_faceid: "Accesso Face ID",
         menu_logout: "Logout",
         menu_exit_demo: "Esci dalla demo",
         demo_badge: "DEMO",
@@ -187,7 +193,10 @@ export const translations = {
         alert_investimento_saved: "Investimento salvato con successo!",
         alert_investimento_updated: "Investimento aggiornato con successo!",
         alert_movimento_saved: "Movimento salvato con successo!",
-        alert_movimento_updated: "Movimento aggiornato con successo!"
+        alert_movimento_updated: "Movimento aggiornato con successo!",
+        alert_faceid_enabled: "Face ID attivato con successo su questo dispositivo!",
+        alert_faceid_disabled: "Face ID disattivato da questo dispositivo.",
+        alert_faceid_failed: "Verifica Face ID non riuscita o annullata."
     },
     en: {
         // App / Meta
@@ -199,12 +208,17 @@ export const translations = {
         label_password: "Password",
         label_hide_amounts: "Hide amounts",
         btn_signin: "Sign In",
+        btn_signin_faceid: "Sign in with Face ID",
         btn_signing_in: '<i class="ph ph-spinner ph-spin"></i> Signing in...',
         demo_text: "App designed for mobile experience.<br>Not Vito Ditrani? You can try a demo.",
         btn_demo: "Try Demo Version",
         demo_modal_title: "Notice",
         demo_modal_text: "Demo version is not yet available.",
         btn_close: "Close",
+        faceid_modal_title: "Enable Face ID",
+        faceid_modal_desc: "Would you like to enable Face ID on this device to sign in instantly without typing your password?",
+        btn_enable_faceid: "Enable Face ID",
+        btn_skip_faceid: "Not now",
 
         // Navigation Titles (Top Bar)
         view_home_title: "Expense Management",
@@ -229,6 +243,7 @@ export const translations = {
         menu_movements: "Expenses & Movements",
         menu_language: "Language",
         menu_hide_values: "Hide Amounts",
+        menu_faceid: "Face ID Sign-in",
         menu_logout: "Logout",
         menu_exit_demo: "Exit demo",
         demo_badge: "DEMO",
@@ -377,6 +392,9 @@ export const translations = {
         alert_investimento_saved: "Investment saved successfully!",
         alert_investimento_updated: "Investment updated successfully!",
         alert_movimento_saved: "Movement saved successfully!",
-        alert_movimento_updated: "Movement updated successfully!"
+        alert_movimento_updated: "Movement updated successfully!",
+        alert_faceid_enabled: "Face ID enabled successfully on this device!",
+        alert_faceid_disabled: "Face ID disabled on this device.",
+        alert_faceid_failed: "Face ID verification failed or canceled."
     }
 };
