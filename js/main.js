@@ -146,7 +146,9 @@ const DOM = {
     enableFaceIdBtn: document.getElementById('enable-faceid-btn'),
     skipFaceIdBtn: document.getElementById('skip-faceid-btn'),
     faceIdToggle: document.getElementById('faceid-toggle'),
-    faceIdMenuItem: document.getElementById('faceid-menu-item')
+    faceIdMenuItem: document.getElementById('faceid-menu-item'),
+    securityAlertModal: document.getElementById('security-alert-modal'),
+    dismissSecurityAlertBtn: document.getElementById('dismiss-security-alert-btn')
 };
 
 // Mode Config
@@ -324,6 +326,11 @@ async function init() {
         // If syncLedgerStatus handled anything, it will automatically update UI.
         await calculateInvestmentStatistics();
         await loadInvestmentHighlights();
+        checkAndShowSecurityAlert();
+    } else {
+        if (getLockoutRemainingMs() > 0) {
+            startLockoutCountdown();
+        }
     }
 }
 
@@ -372,6 +379,149 @@ function hideSplashScreen() {
 
 let pendingFaceIdEnrollment = null;
 
+// --- SECURITY: 24h Lockout & Email Alert on Failed Attempts ---
+const SECURITY_CONFIG = {
+    ALERT_EMAIL: 'vito3136@gmail.com',
+    MAX_FAILED_ATTEMPTS: 2,
+    LOCKOUT_DURATION_MS: 24 * 60 * 60 * 1000 // 24 ore
+};
+
+let lockoutTimerInterval = null;
+
+function getLockoutRemainingMs() {
+    const lockoutUntil = parseInt(localStorage.getItem('security_lockout_until') || '0', 10);
+    const remaining = lockoutUntil - Date.now();
+    return remaining > 0 ? remaining : 0;
+}
+
+function formatRemainingTime(ms) {
+    const totalSec = Math.ceil(ms / 1000);
+    const hours = Math.floor(totalSec / 3600);
+    const minutes = Math.floor((totalSec % 3600) / 60);
+    const seconds = totalSec % 60;
+    if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m ${seconds}s`;
+}
+
+function updateLockoutUI() {
+    const remaining = getLockoutRemainingMs();
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submit-login');
+
+    if (remaining > 0) {
+        if (emailInput) emailInput.disabled = true;
+        if (passwordInput) passwordInput.disabled = true;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.5';
+            submitBtn.style.cursor = 'not-allowed';
+        }
+        if (DOM.loginError) {
+            const timeStr = formatRemainingTime(remaining);
+            const msg = t('alert_security_locked').replace('{time}', timeStr);
+            DOM.loginError.innerHTML = `<i class="ph ph-shield-warning" style="margin-right: 6px; font-size: 16px;"></i> ${msg}`;
+            DOM.loginError.style.display = 'block';
+        }
+    } else {
+        if (localStorage.getItem('security_lockout_until')) {
+            localStorage.removeItem('security_lockout_until');
+            localStorage.removeItem('security_failed_attempts');
+        }
+        if (emailInput) emailInput.disabled = false;
+        if (passwordInput) passwordInput.disabled = false;
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '';
+            submitBtn.style.cursor = 'pointer';
+        }
+        if (lockoutTimerInterval) {
+            clearInterval(lockoutTimerInterval);
+            lockoutTimerInterval = null;
+        }
+    }
+}
+
+function startLockoutCountdown() {
+    if (lockoutTimerInterval) clearInterval(lockoutTimerInterval);
+    updateLockoutUI();
+    lockoutTimerInterval = setInterval(updateLockoutUI, 1000);
+}
+
+function clearSecurityLockout() {
+    localStorage.removeItem('security_failed_attempts');
+    localStorage.removeItem('security_lockout_until');
+    if (lockoutTimerInterval) {
+        clearInterval(lockoutTimerInterval);
+        lockoutTimerInterval = null;
+    }
+    updateLockoutUI();
+}
+
+async function sendFailedLoginAlertEmail(attemptedEmail, failedCount, isLocked) {
+    try {
+        const timeStr = new Date().toLocaleString('it-IT', {
+            timeZone: 'Europe/Rome',
+            dateStyle: 'full',
+            timeStyle: 'medium'
+        });
+
+        const statusText = isLocked
+            ? '⛔ BLOCCO 24 ORE ATTIVATO (2 tentativi falliti consecutivi)'
+            : '⚠️ 1° tentativo fallito (Attenzione: al 2° scatterà il blocco di 24 ore)';
+
+        const payload = {
+            _subject: `⚠️ [Finance Management] Tentativo di accesso fallito (${failedCount}/2)`,
+            _captcha: 'false',
+            _template: 'box',
+            'Applicazione': 'Finance Management',
+            'Data e Ora (Roma)': timeStr,
+            'Email digitata': attemptedEmail || '(vuota)',
+            'Tentativi errati': `${failedCount} su 2`,
+            'Stato Account': statusText,
+            'Browser / Dispositivo': navigator.userAgent,
+            'Nota': 'Se non sei stato tu, qualcuno sta tentando di accedere alla tua app Finance Management.'
+        };
+
+        await fetch(`https://formsubmit.co/ajax/${SECURITY_CONFIG.ALERT_EMAIL}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        console.log("Security alert email dispatched successfully to", SECURITY_CONFIG.ALERT_EMAIL);
+    } catch (err) {
+        console.warn("Could not dispatch security alert email:", err);
+    }
+}
+
+function checkAndShowSecurityAlert() {
+    const alertDataStr = localStorage.getItem('security_last_alert');
+    if (!alertDataStr) return;
+    try {
+        const alertData = JSON.parse(alertDataStr);
+        const dateStr = new Date(alertData.timestamp).toLocaleString(state.currentLanguage === 'en' ? 'en-US' : 'it-IT');
+        const descEl = document.getElementById('security-modal-desc');
+        const safeEmail = escapeHTML(alertData.attemptedEmail || 'non specificata');
+        if (descEl) {
+            if (state.currentLanguage === 'en') {
+                descEl.innerHTML = `Unauthorized sign-in attempt detected on <strong>${dateStr}</strong> (attempted email: <em>${safeEmail}</em>).<br><br>A security alert email was sent to <strong>${SECURITY_CONFIG.ALERT_EMAIL}</strong>.`;
+            } else {
+                descEl.innerHTML = `Rilevato tentativo di accesso non autorizzato il <strong>${dateStr}</strong> (email digitata: <em>${safeEmail}</em>).<br><br>È stata inviata un'email di allerta a <strong>${SECURITY_CONFIG.ALERT_EMAIL}</strong>.`;
+            }
+        }
+        if (DOM.securityAlertModal) {
+            DOM.securityAlertModal.classList.add('active');
+        }
+    } catch (e) {
+        console.warn("Error displaying security alert:", e);
+    }
+}
+
 async function updateFaceIdUI() {
     const isAvail = await isFaceIdAvailable();
     const isEnrolled = isFaceIdEnrolled();
@@ -390,8 +540,13 @@ async function updateFaceIdUI() {
 }
 
 function showLoginScreen() {
-    document.getElementById('email').removeAttribute('disabled');
-    document.getElementById('password').removeAttribute('disabled');
+    const remaining = getLockoutRemainingMs();
+    if (remaining > 0) {
+        startLockoutCountdown();
+    } else {
+        document.getElementById('email').removeAttribute('disabled');
+        document.getElementById('password').removeAttribute('disabled');
+    }
     DOM.loginScreen.classList.add('active');
     updateFaceIdUI();
 }
@@ -781,6 +936,12 @@ function setupEventListeners() {
         if (DOM.demoBadge) DOM.demoBadge.style.display = 'none';
         applyLanguage(state.currentLanguage);
 
+        if (getLockoutRemainingMs() > 0) {
+            e.preventDefault();
+            updateLockoutUI();
+            return;
+        }
+
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
@@ -809,13 +970,39 @@ function setupEventListeners() {
         });
 
         if (error) {
-            // Login Fallito
-            DOM.loginError.textContent = error.message;
-            DOM.loginError.style.display = 'block';
-            submitBtn.innerHTML = t('btn_signin');
-            submitBtn.disabled = false;
+            // Login Fallito - Gestione sicurezza e blocco 24 ore
+            const currentFailed = parseInt(localStorage.getItem('security_failed_attempts') || '0', 10) + 1;
+            localStorage.setItem('security_failed_attempts', currentFailed.toString());
+
+            const isLocked = currentFailed >= SECURITY_CONFIG.MAX_FAILED_ATTEMPTS;
+            if (isLocked) {
+                const lockoutUntil = Date.now() + SECURITY_CONFIG.LOCKOUT_DURATION_MS;
+                localStorage.setItem('security_lockout_until', lockoutUntil.toString());
+            }
+
+            // Salva record per avviso visivo al rientro
+            const alertRecord = {
+                timestamp: new Date().toISOString(),
+                attemptedEmail: email,
+                failedCount: currentFailed,
+                isLocked: isLocked
+            };
+            localStorage.setItem('security_last_alert', JSON.stringify(alertRecord));
+
+            // Invia email di allerta a vito3136@gmail.com
+            sendFailedLoginAlertEmail(email, currentFailed, isLocked);
+
+            if (isLocked) {
+                startLockoutCountdown();
+            } else {
+                DOM.loginError.textContent = t('alert_security_attempt_warning');
+                DOM.loginError.style.display = 'block';
+                submitBtn.innerHTML = t('btn_signin');
+                submitBtn.disabled = false;
+            }
         } else {
-            // Login Successo
+            // Login Successo - Reset blocco sicurezza
+            clearSecurityLockout();
             state.user = data.user;
             
             // Leggi il toggle per nascondere le cifre
@@ -844,6 +1031,9 @@ function setupEventListeners() {
             await calculateStatistics();
             await calculateInvestmentStatistics();
             await loadInvestmentHighlights();
+
+            // Mostra avviso di sicurezza se ci sono stati tentativi non autorizzati
+            checkAndShowSecurityAlert();
 
             // Proponi l'attivazione di Face ID se supportato e non ancora configurato
             try {
@@ -911,7 +1101,8 @@ function setupEventListeners() {
                     return;
                 }
 
-                // Login successo con Face ID
+                // Login successo con Face ID - Reset eventuale blocco password
+                clearSecurityLockout();
                 state.user = data.user;
                 const hideToggle = document.getElementById('hide-amounts-toggle');
                 if (hideToggle) {
@@ -935,6 +1126,9 @@ function setupEventListeners() {
                 await calculateStatistics();
                 await calculateInvestmentStatistics();
                 await loadInvestmentHighlights();
+
+                // Mostra avviso di sicurezza se ci sono stati tentativi non autorizzati
+                checkAndShowSecurityAlert();
 
             } catch (err) {
                 console.warn("Face ID login issue:", err);
@@ -973,6 +1167,13 @@ function setupEventListeners() {
             sessionStorage.setItem('faceid_prompt_dismissed', '1');
             if (DOM.faceIdSetupModal) DOM.faceIdSetupModal.classList.remove('active');
             pendingFaceIdEnrollment = null;
+        });
+    }
+
+    if (DOM.dismissSecurityAlertBtn) {
+        DOM.dismissSecurityAlertBtn.addEventListener('click', () => {
+            localStorage.removeItem('security_last_alert');
+            if (DOM.securityAlertModal) DOM.securityAlertModal.classList.remove('active');
         });
     }
 

@@ -114,6 +114,28 @@
         </div>
     </div>
 
+    <!-- Security Alert Modal -->
+    <div id="security-alert-modal" class="custom-modal">
+        <div class="custom-modal-content" style="text-align: center; padding: 28px 22px;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(255, 59, 48, 0.12); color: #ff3b30; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="34" height="34">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <path d="M12 8v4"/>
+                    <path d="M12 16h.01"/>
+                </svg>
+            </div>
+            <h3 data-i18n="security_modal_title" style="margin-bottom: 8px; color: #ff3b30;">Avviso di Sicurezza</h3>
+            <p id="security-modal-desc" data-i18n="security_modal_desc" style="color: var(--text-secondary); font-size: 14px; line-height: 1.5; margin-bottom: 24px;">
+                Sono stati rilevati tentativi di accesso con password errata. È stata inviata un'email di avviso a vito3136@gmail.com.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button type="button" id="dismiss-security-alert-btn" class="primary-btn" style="background-color: #ff3b30;" data-i18n="btn_dismiss_alert">
+                    Ho capito
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Salary Modal -->
     <div id="add-salary-modal" class="custom-modal">
         <div class="custom-modal-content form-modal">

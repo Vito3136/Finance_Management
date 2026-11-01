@@ -196,7 +196,12 @@ export const translations = {
         alert_movimento_updated: "Movimento aggiornato con successo!",
         alert_faceid_enabled: "Face ID attivato con successo su questo dispositivo!",
         alert_faceid_disabled: "Face ID disattivato da questo dispositivo.",
-        alert_faceid_failed: "Verifica Face ID non riuscita o annullata."
+        alert_faceid_failed: "Verifica Face ID non riuscita o annullata.",
+        security_modal_title: "Avviso di Sicurezza",
+        security_modal_desc: "Sono stati rilevati tentativi di accesso con password errata. È stata inviata un'email di avviso a vito3136@gmail.com.",
+        btn_dismiss_alert: "Ho capito",
+        alert_security_attempt_warning: "Credenziali non valide. Attenzione: tentativo 1 di 2. Al prossimo errore l'accesso con password verrà bloccato per 24 ore.",
+        alert_security_locked: "Accesso con password bloccato per 24 ore (2 tentativi falliti). Riprova tra {time}. Puoi comunque accedere subito con Face ID."
     },
     en: {
         // App / Meta
@@ -395,6 +400,11 @@ export const translations = {
         alert_movimento_updated: "Movement updated successfully!",
         alert_faceid_enabled: "Face ID enabled successfully on this device!",
         alert_faceid_disabled: "Face ID disabled on this device.",
-        alert_faceid_failed: "Face ID verification failed or canceled."
+        alert_faceid_failed: "Face ID verification failed or canceled.",
+        security_modal_title: "Security Notice",
+        security_modal_desc: "Failed password login attempts were detected. A security alert email was sent to vito3136@gmail.com.",
+        btn_dismiss_alert: "Dismiss",
+        alert_security_attempt_warning: "Invalid credentials. Warning: attempt 1 of 2. Password sign-in will be locked for 24 hours on the next failure.",
+        alert_security_locked: "Password sign-in is locked for 24 hours (2 failed attempts). Try again in {time}. You can still sign in immediately with Face ID."
     }
 };
