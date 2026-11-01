@@ -462,40 +462,36 @@ function clearSecurityLockout() {
 
 async function sendFailedLoginAlertEmail(attemptedEmail, failedCount, isLocked) {
     try {
-        const timeStr = new Date().toLocaleString('it-IT', {
-            timeZone: 'Europe/Rome',
-            dateStyle: 'full',
-            timeStyle: 'medium'
+        // 1. Invoca la Edge Function nativa di Supabase (che invia l'email tramite Resend API)
+        const { data, error } = await rawSupabase.functions.invoke('security-alert', {
+            body: {
+                attemptedEmail: attemptedEmail || '',
+                failedCount: failedCount,
+                isLocked: isLocked,
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            }
         });
 
-        const statusText = isLocked
-            ? '⛔ BLOCCO 24 ORE ATTIVATO (2 tentativi falliti consecutivi)'
-            : '⚠️ 1° tentativo fallito (Attenzione: al 2° scatterà il blocco di 24 ore)';
+        if (error) {
+            console.warn("Supabase Edge Function alert notice:", error);
+        } else {
+            console.log("Supabase security alert sent via Resend:", data);
+        }
 
-        const payload = {
-            _subject: `⚠️ [Finance Management] Tentativo di accesso fallito (${failedCount}/2)`,
-            _captcha: 'false',
-            _template: 'box',
-            'Applicazione': 'Finance Management',
-            'Data e Ora (Roma)': timeStr,
-            'Email digitata': attemptedEmail || '(vuota)',
-            'Tentativi errati': `${failedCount} su 2`,
-            'Stato Account': statusText,
-            'Browser / Dispositivo': navigator.userAgent,
-            'Nota': 'Se non sei stato tu, qualcuno sta tentando di accedere alla tua app Finance Management.'
-        };
-
-        await fetch(`https://formsubmit.co/ajax/${SECURITY_CONFIG.ALERT_EMAIL}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-        console.log("Security alert email dispatched successfully to", SECURITY_CONFIG.ALERT_EMAIL);
+        // 2. Registra anche nella tabella security_logs su Supabase (se creata)
+        try {
+            await rawSupabase.from('security_logs').insert([{
+                attempted_email: attemptedEmail || '',
+                failed_count: failedCount,
+                is_locked: isLocked,
+                user_agent: navigator.userAgent
+            }]);
+        } catch (dbErr) {
+            console.warn("DB security log notice:", dbErr);
+        }
     } catch (err) {
-        console.warn("Could not dispatch security alert email:", err);
+        console.warn("Could not dispatch security alert:", err);
     }
 }
 
