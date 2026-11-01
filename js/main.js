@@ -383,8 +383,20 @@ let pendingFaceIdEnrollment = null;
 const SECURITY_CONFIG = {
     ALERT_EMAIL: 'vito3136@gmail.com',
     MAX_FAILED_ATTEMPTS: 2,
-    LOCKOUT_DURATION_MS: 24 * 60 * 60 * 1000 // 24 ore
+    LOCKOUT_DURATION_MS: 24 * 60 * 60 * 1000, // 24 ore
+    ATTEMPT_EXPIRY_MS: 60 * 60 * 1000 // 1 ora di validità per il singolo errore
 };
+
+function getFailedAttemptsCount() {
+    const lastFailedAt = parseInt(localStorage.getItem('security_last_failed_at') || '0', 10);
+    // Se è passata più di 1 ora dall'ultimo errore e non c'è un blocco attivo, azzera il conteggio
+    if (lastFailedAt && (Date.now() - lastFailedAt > SECURITY_CONFIG.ATTEMPT_EXPIRY_MS) && getLockoutRemainingMs() === 0) {
+        localStorage.removeItem('security_failed_attempts');
+        localStorage.removeItem('security_last_failed_at');
+        return 0;
+    }
+    return parseInt(localStorage.getItem('security_failed_attempts') || '0', 10);
+}
 
 let lockoutTimerInterval = null;
 
@@ -429,6 +441,7 @@ function updateLockoutUI() {
         if (localStorage.getItem('security_lockout_until')) {
             localStorage.removeItem('security_lockout_until');
             localStorage.removeItem('security_failed_attempts');
+            localStorage.removeItem('security_last_failed_at');
         }
         if (emailInput) emailInput.disabled = false;
         if (passwordInput) passwordInput.disabled = false;
@@ -452,6 +465,7 @@ function startLockoutCountdown() {
 
 function clearSecurityLockout() {
     localStorage.removeItem('security_failed_attempts');
+    localStorage.removeItem('security_last_failed_at');
     localStorage.removeItem('security_lockout_until');
     if (lockoutTimerInterval) {
         clearInterval(lockoutTimerInterval);
@@ -966,13 +980,17 @@ function setupEventListeners() {
         });
 
         if (error) {
-            // Login Fallito - Gestione sicurezza e blocco 24 ore
-            const currentFailed = parseInt(localStorage.getItem('security_failed_attempts') || '0', 10) + 1;
+            // Login Fallito - Gestione sicurezza e blocco 24 ore con scadenza errore singolo a 1 ora
+            const previousFailed = getFailedAttemptsCount();
+            const currentFailed = previousFailed + 1;
+            const now = Date.now();
+
             localStorage.setItem('security_failed_attempts', currentFailed.toString());
+            localStorage.setItem('security_last_failed_at', now.toString());
 
             const isLocked = currentFailed >= SECURITY_CONFIG.MAX_FAILED_ATTEMPTS;
             if (isLocked) {
-                const lockoutUntil = Date.now() + SECURITY_CONFIG.LOCKOUT_DURATION_MS;
+                const lockoutUntil = now + SECURITY_CONFIG.LOCKOUT_DURATION_MS;
                 localStorage.setItem('security_lockout_until', lockoutUntil.toString());
             }
 
