@@ -15,13 +15,16 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.png">
 
-    <link rel="stylesheet" href="./css/style.css?v=49">
+    <link rel="stylesheet" href="./css/style.css?v=50">
 
     <!-- Phosphor Icons for SVG icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -366,6 +369,43 @@
         </div>
     </div>
 
+    <!-- Manage RAL Increases Modal -->
+    <div id="ral-modal" class="custom-modal">
+        <div class="custom-modal-content form-modal" style="max-height: 85vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <h3 data-i18n="modal_ral_title">Storico Aumenti RAL Lorda</h3>
+                <button type="button" id="close-ral-modal" class="icon-btn close-btn">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            
+            <form id="add-ral-form" style="margin-bottom: 16px; width: 100%; box-sizing: border-box;">
+                <div class="input-group">
+                    <label for="ral-effective-date" data-i18n="label_ral_date">Mese e Anno di decorrenza</label>
+                    <input type="month" id="ral-effective-date" required>
+                </div>
+                <div class="input-group">
+                    <label for="ral-amount" data-i18n="label_ral_amount">Nuova RAL Lorda (€)</label>
+                    <input type="number" id="ral-amount" step="100" min="0" required placeholder="es. 32000" data-i18n-placeholder="placeholder_ral_amount">
+                </div>
+                <div class="input-group">
+                    <label for="ral-note" data-i18n="label_ral_note">Nota (Opzionale)</label>
+                    <input type="text" id="ral-note" placeholder="es. Scatto contrattuale" data-i18n-placeholder="placeholder_ral_note">
+                </div>
+                <button type="submit" class="primary-btn" id="btn-save-ral" style="margin-top: 12px; padding: 12px;" data-i18n="btn_add_ral">
+                    + Registra Aumento RAL
+                </button>
+            </form>
+
+            <div style="flex: 1; overflow-y: auto; max-height: 40vh; padding-right: 4px;">
+                <h4 style="font-size: 13px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px;" data-i18n="section_ral_history">Storico Scatti Registrati</h4>
+                <div id="ral-history-list" class="suggestions-manage-list">
+                    <!-- Elementi caricati dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Top Navigation Bar -->
     <nav class="top-bar">
         <button id="menu-btn" class="icon-btn" aria-label="Menu">
@@ -636,57 +676,137 @@
 
         <!-- Statistics Container -->
         <div id="statistics-container" class="mode-container">
-            <h3 class="section-title" data-i18n="section_statistics">Statistiche</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 class="section-title" style="margin-bottom: 0;" data-i18n="section_statistics">Statistiche</h3>
+                <div class="view-toggle" style="margin-bottom: 0;">
+                    <button type="button" id="toggle-stat-counters" class="toggle-btn active" data-i18n="tab_counters">Contatori</button>
+                    <button type="button" id="toggle-stat-charts" class="toggle-btn" data-i18n="tab_charts">Grafici</button>
+                </div>
+            </div>
             
-            <h4 class="statistics-subsection" data-i18n="section_global_totals"><i class="ph ph-globe" style="color: var(--primary-color);"></i> Totali Generali</h4>
-            <div class="widgets-grid" style="margin-bottom: 24px;">
-                <div class="widget widget-remaining">
-                    <h3 class="widget-value" id="stat-remaining-value">0.00</h3>
-                    <p class="widget-label" data-i18n="widget_remaining">RIMANENTI DA SPENDERE</p>
+            <!-- View 1: Contatori -->
+            <div id="stat-counters-view">
+                <h4 class="statistics-subsection" data-i18n="section_global_totals"><i class="ph ph-globe" style="color: var(--primary-color);"></i> Totali Generali</h4>
+                <div class="widgets-grid" style="margin-bottom: 24px;">
+                    <div class="widget widget-remaining">
+                        <h3 class="widget-value" id="stat-remaining-value">0.00</h3>
+                        <p class="widget-label" data-i18n="widget_remaining">RIMANENTI DA SPENDERE</p>
+                    </div>
+                    <div class="widget widget-spent">
+                        <h3 class="widget-value" id="stat-spent-value">0.00</h3>
+                        <p class="widget-label" data-i18n="widget_spent_total">TOTALE SPESI</p>
+                    </div>
+                    <div class="widget widget-saved">
+                        <h3 class="widget-value" id="stat-saved-value">0.00</h3>
+                        <p class="widget-label" data-i18n="widget_saved">RISPARMIATI TOTALE</p>
+                    </div>
+                    <div class="widget widget-gross">
+                        <h3 class="widget-value" id="stat-gross-value">0.00</h3>
+                        <p class="widget-label" data-i18n="widget_gross_total">LORDO TOTALE</p>
+                    </div>
                 </div>
-                <div class="widget widget-spent">
-                    <h3 class="widget-value" id="stat-spent-value">0.00</h3>
-                    <p class="widget-label" data-i18n="widget_spent_total">TOTALE SPESI</p>
+
+                <h4 class="statistics-subsection" data-i18n="section_reply_salary"><i class="ph ph-briefcase" style="color: #FF9500;"></i> Stipendio Reply</h4>
+                <div class="widgets-grid" style="margin-bottom: 24px;">
+                    <div class="widget widget-reply-gross">
+                        <h3 class="widget-value" id="stat-reply-gross-value">0.00</h3>
+                        <p class="widget-label" data-i18n="widget_reply_gross">LORDO STIPENDIO REPLY</p>
+                    </div>
+                    <div class="widget widget-reply-spendable">
+                        <h3 class="widget-value" id="stat-reply-spendable-value">0.00</h3>
+                        <p class="widget-label" data-i18n="widget_reply_spendable">TOTALE PER ME STIPENDIO REPLY</p>
+                    </div>
+                    <div class="widget widget-reply-saved">
+                        <h3 class="widget-value" id="stat-reply-saved-value">0.00</h3>
+                        <p class="widget-label" data-i18n="widget_reply_saved">RISPARMIATI STIPENDIO REPLY</p>
+                    </div>
                 </div>
-                <div class="widget widget-saved">
-                    <h3 class="widget-value" id="stat-saved-value">0.00</h3>
-                    <p class="widget-label" data-i18n="widget_saved">RISPARMIATI TOTALE</p>
-                </div>
-                <div class="widget widget-gross">
-                    <h3 class="widget-value" id="stat-gross-value">0.00</h3>
-                    <p class="widget-label" data-i18n="widget_gross_total">LORDO TOTALE</p>
+
+                <h4 class="statistics-subsection" data-i18n="section_various_accreditations"><i class="ph ph-gift" style="color: #AF52DE;"></i> Accrediti Vari</h4>
+                <div class="widgets-grid">
+                    <div class="widget widget-various-gross">
+                        <h3 class="widget-value" id="stat-various-gross-value">0.00</h3>
+                        <p class="widget-label" data-i18n="widget_various_gross">LORDO ACCREDITI VARI</p>
+                    </div>
+                    <div class="widget widget-various-spendable">
+                        <h3 class="widget-value" id="stat-various-spendable-value">0.00</h3>
+                        <p class="widget-label" data-i18n="widget_various_spendable">TOTALE PER ME ACCREDITI VARI</p>
+                    </div>
+                    <div class="widget widget-various-saved">
+                        <h3 class="widget-value" id="stat-various-saved-value">0.00</h3>
+                        <p class="widget-label" data-i18n="widget_various_saved">ACCREDITI VARI RISPARMIATI</p>
+                    </div>
                 </div>
             </div>
 
-            <h4 class="statistics-subsection" data-i18n="section_reply_salary"><i class="ph ph-briefcase" style="color: #FF9500;"></i> Stipendio Reply</h4>
-            <div class="widgets-grid" style="margin-bottom: 24px;">
-                <div class="widget widget-reply-gross">
-                    <h3 class="widget-value" id="stat-reply-gross-value">0.00</h3>
-                    <p class="widget-label" data-i18n="widget_reply_gross">LORDO STIPENDIO REPLY</p>
+            <!-- View 2: Grafici -->
+            <div id="stat-charts-view" style="display: none;">
+                <!-- Grafico 1: RAL Netta Annuale -->
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div class="chart-card-title">
+                            <i class="ph ph-money" style="color: #61bb61; font-size: 18px;"></i>
+                            <span data-i18n="chart_net_ral_title">RAL Netta Annuale</span>
+                        </div>
+                    </div>
+                    <div class="chart-container-box">
+                        <canvas id="chart-net-ral"></canvas>
+                    </div>
                 </div>
-                <div class="widget widget-reply-spendable">
-                    <h3 class="widget-value" id="stat-reply-spendable-value">0.00</h3>
-                    <p class="widget-label" data-i18n="widget_reply_spendable">TOTALE PER ME STIPENDIO REPLY</p>
-                </div>
-                <div class="widget widget-reply-saved">
-                    <h3 class="widget-value" id="stat-reply-saved-value">0.00</h3>
-                    <p class="widget-label" data-i18n="widget_reply_saved">RISPARMIATI STIPENDIO REPLY</p>
-                </div>
-            </div>
 
-            <h4 class="statistics-subsection" data-i18n="section_various_accreditations"><i class="ph ph-gift" style="color: #AF52DE;"></i> Accrediti Vari</h4>
-            <div class="widgets-grid">
-                <div class="widget widget-various-gross">
-                    <h3 class="widget-value" id="stat-various-gross-value">0.00</h3>
-                    <p class="widget-label" data-i18n="widget_various_gross">LORDO ACCREDITI VARI</p>
+                <!-- Grafico 2: Evoluzione RAL Lorda -->
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div class="chart-card-title">
+                            <i class="ph ph-chart-line-up" style="color: #AF52DE; font-size: 18px;"></i>
+                            <span data-i18n="chart_gross_ral_title">Evoluzione RAL Lorda</span>
+                        </div>
+                        <button type="button" id="btn-manage-ral" class="chart-action-btn" data-i18n="btn_manage_ral">
+                            <i class="ph ph-plus-circle"></i> Aumenti RAL
+                        </button>
+                    </div>
+                    <div class="chart-container-box">
+                        <canvas id="chart-gross-ral"></canvas>
+                    </div>
                 </div>
-                <div class="widget widget-various-spendable">
-                    <h3 class="widget-value" id="stat-various-spendable-value">0.00</h3>
-                    <p class="widget-label" data-i18n="widget_various_spendable">TOTALE PER ME ACCREDITI VARI</p>
+
+                <!-- Grafico 3: Confronto Lordo vs Netto -->
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div class="chart-card-title">
+                            <i class="ph ph-chart-bar" style="color: #007aff; font-size: 18px;"></i>
+                            <span data-i18n="chart_compare_ral_title">Confronto RAL Lorda vs Netta</span>
+                        </div>
+                    </div>
+                    <div class="chart-container-box">
+                        <canvas id="chart-compare-ral"></canvas>
+                    </div>
                 </div>
-                <div class="widget widget-various-saved">
-                    <h3 class="widget-value" id="stat-various-saved-value">0.00</h3>
-                    <p class="widget-label" data-i18n="widget_various_saved">ACCREDITI VARI RISPARMIATI</p>
+
+                <!-- Grafico 4: Cashflow Mensile -->
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div class="chart-card-title">
+                            <i class="ph ph-arrows-down-up" style="color: #FF9500; font-size: 18px;"></i>
+                            <span data-i18n="chart_cashflow_title">Cashflow Mensile (Entrate vs Spese)</span>
+                        </div>
+                    </div>
+                    <div class="chart-container-box">
+                        <canvas id="chart-cashflow"></canvas>
+                    </div>
+                </div>
+
+                <!-- Grafico 5: Risparmio Cumulato -->
+                <div class="chart-card">
+                    <div class="chart-card-header">
+                        <div class="chart-card-title">
+                            <i class="ph ph-piggy-bank" style="color: #34C759; font-size: 18px;"></i>
+                            <span data-i18n="chart_savings_growth_title">Patrimonio & Risparmio Cumulato</span>
+                        </div>
+                    </div>
+                    <div class="chart-container-box">
+                        <canvas id="chart-savings-growth"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -819,7 +939,7 @@
         </div>
     </main>
 
-    <script src="./js/main.js?v=49" type="module"></script>
+    <script src="./js/main.js?v=50" type="module"></script>
 </body>
 
 </html>

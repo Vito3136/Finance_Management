@@ -209,6 +209,11 @@ export function getInitialDemoData() {
             { id: 'demo-sug-4', user_id: 'demo-user-id', text: 'Bollette', created_at: new Date(currYear, 0, 4).toISOString() },
             { id: 'demo-sug-5', user_id: 'demo-user-id', text: 'Svago', created_at: new Date(currYear, 0, 5).toISOString() },
             { id: 'demo-sug-6', user_id: 'demo-user-id', text: 'Farmacia', created_at: new Date(currYear, 0, 6).toISOString() }
+        ],
+        ral_history: [
+            { id: 'demo-ral-1', user_id: 'demo-user-id', effective_date: `${currYear - 2}-01-01`, amount: 28000, note: 'Assunzione', created_at: new Date(currYear - 2, 0, 1).toISOString() },
+            { id: 'demo-ral-2', user_id: 'demo-user-id', effective_date: `${currYear - 1}-06-01`, amount: 31500, note: 'Scatto livello', created_at: new Date(currYear - 1, 5, 1).toISOString() },
+            { id: 'demo-ral-3', user_id: 'demo-user-id', effective_date: `${currYear}-01-01`, amount: 35000, note: 'Aumento contrattuale', created_at: new Date(currYear, 0, 1).toISOString() }
         ]
     };
 }

@@ -48,7 +48,16 @@ const state = {
         type: null,
         id: null
     },
-    expenseSuggestions: []
+    expenseSuggestions: [],
+    statTab: 'counters',
+    ralHistory: [],
+    charts: {
+        netRal: null,
+        grossRal: null,
+        compareRal: null,
+        cashflow: null,
+        savings: null
+    }
 };
 
 // DOM Elements
@@ -159,7 +168,21 @@ const DOM = {
     closeSuggestionsModal: document.getElementById('close-suggestions-modal'),
     addSuggestionForm: document.getElementById('add-suggestion-form'),
     newSuggestionInput: document.getElementById('new-suggestion-input'),
-    manageSuggestionsList: document.getElementById('manage-suggestions-list')
+    manageSuggestionsList: document.getElementById('manage-suggestions-list'),
+
+    // Statistics & RAL Elements
+    toggleStatCounters: document.getElementById('toggle-stat-counters'),
+    toggleStatCharts: document.getElementById('toggle-stat-charts'),
+    statCountersView: document.getElementById('stat-counters-view'),
+    statChartsView: document.getElementById('stat-charts-view'),
+    btnManageRal: document.getElementById('btn-manage-ral'),
+    ralModal: document.getElementById('ral-modal'),
+    closeRalModal: document.getElementById('close-ral-modal'),
+    addRalForm: document.getElementById('add-ral-form'),
+    ralEffectiveDate: document.getElementById('ral-effective-date'),
+    ralAmount: document.getElementById('ral-amount'),
+    ralNote: document.getElementById('ral-note'),
+    ralHistoryList: document.getElementById('ral-history-list')
 };
 
 // Mode Config
@@ -300,6 +323,8 @@ function applyLanguage(lang) {
         loadInvestmentHighlights();
         renderExpenseSuggestionsChips();
         renderSalarySuggestionChip();
+        renderRalHistoryList();
+        if (state.statTab === 'charts') renderAllStatisticsCharts();
         renderManageSuggestionsList();
     }
 }
@@ -341,6 +366,7 @@ async function init() {
         await calculateInvestmentStatistics();
         await loadInvestmentHighlights();
         await loadExpenseSuggestions();
+        await loadRalHistory();
         checkAndShowSecurityAlert();
     } else {
         if (getLockoutRemainingMs() > 0) {
@@ -1066,6 +1092,7 @@ function setupEventListeners() {
             await calculateInvestmentStatistics();
             await loadInvestmentHighlights();
             await loadExpenseSuggestions();
+            await loadRalHistory();
 
             // Mostra avviso di sicurezza se ci sono stati tentativi non autorizzati
             checkAndShowSecurityAlert();
@@ -1162,6 +1189,7 @@ function setupEventListeners() {
                 await calculateInvestmentStatistics();
                 await loadInvestmentHighlights();
                 await loadExpenseSuggestions();
+                await loadRalHistory();
 
                 // Mostra avviso di sicurezza se ci sono stati tentativi non autorizzati
                 checkAndShowSecurityAlert();
@@ -1273,6 +1301,7 @@ function setupEventListeners() {
         await calculateInvestmentStatistics();
         await loadInvestmentHighlights();
         await loadExpenseSuggestions();
+        await loadRalHistory();
     }
 
     function exitDemoMode() {
@@ -1664,6 +1693,71 @@ function setupEventListeners() {
                     const text = DOM.newSuggestionInput.value;
                     await addExpenseSuggestion(text);
                     DOM.newSuggestionInput.value = '';
+                }
+            });
+        }
+    }
+
+    // Statistics Tab Switcher (Contatori / Grafici)
+    if (DOM.toggleStatCounters && DOM.toggleStatCharts) {
+        DOM.toggleStatCounters.addEventListener('click', () => {
+            if (state.statTab === 'counters') return;
+            if (navigator.vibrate) navigator.vibrate(25);
+            state.statTab = 'counters';
+            DOM.toggleStatCounters.classList.add('active');
+            DOM.toggleStatCharts.classList.remove('active');
+            if (DOM.statCountersView) DOM.statCountersView.style.display = 'block';
+            if (DOM.statChartsView) DOM.statChartsView.style.display = 'none';
+        });
+
+        DOM.toggleStatCharts.addEventListener('click', async () => {
+            if (state.statTab === 'charts') return;
+            if (navigator.vibrate) navigator.vibrate(25);
+            state.statTab = 'charts';
+            DOM.toggleStatCharts.classList.add('active');
+            DOM.toggleStatCounters.classList.remove('active');
+            if (DOM.statCountersView) DOM.statCountersView.style.display = 'none';
+            if (DOM.statChartsView) DOM.statChartsView.style.display = 'block';
+            renderAllStatisticsCharts();
+        });
+    }
+
+    // Manage RAL Increases Modal Logic
+    if (DOM.btnManageRal && DOM.ralModal && DOM.closeRalModal) {
+        DOM.btnManageRal.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            renderRalHistoryList();
+            const now = new Date();
+            const curYm = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            if (DOM.ralEffectiveDate) DOM.ralEffectiveDate.value = curYm;
+            DOM.ralModal.classList.add('active');
+        });
+
+        DOM.closeRalModal.addEventListener('click', () => {
+            DOM.ralModal.classList.remove('active');
+        });
+
+        if (DOM.addRalForm) {
+            DOM.addRalForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const date = DOM.ralEffectiveDate?.value;
+                const amount = DOM.ralAmount?.value;
+                const note = DOM.ralNote?.value;
+                if (!date || !amount) return;
+
+                const submitBtn = DOM.addRalForm.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = t('btn_saving');
+                }
+
+                await addRalIncrease(date, amount, note);
+
+                if (DOM.ralAmount) DOM.ralAmount.value = '';
+                if (DOM.ralNote) DOM.ralNote.value = '';
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = t('btn_add_ral');
                 }
             });
         }
@@ -2443,6 +2537,503 @@ async function deleteExpenseSuggestion(id) {
     }
 }
 
+// --- RAL History & Statistics Charts ---
+
+async function loadRalHistory() {
+    if (state.isDemo) {
+        state.ralHistory = (state.demoData && state.demoData.ral_history)
+            ? [...state.demoData.ral_history]
+            : [];
+        renderRalHistoryList();
+        if (state.statTab === 'charts') renderAllStatisticsCharts();
+        return;
+    }
+
+    if (!state.user) {
+        state.ralHistory = [];
+        renderRalHistoryList();
+        return;
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from('ral_history')
+            .select('*')
+            .order('effective_date', { ascending: true });
+
+        if (error) {
+            console.warn("Could not load ral_history from Supabase (using local cache):", error.message);
+            const cached = localStorage.getItem('ral_history_cache');
+            state.ralHistory = cached ? JSON.parse(cached) : [];
+        } else {
+            state.ralHistory = data || [];
+            localStorage.setItem('ral_history_cache', JSON.stringify(state.ralHistory));
+        }
+    } catch (e) {
+        console.warn("Error fetching ral_history:", e);
+        const cached = localStorage.getItem('ral_history_cache');
+        state.ralHistory = cached ? JSON.parse(cached) : [];
+    }
+
+    renderRalHistoryList();
+    if (state.statTab === 'charts') {
+        renderAllStatisticsCharts();
+    }
+}
+
+async function addRalIncrease(date, amount, note) {
+    if (!date || !amount || parseFloat(amount) <= 0) return;
+
+    let fullDate = date;
+    if (date.length === 7) {
+        fullDate = `${date}-01`;
+    }
+
+    const payload = {
+        effective_date: fullDate,
+        amount: parseFloat(amount),
+        note: (note || '').trim()
+    };
+
+    if (state.isDemo) {
+        const newRecord = {
+            id: `demo-ral-${Date.now()}`,
+            user_id: 'demo-user-id',
+            ...payload,
+            created_at: new Date().toISOString()
+        };
+        if (!state.demoData.ral_history) state.demoData.ral_history = [];
+        state.demoData.ral_history.push(newRecord);
+        state.demoData.ral_history.sort((a, b) => a.effective_date.localeCompare(b.effective_date));
+        state.ralHistory = state.demoData.ral_history;
+        renderRalHistoryList();
+        renderAllStatisticsCharts();
+        return;
+    }
+
+    if (state.user) {
+        try {
+            const { data, error } = await supabase
+                .from('ral_history')
+                .insert([{ user_id: state.user.id, ...payload }])
+                .select();
+
+            if (error) {
+                console.warn("Error inserting ral_history to Supabase, saving locally:", error.message);
+                state.ralHistory.push({ id: `local_ral_${Date.now()}`, user_id: state.user.id, ...payload });
+            } else if (data && data.length > 0) {
+                state.ralHistory.push(data[0]);
+            }
+        } catch (e) {
+            console.warn("Error inserting ral_history:", e);
+            state.ralHistory.push({ id: `local_ral_${Date.now()}`, user_id: state.user.id, ...payload });
+        }
+
+        state.ralHistory.sort((a, b) => a.effective_date.localeCompare(b.effective_date));
+        localStorage.setItem('ral_history_cache', JSON.stringify(state.ralHistory));
+        renderRalHistoryList();
+        renderAllStatisticsCharts();
+    }
+}
+
+async function deleteRalIncrease(id) {
+    if (state.isDemo) {
+        if (state.demoData && state.demoData.ral_history) {
+            state.demoData.ral_history = state.demoData.ral_history.filter(r => r.id !== id);
+            state.ralHistory = state.demoData.ral_history;
+        }
+        renderRalHistoryList();
+        renderAllStatisticsCharts();
+        return;
+    }
+
+    if (state.user) {
+        try {
+            const { error } = await supabase
+                .from('ral_history')
+                .delete()
+                .eq('id', id);
+
+            if (error) console.warn("Error deleting ral_history from Supabase:", error.message);
+        } catch (e) {
+            console.warn("Error deleting ral_history:", e);
+        }
+
+        state.ralHistory = state.ralHistory.filter(r => r.id !== id);
+        localStorage.setItem('ral_history_cache', JSON.stringify(state.ralHistory));
+        renderRalHistoryList();
+        renderAllStatisticsCharts();
+    }
+}
+
+function renderRalHistoryList() {
+    if (!DOM.ralHistoryList) return;
+    DOM.ralHistoryList.innerHTML = '';
+
+    if (!state.ralHistory || state.ralHistory.length === 0) {
+        DOM.ralHistoryList.innerHTML = `
+            <p style="text-align: center; color: var(--text-secondary); font-size: 14px; padding: 16px 0;" data-i18n="empty_ral_history">
+                ${t('empty_ral_history')}
+            </p>
+        `;
+        return;
+    }
+
+    const sorted = [...state.ralHistory].sort((a, b) => b.effective_date.localeCompare(a.effective_date));
+
+    sorted.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'ral-manage-item';
+
+        const [y, m] = item.effective_date.split('-');
+        const dateObj = new Date(parseInt(y, 10), parseInt(m, 10) - 1, 1);
+        const locale = state.currentLanguage === 'en' ? 'en-US' : 'it-IT';
+        let formattedMonth = dateObj.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
+        formattedMonth = formattedMonth.charAt(0).toUpperCase() + formattedMonth.slice(1);
+
+        row.innerHTML = `
+            <div class="ral-manage-item-info">
+                <span class="ral-manage-item-amount">${formatCurrency(item.amount)}</span>
+                <span class="ral-manage-item-date">${escapeHTML(formattedMonth)}</span>
+                ${item.note ? `<span class="ral-manage-item-note">${escapeHTML(item.note)}</span>` : ''}
+            </div>
+            <button type="button" class="delete-suggestion-btn" data-id="${item.id}" title="${t('confirm_delete')}">
+                <i class="ph ph-trash"></i>
+            </button>
+        `;
+
+        const delBtn = row.querySelector('.delete-suggestion-btn');
+        if (delBtn) {
+            delBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (confirm(t('confirm_delete_ral'))) {
+                    await deleteRalIncrease(item.id);
+                }
+            });
+        }
+
+        DOM.ralHistoryList.appendChild(row);
+    });
+}
+
+function getChartThemeOptions() {
+    const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const textColor = isDark ? '#aeaeb2' : '#8e8e93';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+    const tooltipBg = isDark ? '#2c2c2e' : '#1c1c1e';
+
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false,
+                labels: {
+                    color: textColor,
+                    font: { family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto', size: 12, weight: 600 },
+                    boxWidth: 12,
+                    boxHeight: 12,
+                    borderRadius: 3,
+                    useBorderRadius: true
+                }
+            },
+            tooltip: {
+                backgroundColor: tooltipBg,
+                titleColor: '#ffffff',
+                bodyColor: '#ffffff',
+                borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                borderWidth: 1,
+                padding: 10,
+                cornerRadius: 8,
+                callbacks: {
+                    label: function(context) {
+                        const val = context.parsed.y !== undefined ? context.parsed.y : context.parsed;
+                        const label = context.dataset.label ? `${context.dataset.label}: ` : '';
+                        return `${label}€ ${parseFloat(val || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { color: textColor, font: { size: 11, weight: 500 } }
+            },
+            y: {
+                grid: { color: gridColor },
+                ticks: {
+                    color: textColor,
+                    font: { size: 11 },
+                    callback: function(value) {
+                        if (Math.abs(value) >= 1000) {
+                            return '€ ' + (value / 1000).toFixed(value % 1000 === 0 ? 0 : 1) + 'k';
+                        }
+                        return '€ ' + value;
+                    }
+                }
+            }
+        }
+    };
+}
+
+async function renderAllStatisticsCharts() {
+    if (typeof Chart === 'undefined') {
+        console.warn("Chart.js not loaded yet");
+        return;
+    }
+
+    let salaries = [];
+    let various = [];
+    let expenses = [];
+    let ralIncreases = state.ralHistory || [];
+
+    if (state.isDemo) {
+        salaries = (state.demoData && state.demoData.salary_credits) ? state.demoData.salary_credits : [];
+        various = (state.demoData && state.demoData.various_accreditations) ? state.demoData.various_accreditations : [];
+        expenses = (state.demoData && state.demoData.expenses) ? state.demoData.expenses : [];
+    } else if (state.user) {
+        try {
+            const [salRes, varRes, expRes] = await Promise.all([
+                supabase.from('salary_credits').select('credit_date, total_amount').order('credit_date', { ascending: true }),
+                supabase.from('various_accreditations').select('credit_date, total_amount').order('credit_date', { ascending: true }),
+                supabase.from('expenses').select('expense_date, amount, is_handled').order('expense_date', { ascending: true })
+            ]);
+            salaries = salRes.data || [];
+            various = varRes.data || [];
+            expenses = expRes.data || [];
+        } catch (err) {
+            console.error("Error loading chart data:", err);
+        }
+    }
+
+    // Destroy existing Chart instances
+    Object.keys(state.charts).forEach(key => {
+        if (state.charts[key]) {
+            state.charts[key].destroy();
+            state.charts[key] = null;
+        }
+    });
+
+    const themeOpts = getChartThemeOptions();
+
+    // 1. CHART: RAL Netta Annuale
+    const netByYear = {};
+    salaries.forEach(item => {
+        if (!item.credit_date) return;
+        const year = item.credit_date.substring(0, 4);
+        netByYear[year] = (netByYear[year] || 0) + parseFloat(item.total_amount || 0);
+    });
+
+    const netYears = Object.keys(netByYear).sort();
+    const netValues = netYears.map(y => netByYear[y]);
+
+    const ctxNet = document.getElementById('chart-net-ral')?.getContext('2d');
+    if (ctxNet) {
+        const netOpts = JSON.parse(JSON.stringify(themeOpts));
+        state.charts.netRal = new Chart(ctxNet, {
+            type: 'bar',
+            data: {
+                labels: netYears.length > 0 ? netYears : ['-'],
+                datasets: [{
+                    label: t('chart_label_net'),
+                    data: netValues.length > 0 ? netValues : [0],
+                    backgroundColor: 'rgba(97, 187, 97, 0.85)',
+                    hoverBackgroundColor: '#61bb61',
+                    borderRadius: 8,
+                    maxBarThickness: 45
+                }]
+            },
+            options: netOpts
+        });
+    }
+
+    // 2. CHART: Evoluzione RAL Lorda nel Tempo
+    const sortedRal = [...ralIncreases].sort((a, b) => a.effective_date.localeCompare(b.effective_date));
+    const ralLabels = sortedRal.map(r => {
+        const [y, m] = r.effective_date.split('-');
+        const d = new Date(parseInt(y, 10), parseInt(m, 10) - 1, 1);
+        const loc = state.currentLanguage === 'en' ? 'en-US' : 'it-IT';
+        let str = d.toLocaleDateString(loc, { month: 'short', year: '2-digit' });
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    });
+    const ralValues = sortedRal.map(r => parseFloat(r.amount));
+
+    const ctxGross = document.getElementById('chart-gross-ral')?.getContext('2d');
+    if (ctxGross) {
+        const grossOpts = JSON.parse(JSON.stringify(themeOpts));
+        state.charts.grossRal = new Chart(ctxGross, {
+            type: 'line',
+            data: {
+                labels: ralLabels.length > 0 ? ralLabels : ['Nessun aumento'],
+                datasets: [{
+                    label: t('chart_label_gross'),
+                    data: ralValues.length > 0 ? ralValues : [0],
+                    borderColor: '#AF52DE',
+                    backgroundColor: 'rgba(175, 82, 222, 0.15)',
+                    fill: true,
+                    stepped: 'before',
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#AF52DE',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: grossOpts
+        });
+    }
+
+    // 3. CHART: Confronto RAL Lorda vs RAL Netta Annuale
+    const allYearsSet = new Set([...netYears]);
+    sortedRal.forEach(r => {
+        allYearsSet.add(r.effective_date.substring(0, 4));
+    });
+    const compareYears = Array.from(allYearsSet).sort();
+
+    const compareGrossVals = compareYears.map(year => {
+        const yearEnd = `${year}-12-31`;
+        const activeRaises = sortedRal.filter(r => r.effective_date <= yearEnd);
+        if (activeRaises.length === 0) return 0;
+        return parseFloat(activeRaises[activeRaises.length - 1].amount);
+    });
+    const compareNetVals = compareYears.map(year => netByYear[year] || 0);
+
+    const ctxCompare = document.getElementById('chart-compare-ral')?.getContext('2d');
+    if (ctxCompare) {
+        const compareOpts = JSON.parse(JSON.stringify(themeOpts));
+        compareOpts.plugins.legend.display = true;
+        state.charts.compareRal = new Chart(ctxCompare, {
+            type: 'bar',
+            data: {
+                labels: compareYears.length > 0 ? compareYears : ['-'],
+                datasets: [
+                    {
+                        label: t('chart_label_gross'),
+                        data: compareGrossVals.length > 0 ? compareGrossVals : [0],
+                        backgroundColor: 'rgba(175, 82, 222, 0.85)',
+                        hoverBackgroundColor: '#AF52DE',
+                        borderRadius: 6,
+                        maxBarThickness: 30
+                    },
+                    {
+                        label: t('chart_label_net'),
+                        data: compareNetVals.length > 0 ? compareNetVals : [0],
+                        backgroundColor: 'rgba(97, 187, 97, 0.85)',
+                        hoverBackgroundColor: '#61bb61',
+                        borderRadius: 6,
+                        maxBarThickness: 30
+                    }
+                ]
+            },
+            options: compareOpts
+        });
+    }
+
+    // 4. CHART: Cashflow Mensile (Entrate vs Spese)
+    const monthlyIncome = {};
+    const monthlyExpenses = {};
+
+    salaries.forEach(s => {
+        if (!s.credit_date) return;
+        const ym = s.credit_date.substring(0, 7);
+        monthlyIncome[ym] = (monthlyIncome[ym] || 0) + parseFloat(s.total_amount || 0);
+    });
+    various.forEach(v => {
+        if (!v.credit_date) return;
+        const ym = v.credit_date.substring(0, 7);
+        monthlyIncome[ym] = (monthlyIncome[ym] || 0) + parseFloat(v.total_amount || 0);
+    });
+    expenses.forEach(e => {
+        if (!e.expense_date || e.is_handled === false) return;
+        const ym = e.expense_date.substring(0, 7);
+        monthlyExpenses[ym] = (monthlyExpenses[ym] || 0) + parseFloat(e.amount || 0);
+    });
+
+    const allMonths = Array.from(new Set([...Object.keys(monthlyIncome), ...Object.keys(monthlyExpenses)])).sort();
+    const recentMonths = allMonths.slice(-8);
+
+    const cashflowLabels = recentMonths.map(ym => {
+        const [y, m] = ym.split('-');
+        const d = new Date(parseInt(y, 10), parseInt(m, 10) - 1, 1);
+        const loc = state.currentLanguage === 'en' ? 'en-US' : 'it-IT';
+        let str = d.toLocaleDateString(loc, { month: 'short' });
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    });
+    const incomeData = recentMonths.map(ym => monthlyIncome[ym] || 0);
+    const expenseData = recentMonths.map(ym => monthlyExpenses[ym] || 0);
+
+    const ctxCashflow = document.getElementById('chart-cashflow')?.getContext('2d');
+    if (ctxCashflow) {
+        const cfOpts = JSON.parse(JSON.stringify(themeOpts));
+        cfOpts.plugins.legend.display = true;
+        state.charts.cashflow = new Chart(ctxCashflow, {
+            type: 'bar',
+            data: {
+                labels: cashflowLabels.length > 0 ? cashflowLabels : ['-'],
+                datasets: [
+                    {
+                        label: t('chart_label_income'),
+                        data: incomeData.length > 0 ? incomeData : [0],
+                        backgroundColor: 'rgba(52, 199, 89, 0.85)',
+                        hoverBackgroundColor: '#34c759',
+                        borderRadius: 6,
+                        maxBarThickness: 26
+                    },
+                    {
+                        label: t('chart_label_expenses'),
+                        data: expenseData.length > 0 ? expenseData : [0],
+                        backgroundColor: 'rgba(255, 59, 48, 0.85)',
+                        hoverBackgroundColor: '#ff3b30',
+                        borderRadius: 6,
+                        maxBarThickness: 26
+                    }
+                ]
+            },
+            options: cfOpts
+        });
+    }
+
+    // 5. CHART: Crescita del Risparmio Cumulato
+    let runningSavings = 0;
+    const savingsTimeline = allMonths.map(ym => {
+        const inc = monthlyIncome[ym] || 0;
+        const exp = monthlyExpenses[ym] || 0;
+        runningSavings += (inc - exp);
+        return runningSavings;
+    });
+
+    const savingsLabels = allMonths.map(ym => {
+        const [y, m] = ym.split('-');
+        const d = new Date(parseInt(y, 10), parseInt(m, 10) - 1, 1);
+        const loc = state.currentLanguage === 'en' ? 'en-US' : 'it-IT';
+        let str = d.toLocaleDateString(loc, { month: 'short', year: '2-digit' });
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    });
+
+    const ctxSavings = document.getElementById('chart-savings-growth')?.getContext('2d');
+    if (ctxSavings) {
+        const savOpts = JSON.parse(JSON.stringify(themeOpts));
+        state.charts.savings = new Chart(ctxSavings, {
+            type: 'line',
+            data: {
+                labels: savingsLabels.length > 0 ? savingsLabels : ['-'],
+                datasets: [{
+                    label: t('chart_label_savings'),
+                    data: savingsTimeline.length > 0 ? savingsTimeline : [0],
+                    borderColor: '#34C759',
+                    backgroundColor: 'rgba(52, 199, 89, 0.15)',
+                    fill: true,
+                    tension: 0.35,
+                    borderWidth: 2.5,
+                    pointBackgroundColor: '#34C759',
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }]
+            },
+            options: savOpts
+        });
+    }
+}
+
 // Load Expenses
 async function loadExpenses() {
     if (!state.user) return;
@@ -2634,6 +3225,10 @@ async function calculateStatistics() {
         // Update Homepage Widgets
         updateEl('home-remaining-value', totalRemaining);
         updateEl('home-saved-value', totalSaved);
+
+        if (state.statTab === 'charts') {
+            renderAllStatisticsCharts();
+        }
 
     } catch (error) {
         console.error("Error calculating statistics:", error);
