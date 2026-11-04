@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finance-app-v46';
+const CACHE_NAME = 'finance-app-v47';
 const ASSETS = [
   '/',
   '/index.html',
@@ -11,13 +11,29 @@ const ASSETS = [
   '/icon.png'
 ];
 
-// Install event
+// Install event (Skip waiting immediately)
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
         return cache.addAll(ASSETS);
       })
+  );
+});
+
+// Activate event (Clean up old caches immediately and claim clients)
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
   );
 });
 

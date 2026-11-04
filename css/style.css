@@ -1158,41 +1158,59 @@ main {
 
 /* Manage Suggestions Modal & Form */
 .add-suggestion-form {
-    display: flex;
-    gap: 8px;
-    width: 100%;
-    box-sizing: border-box;
-    align-items: center;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 .new-suggestion-input {
-    flex: 1 1 0%;
+    flex: 1 1 0% !important;
     min-width: 0 !important;
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-color);
-    background: var(--bg-color);
-    color: var(--text-primary);
-    font-size: 14px;
-    box-sizing: border-box;
-    transition: border-color 0.2s ease;
+    width: 0 !important;
+    height: 42px !important;
+    padding: 0 12px !important;
+    border-radius: var(--radius-sm) !important;
+    border: 1px solid var(--border-color) !important;
+    background: var(--bg-color) !important;
+    color: var(--text-primary) !important;
+    font-size: 14px !important;
+    box-sizing: border-box !important;
+    transition: border-color 0.2s ease !important;
 }
 
 .new-suggestion-input:focus {
-    outline: none;
-    border-color: var(--accent-expense);
+    outline: none !important;
+    border-color: var(--accent-expense) !important;
 }
 
 .add-suggestion-btn {
-    flex-shrink: 0 !important;
-    white-space: nowrap;
-    padding: 10px 14px;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    font-weight: 600;
-    box-sizing: border-box;
-    cursor: pointer;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: max-content !important;
+    height: 42px !important;
+    padding: 0 14px !important;
+    border-radius: var(--radius-sm) !important;
+    border: none !important;
+    background-color: var(--accent-expense) !important;
+    color: #ffffff !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3) !important;
+    transition: opacity 0.2s ease, transform 0.1s ease !important;
+}
+
+.add-suggestion-btn:active {
+    opacity: 0.85 !important;
+    transform: scale(0.97) !important;
 }
 
 /* Manage Suggestions List */
