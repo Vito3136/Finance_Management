@@ -1137,7 +1137,7 @@ function setupEventListeners() {
             DOM.loginError.style.display = 'none';
 
             DOM.faceIdLoginBtn.disabled = true;
-            DOM.faceIdLoginBtn.innerHTML = `<i class="ph ph-spinner ph-spin"></i> ${t('btn_signing_in')}`;
+            DOM.faceIdLoginBtn.innerHTML = t('btn_signing_in');
 
             try {
                 const creds = await authenticateWithFaceId();

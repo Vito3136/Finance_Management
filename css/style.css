@@ -352,9 +352,9 @@ main {
 
 .view-toggle {
     display: flex;
-    background-color: var(--card-bg);
+    background-color: var(--surface-color);
     border-radius: 12px;
-    padding: 4px;
+    padding: 3px;
     border: 1px solid var(--border-color);
 }
 
@@ -362,18 +362,21 @@ main {
     flex: 1;
     background: transparent;
     border: none;
-    padding: 8px 12px;
-    border-radius: 8px;
-    color: var(--text-muted);
+    padding: 7px 14px;
+    border-radius: 9px;
+    color: var(--text-secondary);
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
+    white-space: nowrap;
 }
 
 .toggle-btn.active {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background-color: var(--accent-expense);
+    color: #ffffff !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 122, 255, 0.35);
 }
 
 .month-divider {
@@ -1296,21 +1299,24 @@ main {
 .chart-action-btn {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    background: rgba(175, 82, 222, 0.12);
-    color: #AF52DE;
-    border: 1px solid rgba(175, 82, 222, 0.3);
-    padding: 6px 12px;
+    justify-content: center;
+    background-color: #AF52DE;
+    color: #ffffff !important;
+    border: none;
+    padding: 6px 14px;
     border-radius: 14px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.2px;
     cursor: pointer;
+    box-shadow: 0 2px 8px rgba(175, 82, 222, 0.4);
+    white-space: nowrap;
     transition: all 0.2s ease;
 }
 
 .chart-action-btn:active {
     transform: scale(0.96);
-    background: rgba(175, 82, 222, 0.2);
+    opacity: 0.85;
 }
 
 .chart-container-box {
