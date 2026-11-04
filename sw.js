@@ -1,14 +1,14 @@
-const CACHE_NAME = 'finance-app-v47';
+const CACHE_NAME = 'finance-app-v48';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/css/style.css',
-  '/js/main.js',
-  '/js/translations.js',
-  '/js/demo_data.js',
-  '/js/faceid.js',
-  '/manifest.json',
-  '/icon.png'
+  './',
+  './index.html',
+  './css/style.css',
+  './js/main.js',
+  './js/translations.js',
+  './js/demo_data.js',
+  './js/faceid.js',
+  './manifest.json',
+  './icon.png'
 ];
 
 // Install event (Skip waiting immediately)
