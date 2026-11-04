@@ -201,6 +201,14 @@ export function getInitialDemoData() {
                 is_highlighted: true,
                 created_at: new Date(currYear, now.getMonth(), 20, 10, 0, 0).toISOString()
             }
+        ],
+        expense_suggestions: [
+            { id: 'demo-sug-1', user_id: 'demo-user-id', text: 'Spesa alimentare', created_at: new Date(currYear, 0, 1).toISOString() },
+            { id: 'demo-sug-2', user_id: 'demo-user-id', text: 'Ristorante', created_at: new Date(currYear, 0, 2).toISOString() },
+            { id: 'demo-sug-3', user_id: 'demo-user-id', text: 'Benzina', created_at: new Date(currYear, 0, 3).toISOString() },
+            { id: 'demo-sug-4', user_id: 'demo-user-id', text: 'Bollette', created_at: new Date(currYear, 0, 4).toISOString() },
+            { id: 'demo-sug-5', user_id: 'demo-user-id', text: 'Svago', created_at: new Date(currYear, 0, 5).toISOString() },
+            { id: 'demo-sug-6', user_id: 'demo-user-id', text: 'Farmacia', created_at: new Date(currYear, 0, 6).toISOString() }
         ]
     };
 }

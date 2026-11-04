@@ -230,6 +230,12 @@
                 <div class="input-group">
                     <label for="expense-desc" data-i18n="label_description">Descrizione</label>
                     <input type="text" id="expense-desc" required>
+                    <div class="suggestions-wrapper">
+                        <span class="suggestions-label" data-i18n="label_suggestions">Suggerimenti:</span>
+                        <div id="expense-suggestions-list" class="expense-suggestions-chips">
+                            <!-- Chips caricate dinamicamente -->
+                        </div>
+                    </div>
                 </div>
                 
                 <button type="submit" class="primary-btn btn-expense submit-btn" id="expense-submit-btn" data-i18n="btn_save_expense">
@@ -326,6 +332,31 @@
                     Salva Movimento
                 </button>
             </form>
+        </div>
+    </div>
+
+    <!-- Manage Suggestions Modal -->
+    <div id="suggestions-modal" class="custom-modal">
+        <div class="custom-modal-content form-modal" style="max-height: 85vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <h3 data-i18n="modal_suggestions_title">Gestione Suggerimenti</h3>
+                <button type="button" id="close-suggestions-modal" class="icon-btn close-btn">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <div style="margin-bottom: 12px;">
+                <form id="add-suggestion-form" style="display: flex; gap: 8px;">
+                    <input type="text" id="new-suggestion-input" required placeholder="Nuovo suggerimento (es. Spesa, Benzina...)" data-i18n-placeholder="placeholder_new_suggestion" style="flex: 1; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-primary); font-size: 14px;">
+                    <button type="submit" class="primary-btn" id="btn-add-suggestion" style="white-space: nowrap; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 14px;" data-i18n="btn_add_suggestion">
+                        + Aggiungi
+                    </button>
+                </form>
+            </div>
+            <div style="flex: 1; overflow-y: auto; max-height: 55vh; padding-right: 4px;">
+                <div id="manage-suggestions-list" class="suggestions-manage-list">
+                    <!-- Elementi caricati dinamicamente -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -438,6 +469,14 @@
                     <span class="toggle-slider"></span>
                 </label>
             </div>
+
+            <button type="button" id="menu-suggestions-btn" class="menu-item" style="width: 100%; border: none; background: transparent; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px; color: var(--text-secondary);">
+                    <i class="ph ph-sparkle"></i>
+                    <span data-i18n="menu_suggestions">Suggerimenti Spese</span>
+                </div>
+                <i class="ph ph-caret-right" style="color: var(--text-secondary); font-size: 14px;"></i>
+            </button>
 
             <button id="logout-btn" class="menu-item text-danger">
                 <i class="ph ph-sign-out"></i>

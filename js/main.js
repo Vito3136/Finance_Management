@@ -47,7 +47,8 @@ const state = {
         active: false,
         type: null,
         id: null
-    }
+    },
+    expenseSuggestions: []
 };
 
 // DOM Elements
@@ -148,7 +149,16 @@ const DOM = {
     faceIdToggle: document.getElementById('faceid-toggle'),
     faceIdMenuItem: document.getElementById('faceid-menu-item'),
     securityAlertModal: document.getElementById('security-alert-modal'),
-    dismissSecurityAlertBtn: document.getElementById('dismiss-security-alert-btn')
+    dismissSecurityAlertBtn: document.getElementById('dismiss-security-alert-btn'),
+
+    // Suggestions Elements
+    expenseSuggestionsList: document.getElementById('expense-suggestions-list'),
+    menuSuggestionsBtn: document.getElementById('menu-suggestions-btn'),
+    suggestionsModal: document.getElementById('suggestions-modal'),
+    closeSuggestionsModal: document.getElementById('close-suggestions-modal'),
+    addSuggestionForm: document.getElementById('add-suggestion-form'),
+    newSuggestionInput: document.getElementById('new-suggestion-input'),
+    manageSuggestionsList: document.getElementById('manage-suggestions-list')
 };
 
 // Mode Config
@@ -287,6 +297,8 @@ function applyLanguage(lang) {
         loadInvestments();
         loadInvestmentMovements();
         loadInvestmentHighlights();
+        renderExpenseSuggestionsChips();
+        renderManageSuggestionsList();
     }
 }
 
@@ -326,6 +338,7 @@ async function init() {
         // If syncLedgerStatus handled anything, it will automatically update UI.
         await calculateInvestmentStatistics();
         await loadInvestmentHighlights();
+        await loadExpenseSuggestions();
         checkAndShowSecurityAlert();
     } else {
         if (getLockoutRemainingMs() > 0) {
@@ -578,6 +591,9 @@ function resetEditMode(type) {
         document.getElementById('expense-submit-btn').textContent = t('btn_save_expense');
         const form = document.getElementById('add-expense-form');
         if(form) form.reset();
+        if (DOM.expenseSuggestionsList) {
+            DOM.expenseSuggestionsList.querySelectorAll('.suggestion-chip').forEach(c => c.classList.remove('active'));
+        }
     } else if (type === 'bonifico') {
         document.getElementById('bonifico-modal-title').textContent = t('modal_add_bonifico_title');
         document.getElementById('bonifico-submit-btn').textContent = t('btn_save_bonifico');
@@ -769,6 +785,7 @@ function setupEventListeners() {
                 document.getElementById('expense-amount').value = itemData.amount;
                 document.getElementById('expense-date').value = itemData.expense_date;
                 document.getElementById('expense-desc').value = itemData.description || '';
+                renderExpenseSuggestionsChips();
                 
                 if (DOM.addExpenseModal) DOM.addExpenseModal.classList.add('active');
             } else if (listType === 'bonifico') {
@@ -1045,6 +1062,7 @@ function setupEventListeners() {
             await calculateStatistics();
             await calculateInvestmentStatistics();
             await loadInvestmentHighlights();
+            await loadExpenseSuggestions();
 
             // Mostra avviso di sicurezza se ci sono stati tentativi non autorizzati
             checkAndShowSecurityAlert();
@@ -1140,6 +1158,7 @@ function setupEventListeners() {
                 await calculateStatistics();
                 await calculateInvestmentStatistics();
                 await loadInvestmentHighlights();
+                await loadExpenseSuggestions();
 
                 // Mostra avviso di sicurezza se ci sono stati tentativi non autorizzati
                 checkAndShowSecurityAlert();
@@ -1250,6 +1269,7 @@ function setupEventListeners() {
         await syncLedgerStatus();
         await calculateInvestmentStatistics();
         await loadInvestmentHighlights();
+        await loadExpenseSuggestions();
     }
 
     function exitDemoMode() {
@@ -1499,6 +1519,7 @@ function setupEventListeners() {
         const openExpenseModal = () => {
             if (navigator.vibrate) navigator.vibrate(50);
             document.getElementById('expense-date').valueAsDate = new Date();
+            renderExpenseSuggestionsChips();
             DOM.addExpenseModal.classList.add('active');
         };
 
@@ -1576,6 +1597,48 @@ function setupEventListeners() {
                 calculateStatistics(); // Update total spent
             }
         });
+
+        // Sync chip highlights when typing manually in description
+        const expenseDescInput = document.getElementById('expense-desc');
+        if (expenseDescInput) {
+            expenseDescInput.addEventListener('input', () => {
+                const val = expenseDescInput.value.trim().toLowerCase();
+                if (DOM.expenseSuggestionsList) {
+                    DOM.expenseSuggestionsList.querySelectorAll('.suggestion-chip').forEach(chip => {
+                        if (chip.getAttribute('data-text').trim().toLowerCase() === val) {
+                            chip.classList.add('active');
+                        } else {
+                            chip.classList.remove('active');
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    // Manage Suggestions Modal Logic
+    if (DOM.menuSuggestionsBtn && DOM.suggestionsModal && DOM.closeSuggestionsModal) {
+        DOM.menuSuggestionsBtn.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            toggleMenu(); // close side menu
+            renderManageSuggestionsList();
+            DOM.suggestionsModal.classList.add('active');
+        });
+
+        DOM.closeSuggestionsModal.addEventListener('click', () => {
+            DOM.suggestionsModal.classList.remove('active');
+        });
+
+        if (DOM.addSuggestionForm) {
+            DOM.addSuggestionForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (DOM.newSuggestionInput) {
+                    const text = DOM.newSuggestionInput.value;
+                    await addExpenseSuggestion(text);
+                    DOM.newSuggestionInput.value = '';
+                }
+            });
+        }
     }
 }
 
@@ -2066,6 +2129,236 @@ async function loadVariousAccreditations() {
                 <p>${t('empty_failed_load')}${error.message || JSON.stringify(error)}</p>
             </div>
         `;
+    }
+}
+
+// --- Expense Suggestions ---
+const DEFAULT_SUGGESTIONS = [
+    'Spesa alimentare',
+    'Ristorante',
+    'Benzina',
+    'Bollette',
+    'Svago',
+    'Farmacia'
+];
+
+async function loadExpenseSuggestions() {
+    if (state.isDemo) {
+        state.expenseSuggestions = (state.demoData && state.demoData.expense_suggestions)
+            ? [...state.demoData.expense_suggestions]
+            : DEFAULT_SUGGESTIONS.map((text, idx) => ({ id: `demo-sug-${idx}`, text }));
+        renderExpenseSuggestionsChips();
+        return;
+    }
+
+    if (!state.user) {
+        state.expenseSuggestions = [];
+        renderExpenseSuggestionsChips();
+        return;
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from('expense_suggestions')
+            .select('*')
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.warn("Could not load suggestions from Supabase (using local cache or defaults):", error.message);
+            const cached = localStorage.getItem('expense_suggestions_cache');
+            if (cached) {
+                state.expenseSuggestions = JSON.parse(cached);
+            } else {
+                state.expenseSuggestions = DEFAULT_SUGGESTIONS.map((text, idx) => ({
+                    id: `local_sug_${idx}`,
+                    text: text
+                }));
+            }
+        } else if (!data || data.length === 0) {
+            // First time setup for this user in DB: seed defaults
+            const toInsert = DEFAULT_SUGGESTIONS.map(text => ({
+                user_id: state.user.id,
+                text: text
+            }));
+            const { data: inserted, error: insErr } = await supabase
+                .from('expense_suggestions')
+                .insert(toInsert)
+                .select();
+
+            if (!insErr && inserted && inserted.length > 0) {
+                state.expenseSuggestions = inserted;
+            } else {
+                state.expenseSuggestions = toInsert.map((item, idx) => ({ id: `default_${idx}`, ...item }));
+            }
+            localStorage.setItem('expense_suggestions_cache', JSON.stringify(state.expenseSuggestions));
+        } else {
+            state.expenseSuggestions = data;
+            localStorage.setItem('expense_suggestions_cache', JSON.stringify(data));
+        }
+    } catch (e) {
+        console.warn("Error fetching expense suggestions:", e);
+        const cached = localStorage.getItem('expense_suggestions_cache');
+        state.expenseSuggestions = cached ? JSON.parse(cached) : DEFAULT_SUGGESTIONS.map((text, idx) => ({ id: `local_sug_${idx}`, text }));
+    }
+
+    renderExpenseSuggestionsChips();
+}
+
+function renderExpenseSuggestionsChips() {
+    if (!DOM.expenseSuggestionsList) return;
+    DOM.expenseSuggestionsList.innerHTML = '';
+
+    const currentDesc = (document.getElementById('expense-desc')?.value || '').trim().toLowerCase();
+
+    if (!state.expenseSuggestions || state.expenseSuggestions.length === 0) {
+        DOM.expenseSuggestionsList.style.display = 'none';
+        const wrapper = DOM.expenseSuggestionsList.closest('.suggestions-wrapper');
+        if (wrapper) wrapper.style.display = 'none';
+        return;
+    }
+
+    const wrapper = DOM.expenseSuggestionsList.closest('.suggestions-wrapper');
+    if (wrapper) wrapper.style.display = 'block';
+    DOM.expenseSuggestionsList.style.display = 'flex';
+
+    state.expenseSuggestions.forEach(sug => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'suggestion-chip';
+        chip.setAttribute('data-text', sug.text);
+        chip.textContent = sug.text;
+
+        if (sug.text.trim().toLowerCase() === currentDesc) {
+            chip.classList.add('active');
+        }
+
+        chip.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(25);
+            const descInput = document.getElementById('expense-desc');
+            if (descInput) {
+                descInput.value = sug.text;
+                descInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            DOM.expenseSuggestionsList.querySelectorAll('.suggestion-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+        });
+
+        DOM.expenseSuggestionsList.appendChild(chip);
+    });
+}
+
+function renderManageSuggestionsList() {
+    if (!DOM.manageSuggestionsList) return;
+    DOM.manageSuggestionsList.innerHTML = '';
+
+    if (!state.expenseSuggestions || state.expenseSuggestions.length === 0) {
+        DOM.manageSuggestionsList.innerHTML = `<p style="text-align: center; color: var(--text-secondary); font-size: 14px; padding: 20px 0;" data-i18n="no_suggestions">${t('no_suggestions')}</p>`;
+        return;
+    }
+
+    state.expenseSuggestions.forEach(sug => {
+        const item = document.createElement('div');
+        item.className = 'suggestion-manage-item';
+        item.innerHTML = `
+            <span>${escapeHTML(sug.text)}</span>
+            <button type="button" class="delete-suggestion-btn" data-id="${sug.id}" title="${t('confirm_delete')}">
+                <i class="ph ph-trash"></i>
+            </button>
+        `;
+
+        const delBtn = item.querySelector('.delete-suggestion-btn');
+        if (delBtn) {
+            delBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (confirm(t('confirm_delete_suggestion'))) {
+                    await deleteExpenseSuggestion(sug.id);
+                }
+            });
+        }
+
+        DOM.manageSuggestionsList.appendChild(item);
+    });
+}
+
+async function addExpenseSuggestion(text) {
+    text = (text || '').trim();
+    if (!text) return;
+
+    // Check duplicate
+    const exists = state.expenseSuggestions.some(s => s.text.toLowerCase() === text.toLowerCase());
+    if (exists) {
+        alert(t('alert_suggestion_exists'));
+        return;
+    }
+
+    if (state.isDemo) {
+        const newSug = {
+            id: `demo-sug-${Date.now()}`,
+            user_id: 'demo-user-id',
+            text: text,
+            created_at: new Date().toISOString()
+        };
+        if (!state.demoData.expense_suggestions) state.demoData.expense_suggestions = [];
+        state.demoData.expense_suggestions.push(newSug);
+        state.expenseSuggestions = state.demoData.expense_suggestions;
+        renderManageSuggestionsList();
+        renderExpenseSuggestionsChips();
+        return;
+    }
+
+    if (state.user) {
+        try {
+            const { data, error } = await supabase
+                .from('expense_suggestions')
+                .insert([{ user_id: state.user.id, text }])
+                .select();
+
+            if (error) {
+                console.warn("Could not insert suggestion to Supabase, saving locally:", error.message);
+                state.expenseSuggestions.push({ id: `local_sug_${Date.now()}`, text });
+            } else if (data && data.length > 0) {
+                state.expenseSuggestions.push(data[0]);
+            } else {
+                state.expenseSuggestions.push({ id: `local_sug_${Date.now()}`, text });
+            }
+        } catch (e) {
+            console.warn("Error inserting suggestion:", e);
+            state.expenseSuggestions.push({ id: `local_sug_${Date.now()}`, text });
+        }
+        localStorage.setItem('expense_suggestions_cache', JSON.stringify(state.expenseSuggestions));
+        renderManageSuggestionsList();
+        renderExpenseSuggestionsChips();
+    }
+}
+
+async function deleteExpenseSuggestion(id) {
+    if (state.isDemo) {
+        if (state.demoData && state.demoData.expense_suggestions) {
+            state.demoData.expense_suggestions = state.demoData.expense_suggestions.filter(s => s.id !== id);
+            state.expenseSuggestions = state.demoData.expense_suggestions;
+        }
+        renderManageSuggestionsList();
+        renderExpenseSuggestionsChips();
+        return;
+    }
+
+    if (state.user) {
+        try {
+            const { error } = await supabase
+                .from('expense_suggestions')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                console.warn("Could not delete from Supabase:", error.message);
+            }
+        } catch (e) {
+            console.warn("Error deleting suggestion:", e);
+        }
+        state.expenseSuggestions = state.expenseSuggestions.filter(s => s.id !== id);
+        localStorage.setItem('expense_suggestions_cache', JSON.stringify(state.expenseSuggestions));
+        renderManageSuggestionsList();
+        renderExpenseSuggestionsChips();
     }
 }
 
