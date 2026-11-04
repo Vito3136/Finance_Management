@@ -153,6 +153,7 @@ const DOM = {
 
     // Suggestions Elements
     expenseSuggestionsList: document.getElementById('expense-suggestions-list'),
+    salarySuggestionsList: document.getElementById('salary-suggestions-list'),
     menuSuggestionsBtn: document.getElementById('menu-suggestions-btn'),
     suggestionsModal: document.getElementById('suggestions-modal'),
     closeSuggestionsModal: document.getElementById('close-suggestions-modal'),
@@ -298,6 +299,7 @@ function applyLanguage(lang) {
         loadInvestmentMovements();
         loadInvestmentHighlights();
         renderExpenseSuggestionsChips();
+        renderSalarySuggestionChip();
         renderManageSuggestionsList();
     }
 }
@@ -766,6 +768,7 @@ function setupEventListeners() {
                 document.getElementById('salary-spendable').value = itemData.spendable_amount;
                 document.getElementById('salary-date').value = itemData.credit_date;
                 document.getElementById('salary-desc').value = itemData.description || '';
+                renderSalarySuggestionChip();
                 
                 const modal = document.getElementById('add-salary-modal');
                 if (modal) modal.classList.add('active');
@@ -1328,6 +1331,7 @@ function setupEventListeners() {
             if (navigator.vibrate) navigator.vibrate(50);
             // Default date to today
             document.getElementById('salary-date').valueAsDate = new Date();
+            renderSalarySuggestionChip();
             addSalaryModal.classList.add('active');
         };
 
@@ -1612,6 +1616,30 @@ function setupEventListeners() {
                         }
                     });
                 }
+            });
+        }
+
+        // Sync salary chip highlights and date changes
+        const salaryDescInput = document.getElementById('salary-desc');
+        if (salaryDescInput) {
+            salaryDescInput.addEventListener('input', () => {
+                const val = salaryDescInput.value.trim().toUpperCase();
+                if (DOM.salarySuggestionsList) {
+                    DOM.salarySuggestionsList.querySelectorAll('.suggestion-chip').forEach(chip => {
+                        if (chip.getAttribute('data-text') === val) {
+                            chip.classList.add('active');
+                        } else {
+                            chip.classList.remove('active');
+                        }
+                    });
+                }
+            });
+        }
+
+        const salaryDateInput = document.getElementById('salary-date');
+        if (salaryDateInput) {
+            salaryDateInput.addEventListener('change', () => {
+                renderSalarySuggestionChip();
             });
         }
     }
@@ -2259,6 +2287,45 @@ function renderExpenseSuggestionsChips() {
 
         DOM.expenseSuggestionsList.appendChild(chip);
     });
+}
+
+function renderSalarySuggestionChip() {
+    if (!DOM.salarySuggestionsList) return;
+    DOM.salarySuggestionsList.innerHTML = '';
+
+    const dateVal = document.getElementById('salary-date')?.value;
+    let targetDate = new Date();
+    if (dateVal) {
+        const [y, m, d] = dateVal.split('-').map(Number);
+        if (y && m) targetDate = new Date(y, m - 1, d || 1);
+    }
+
+    const locale = state.currentLanguage === 'en' ? 'en-US' : 'it-IT';
+    const monthName = targetDate.toLocaleDateString(locale, { month: 'long' }).toUpperCase();
+    const currentDesc = (document.getElementById('salary-desc')?.value || '').trim().toUpperCase();
+
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'suggestion-chip';
+    chip.setAttribute('data-text', monthName);
+    chip.textContent = monthName;
+
+    if (currentDesc === monthName) {
+        chip.classList.add('active');
+    }
+
+    chip.addEventListener('click', () => {
+        if (navigator.vibrate) navigator.vibrate(25);
+        const descInput = document.getElementById('salary-desc');
+        if (descInput) {
+            descInput.value = monthName;
+            descInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        DOM.salarySuggestionsList.querySelectorAll('.suggestion-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+    });
+
+    DOM.salarySuggestionsList.appendChild(chip);
 }
 
 function renderManageSuggestionsList() {

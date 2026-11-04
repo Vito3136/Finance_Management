@@ -1156,6 +1156,19 @@ main {
     box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
 }
 
+#salary-suggestions-list .suggestion-chip:hover {
+    border-color: #61bb61;
+    color: #61bb61;
+}
+
+#salary-suggestions-list .suggestion-chip.active {
+    background: #61bb61;
+    color: #ffffff;
+    border-color: #61bb61;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(97, 187, 97, 0.3);
+}
+
 /* Manage Suggestions Modal & Form */
 .add-suggestion-form {
     display: flex !important;

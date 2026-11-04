@@ -15,7 +15,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.png">
 
-    <link rel="stylesheet" href="./css/style.css?v=48">
+    <link rel="stylesheet" href="./css/style.css?v=49">
 
     <!-- Phosphor Icons for SVG icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -163,6 +163,12 @@
                 <div class="input-group">
                     <label for="salary-desc" data-i18n="label_description_opt">Descrizione (Opzionale)</label>
                     <input type="text" id="salary-desc" data-i18n-placeholder="placeholder_salary_desc" placeholder="es. Stipendio Ottobre">
+                    <div class="suggestions-wrapper">
+                        <span class="suggestions-label" data-i18n="label_suggestions">Suggerimenti:</span>
+                        <div id="salary-suggestions-list" class="expense-suggestions-chips">
+                            <!-- Chip del mese corrente -->
+                        </div>
+                    </div>
                 </div>
                 
                 <button type="submit" class="primary-btn btn-salary submit-btn" id="salary-submit-btn" data-i18n="btn_save_credit">
@@ -813,7 +819,7 @@
         </div>
     </main>
 
-    <script src="./js/main.js?v=48" type="module"></script>
+    <script src="./js/main.js?v=49" type="module"></script>
 </body>
 
 </html>
