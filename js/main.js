@@ -1748,16 +1748,20 @@ function setupEventListeners() {
                 const submitBtn = DOM.addRalForm.querySelector('button[type="submit"]');
                 if (submitBtn) {
                     submitBtn.disabled = true;
-                    submitBtn.textContent = t('btn_saving');
+                    submitBtn.innerHTML = t('btn_saving');
                 }
 
-                await addRalIncrease(date, amount, note);
+                if (navigator.vibrate) navigator.vibrate(40);
+                await Promise.all([
+                    addRalIncrease(date, amount, note),
+                    new Promise(res => setTimeout(res, 350))
+                ]);
 
                 if (DOM.ralAmount) DOM.ralAmount.value = '';
                 if (DOM.ralNote) DOM.ralNote.value = '';
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = t('btn_add_ral');
+                    submitBtn.innerHTML = t('btn_add_ral');
                 }
             });
         }
