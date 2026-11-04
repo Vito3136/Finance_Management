@@ -337,17 +337,17 @@
 
     <!-- Manage Suggestions Modal -->
     <div id="suggestions-modal" class="custom-modal">
-        <div class="custom-modal-content form-modal" style="max-height: 85vh; display: flex; flex-direction: column;">
+        <div class="custom-modal-content form-modal" style="max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;">
             <div class="modal-header">
                 <h3 data-i18n="modal_suggestions_title">Gestione Suggerimenti</h3>
                 <button type="button" id="close-suggestions-modal" class="icon-btn close-btn">
                     <i class="ph ph-x"></i>
                 </button>
             </div>
-            <div style="margin-bottom: 12px;">
-                <form id="add-suggestion-form" style="display: flex; gap: 8px;">
-                    <input type="text" id="new-suggestion-input" required placeholder="Nuovo suggerimento (es. Spesa, Benzina...)" data-i18n-placeholder="placeholder_new_suggestion" style="flex: 1; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-primary); font-size: 14px;">
-                    <button type="submit" class="primary-btn" id="btn-add-suggestion" style="white-space: nowrap; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 14px;" data-i18n="btn_add_suggestion">
+            <div style="margin-bottom: 12px; width: 100%;">
+                <form id="add-suggestion-form" class="add-suggestion-form">
+                    <input type="text" id="new-suggestion-input" class="new-suggestion-input" required placeholder="Nuovo suggerimento (es. Spesa, Benzina...)" data-i18n-placeholder="placeholder_new_suggestion">
+                    <button type="submit" class="primary-btn add-suggestion-btn" id="btn-add-suggestion" data-i18n="btn_add_suggestion">
                         + Aggiungi
                     </button>
                 </form>

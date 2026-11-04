@@ -2157,6 +2157,9 @@ async function loadExpenseSuggestions() {
         return;
     }
 
+    const seededKey = `expense_suggestions_seeded_${state.user.id}`;
+    const hasBeenSeeded = localStorage.getItem(seededKey) === 'true';
+
     try {
         const { data, error } = await supabase
             .from('expense_suggestions')
@@ -2168,37 +2171,48 @@ async function loadExpenseSuggestions() {
             const cached = localStorage.getItem('expense_suggestions_cache');
             if (cached) {
                 state.expenseSuggestions = JSON.parse(cached);
-            } else {
+            } else if (!hasBeenSeeded) {
                 state.expenseSuggestions = DEFAULT_SUGGESTIONS.map((text, idx) => ({
                     id: `local_sug_${idx}`,
                     text: text
                 }));
+            } else {
+                state.expenseSuggestions = [];
             }
         } else if (!data || data.length === 0) {
-            // First time setup for this user in DB: seed defaults
-            const toInsert = DEFAULT_SUGGESTIONS.map(text => ({
-                user_id: state.user.id,
-                text: text
-            }));
-            const { data: inserted, error: insErr } = await supabase
-                .from('expense_suggestions')
-                .insert(toInsert)
-                .select();
+            if (!hasBeenSeeded) {
+                // First time setup for this user in DB: seed defaults
+                localStorage.setItem(seededKey, 'true');
+                const toInsert = DEFAULT_SUGGESTIONS.map(text => ({
+                    user_id: state.user.id,
+                    text: text
+                }));
+                const { data: inserted, error: insErr } = await supabase
+                    .from('expense_suggestions')
+                    .insert(toInsert)
+                    .select();
 
-            if (!insErr && inserted && inserted.length > 0) {
-                state.expenseSuggestions = inserted;
+                if (!insErr && inserted && inserted.length > 0) {
+                    state.expenseSuggestions = inserted;
+                } else {
+                    state.expenseSuggestions = toInsert.map((item, idx) => ({ id: `default_${idx}`, ...item }));
+                }
+                localStorage.setItem('expense_suggestions_cache', JSON.stringify(state.expenseSuggestions));
             } else {
-                state.expenseSuggestions = toInsert.map((item, idx) => ({ id: `default_${idx}`, ...item }));
+                // User intentionally deleted all suggestions, keep it empty
+                state.expenseSuggestions = [];
+                localStorage.setItem('expense_suggestions_cache', JSON.stringify([]));
             }
-            localStorage.setItem('expense_suggestions_cache', JSON.stringify(state.expenseSuggestions));
         } else {
+            // Suggestions exist in DB, mark user as seeded so defaults won't re-seed if deleted
+            localStorage.setItem(seededKey, 'true');
             state.expenseSuggestions = data;
             localStorage.setItem('expense_suggestions_cache', JSON.stringify(data));
         }
     } catch (e) {
         console.warn("Error fetching expense suggestions:", e);
         const cached = localStorage.getItem('expense_suggestions_cache');
-        state.expenseSuggestions = cached ? JSON.parse(cached) : DEFAULT_SUGGESTIONS.map((text, idx) => ({ id: `local_sug_${idx}`, text }));
+        state.expenseSuggestions = cached ? JSON.parse(cached) : [];
     }
 
     renderExpenseSuggestionsChips();
