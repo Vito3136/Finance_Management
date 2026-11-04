@@ -25,7 +25,7 @@ export const translations = {
         view_home_title: "Gestione Spese",
         view_expense_title: "Cronologia Spese",
         view_statistics_title: "Statistiche",
-        view_investment_title: "Gestione Portafoglio",
+        view_investment_title: "Gestione Investimenti",
         view_salary_title: "Stipendi",
         view_various_title: "Accrediti Vari",
         view_transfers_title: "Bonifici in Entrata",

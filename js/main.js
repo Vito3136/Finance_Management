@@ -2003,8 +2003,21 @@ function updateUI() {
 
     // Update Menu Groups visibility
     const isInvestment = state.globalMode === 'investment';
-    document.getElementById('expense-menu-group').style.display = isInvestment ? 'none' : 'block';
-    document.getElementById('investment-menu-group').style.display = isInvestment ? 'block' : 'none';
+    const expenseMenuGroup = document.getElementById('expense-menu-group');
+    if (expenseMenuGroup) expenseMenuGroup.style.display = isInvestment ? 'none' : 'block';
+
+    const investmentMenuGroup = document.getElementById('investment-menu-group');
+    if (investmentMenuGroup) investmentMenuGroup.style.display = isInvestment ? 'block' : 'none';
+
+    const expenseExtraGroup = document.getElementById('expense-extra-menu-group');
+    if (expenseExtraGroup) expenseExtraGroup.style.display = isInvestment ? 'none' : 'block';
+
+    const investmentExtraGroup = document.getElementById('investment-extra-menu-group');
+    if (investmentExtraGroup) investmentExtraGroup.style.display = isInvestment ? 'block' : 'none';
+
+    if (DOM.menuSuggestionsBtn) {
+        DOM.menuSuggestionsBtn.style.display = isInvestment ? 'none' : 'flex';
+    }
 
     // Update active class on nav links
     DOM.navLinks.forEach(link => {

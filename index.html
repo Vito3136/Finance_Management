@@ -15,7 +15,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.png">
 
-    <link rel="stylesheet" href="./css/style.css?v=52">
+    <link rel="stylesheet" href="./css/style.css?v=53">
 
     <!-- Phosphor Icons for SVG icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -516,13 +516,19 @@
                 </label>
             </div>
 
-            <button type="button" id="menu-suggestions-btn" class="menu-item" style="width: 100%; border: none; background: transparent; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 12px; color: var(--text-secondary);">
-                    <i class="ph ph-sparkle"></i>
-                    <span data-i18n="menu_suggestions">Suggerimenti Spese</span>
-                </div>
-                <i class="ph ph-caret-right" style="color: var(--text-secondary); font-size: 14px;"></i>
-            </button>
+            <!-- Expense-specific items -->
+            <div id="expense-extra-menu-group">
+                <button type="button" id="menu-suggestions-btn" class="menu-item" style="width: 100%; border: none; background: transparent; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 12px; color: var(--text-secondary);">
+                        <i class="ph ph-sparkle"></i>
+                        <span data-i18n="menu_suggestions">Suggerimenti Spese</span>
+                    </div>
+                    <i class="ph ph-caret-right" style="color: var(--text-secondary); font-size: 14px;"></i>
+                </button>
+            </div>
+
+            <!-- Investment-specific items (placeholder for investment additions) -->
+            <div id="investment-extra-menu-group" style="display: none;"></div>
 
             <button id="logout-btn" class="menu-item text-danger">
                 <i class="ph ph-sign-out"></i>
@@ -939,7 +945,7 @@
         </div>
     </main>
 
-    <script src="./js/main.js?v=52" type="module"></script>
+    <script src="./js/main.js?v=53" type="module"></script>
 </body>
 
 </html>
