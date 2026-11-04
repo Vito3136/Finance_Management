@@ -210,6 +210,14 @@ export function getInitialDemoData() {
             { id: 'demo-sug-5', user_id: 'demo-user-id', text: 'Svago', created_at: new Date(currYear, 0, 5).toISOString() },
             { id: 'demo-sug-6', user_id: 'demo-user-id', text: 'Farmacia', created_at: new Date(currYear, 0, 6).toISOString() }
         ],
+        movement_suggestions: [
+            { id: 'demo-mov-sug-1', user_id: 'demo-user-id', text: 'Commissione acquisto titoli', created_at: new Date(currYear, 0, 1).toISOString() },
+            { id: 'demo-mov-sug-2', user_id: 'demo-user-id', text: 'Commissione ETF', created_at: new Date(currYear, 0, 2).toISOString() },
+            { id: 'demo-mov-sug-3', user_id: 'demo-user-id', text: 'Dividendo', created_at: new Date(currYear, 0, 3).toISOString() },
+            { id: 'demo-mov-sug-4', user_id: 'demo-user-id', text: 'Interessi', created_at: new Date(currYear, 0, 4).toISOString() },
+            { id: 'demo-mov-sug-5', user_id: 'demo-user-id', text: 'Imposta di bollo', created_at: new Date(currYear, 0, 5).toISOString() },
+            { id: 'demo-mov-sug-6', user_id: 'demo-user-id', text: 'Ritenuta fiscale', created_at: new Date(currYear, 0, 6).toISOString() }
+        ],
         ral_history: [
             { id: 'demo-ral-1', user_id: 'demo-user-id', effective_date: `${currYear - 2}-01-01`, amount: 28000, note: 'Assunzione', created_at: new Date(currYear - 2, 0, 1).toISOString() },
             { id: 'demo-ral-2', user_id: 'demo-user-id', effective_date: `${currYear - 1}-06-01`, amount: 31500, note: 'Scatto livello', created_at: new Date(currYear - 1, 5, 1).toISOString() },

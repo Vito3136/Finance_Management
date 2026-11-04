@@ -15,7 +15,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.png">
 
-    <link rel="stylesheet" href="./css/style.css?v=53">
+    <link rel="stylesheet" href="./css/style.css?v=54">
 
     <!-- Phosphor Icons for SVG icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -300,6 +300,12 @@
                 <div class="input-group">
                     <label for="investimento-desc" data-i18n="label_description">Descrizione</label>
                     <input type="text" id="investimento-desc" required>
+                    <div class="suggestions-wrapper" id="investment-suggestion-wrapper" style="display: none;">
+                        <span class="suggestions-label" data-i18n="label_suggestions">Suggerimenti:</span>
+                        <div id="investment-suggestions-list" class="expense-suggestions-chips">
+                            <!-- Chip caricata dinamicamente con l'ultima descrizione usata -->
+                        </div>
+                    </div>
                 </div>
                 <button type="submit" id="investimento-submit-btn" class="primary-btn submit-btn" style="background-color: #5856d6;" data-i18n="btn_save_investimento">
                     Salva Investimento
@@ -329,6 +335,12 @@
                 <div class="input-group">
                     <label for="movimento-desc" data-i18n="label_description">Descrizione</label>
                     <input type="text" id="movimento-desc" required>
+                    <div class="suggestions-wrapper" id="movement-suggestions-wrapper">
+                        <span class="suggestions-label" data-i18n="label_suggestions">Suggerimenti:</span>
+                        <div id="movement-suggestions-list" class="expense-suggestions-chips">
+                            <!-- Chips caricate dinamicamente -->
+                        </div>
+                    </div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
                     <span style="font-size: 14px; font-weight: 500;" data-i18n="label_highlight">Metti in evidenza</span>
@@ -363,6 +375,31 @@
             </div>
             <div style="flex: 1; overflow-y: auto; max-height: 55vh; padding-right: 4px;">
                 <div id="manage-suggestions-list" class="suggestions-manage-list">
+                    <!-- Elementi caricati dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Movement Suggestions Modal -->
+    <div id="movement-suggestions-modal" class="custom-modal">
+        <div class="custom-modal-content form-modal" style="max-height: 85vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <h3 data-i18n="modal_movement_suggestions_title">Gestione Suggerimenti Movimenti</h3>
+                <button type="button" id="close-movement-suggestions-modal" class="icon-btn close-btn">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+            <div style="margin-bottom: 16px; width: 100%; box-sizing: border-box;">
+                <form id="add-movement-suggestion-form" class="add-suggestion-form" style="display: flex; gap: 8px; width: 100%; box-sizing: border-box; align-items: center;">
+                    <input type="text" id="new-movement-suggestion-input" class="new-suggestion-input" required placeholder="es. Commissione, Dividendo..." data-i18n-placeholder="placeholder_new_movement_suggestion" style="flex: 1 1 0%; min-width: 0; width: 0; height: 42px; padding: 0 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-primary); font-size: 14px; box-sizing: border-box;">
+                    <button type="submit" class="add-suggestion-btn" id="btn-add-movement-suggestion" data-i18n="btn_add_movement_suggestion" style="flex: 0 0 auto; width: auto; height: 42px; padding: 0 14px; border-radius: var(--radius-sm); border: none; background-color: #FF9500; color: #ffffff; font-size: 14px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; cursor: pointer;">
+                        + Aggiungi
+                    </button>
+                </form>
+            </div>
+            <div style="flex: 1; overflow-y: auto; max-height: 55vh; padding-right: 4px;">
+                <div id="manage-movement-suggestions-list" class="suggestions-manage-list">
                     <!-- Elementi caricati dinamicamente -->
                 </div>
             </div>
@@ -527,8 +564,16 @@
                 </button>
             </div>
 
-            <!-- Investment-specific items (placeholder for investment additions) -->
-            <div id="investment-extra-menu-group" style="display: none;"></div>
+            <!-- Investment-specific items -->
+            <div id="investment-extra-menu-group" style="display: none;">
+                <button type="button" id="menu-movement-suggestions-btn" class="menu-item" style="width: 100%; border: none; background: transparent; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 12px; color: var(--text-secondary);">
+                        <i class="ph ph-sparkle"></i>
+                        <span data-i18n="menu_movement_suggestions">Suggerimenti Movimenti</span>
+                    </div>
+                    <i class="ph ph-caret-right" style="color: var(--text-secondary); font-size: 14px;"></i>
+                </button>
+            </div>
 
             <button id="logout-btn" class="menu-item text-danger">
                 <i class="ph ph-sign-out"></i>
@@ -945,7 +990,7 @@
         </div>
     </main>
 
-    <script src="./js/main.js?v=53" type="module"></script>
+    <script src="./js/main.js?v=54" type="module"></script>
 </body>
 
 </html>

@@ -49,6 +49,8 @@ const state = {
         id: null
     },
     expenseSuggestions: [],
+    movementSuggestions: [],
+    lastInvestmentDescription: '',
     statTab: 'counters',
     ralHistory: [],
     charts: {
@@ -169,6 +171,15 @@ const DOM = {
     addSuggestionForm: document.getElementById('add-suggestion-form'),
     newSuggestionInput: document.getElementById('new-suggestion-input'),
     manageSuggestionsList: document.getElementById('manage-suggestions-list'),
+    movementSuggestionsList: document.getElementById('movement-suggestions-list'),
+    menuMovementSuggestionsBtn: document.getElementById('menu-movement-suggestions-btn'),
+    movementSuggestionsModal: document.getElementById('movement-suggestions-modal'),
+    closeMovementSuggestionsModal: document.getElementById('close-movement-suggestions-modal'),
+    addMovementSuggestionForm: document.getElementById('add-movement-suggestion-form'),
+    newMovementSuggestionInput: document.getElementById('new-movement-suggestion-input'),
+    manageMovementSuggestionsList: document.getElementById('manage-movement-suggestions-list'),
+    investmentSuggestionsList: document.getElementById('investment-suggestions-list'),
+    investmentSuggestionWrapper: document.getElementById('investment-suggestion-wrapper'),
 
     // Statistics & RAL Elements
     toggleStatCounters: document.getElementById('toggle-stat-counters'),
@@ -323,9 +334,12 @@ function applyLanguage(lang) {
         loadInvestmentHighlights();
         renderExpenseSuggestionsChips();
         renderSalarySuggestionChip();
+        renderMovementSuggestionsChips();
+        renderInvestmentSuggestionChip();
         renderRalHistoryList();
         if (state.statTab === 'charts') renderAllStatisticsCharts();
         renderManageSuggestionsList();
+        renderManageMovementSuggestionsList();
     }
 }
 
@@ -366,6 +380,8 @@ async function init() {
         await calculateInvestmentStatistics();
         await loadInvestmentHighlights();
         await loadExpenseSuggestions();
+        await loadMovementSuggestions();
+        await getLastInvestmentDescription();
         await loadRalHistory();
         checkAndShowSecurityAlert();
     } else {
@@ -632,11 +648,17 @@ function resetEditMode(type) {
         document.getElementById('investimento-submit-btn').textContent = t('btn_save_investimento');
         const form = document.getElementById('add-investimento-form');
         if(form) form.reset();
+        if (DOM.investmentSuggestionsList) {
+            DOM.investmentSuggestionsList.querySelectorAll('.suggestion-chip').forEach(c => c.classList.remove('active'));
+        }
     } else if (type === 'movimento') {
         document.getElementById('movimento-modal-title').textContent = t('modal_add_movimento_title');
         document.getElementById('movimento-submit-btn').textContent = t('btn_save_movimento');
         const form = document.getElementById('add-movimento-form');
         if(form) form.reset();
+        if (DOM.movementSuggestionsList) {
+            DOM.movementSuggestionsList.querySelectorAll('.suggestion-chip').forEach(c => c.classList.remove('active'));
+        }
     }
 }
 
@@ -1092,6 +1114,8 @@ function setupEventListeners() {
             await calculateInvestmentStatistics();
             await loadInvestmentHighlights();
             await loadExpenseSuggestions();
+            await loadMovementSuggestions();
+            await getLastInvestmentDescription();
             await loadRalHistory();
 
             // Mostra avviso di sicurezza se ci sono stati tentativi non autorizzati
@@ -1189,6 +1213,8 @@ function setupEventListeners() {
                 await calculateInvestmentStatistics();
                 await loadInvestmentHighlights();
                 await loadExpenseSuggestions();
+                await loadMovementSuggestions();
+                await getLastInvestmentDescription();
                 await loadRalHistory();
 
                 // Mostra avviso di sicurezza se ci sono stati tentativi non autorizzati
@@ -1301,6 +1327,8 @@ function setupEventListeners() {
         await calculateInvestmentStatistics();
         await loadInvestmentHighlights();
         await loadExpenseSuggestions();
+        await loadMovementSuggestions();
+        await getLastInvestmentDescription();
         await loadRalHistory();
     }
 
@@ -1833,9 +1861,10 @@ function setupInvestmentModals() {
 
     // Investimento
     if ((DOM.btnAddInvestimento || DOM.btnAddInvestimentoPage) && DOM.addInvestimentoModal && DOM.closeInvestimentoModal && DOM.addInvestimentoForm) {
-        const openInvestimento = () => {
+        const openInvestimento = async () => {
             if (navigator.vibrate) navigator.vibrate(50);
             document.getElementById('investimento-date').valueAsDate = new Date();
+            await renderInvestmentSuggestionChip();
             DOM.addInvestimentoModal.classList.add('active');
         };
         if (DOM.btnAddInvestimento) DOM.btnAddInvestimento.addEventListener('click', openInvestimento);
@@ -1845,6 +1874,19 @@ function setupInvestmentModals() {
             DOM.addInvestimentoModal.classList.remove('active');
             resetEditMode('investimento');
         });
+
+        const invDescInput = document.getElementById('investimento-desc');
+        if (invDescInput) {
+            invDescInput.addEventListener('input', () => {
+                const val = invDescInput.value.trim().toLowerCase();
+                if (DOM.investmentSuggestionsList) {
+                    DOM.investmentSuggestionsList.querySelectorAll('.suggestion-chip').forEach(c => {
+                        const cText = (c.getAttribute('data-text') || '').trim().toLowerCase();
+                        c.classList.toggle('active', cText === val && val !== '');
+                    });
+                }
+            });
+        }
         
         DOM.addInvestimentoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1886,6 +1928,9 @@ function setupInvestmentModals() {
                 console.error("Errore salvataggio investimento:", error);
                 alert(t('alert_save_error') + error.message);
             } else {
+                state.lastInvestmentDescription = desc;
+                localStorage.setItem('last_investment_desc', desc);
+                renderInvestmentSuggestionChip();
                 alert(state.editContext.active ? t('alert_investimento_updated') : t('alert_investimento_saved'));
                 DOM.addInvestimentoModal.classList.remove('active');
                 resetEditMode('investimento');
@@ -1900,6 +1945,7 @@ function setupInvestmentModals() {
         const openMovimento = () => {
             if (navigator.vibrate) navigator.vibrate(50);
             document.getElementById('movimento-date').valueAsDate = new Date();
+            renderMovementSuggestionsChips();
             DOM.addMovimentoModal.classList.add('active');
         };
         if (DOM.btnAddMovimento) DOM.btnAddMovimento.addEventListener('click', openMovimento);
@@ -1909,6 +1955,19 @@ function setupInvestmentModals() {
             DOM.addMovimentoModal.classList.remove('active');
             resetEditMode('movimento');
         });
+
+        const movDescInput = document.getElementById('movimento-desc');
+        if (movDescInput) {
+            movDescInput.addEventListener('input', () => {
+                const val = movDescInput.value.trim().toLowerCase();
+                if (DOM.movementSuggestionsList) {
+                    DOM.movementSuggestionsList.querySelectorAll('.suggestion-chip').forEach(c => {
+                        const cText = (c.getAttribute('data-text') || '').trim().toLowerCase();
+                        c.classList.toggle('active', cText === val && val !== '');
+                    });
+                }
+            });
+        }
         
         DOM.addMovimentoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1955,6 +2014,35 @@ function setupInvestmentModals() {
                 loadInvestmentMovements();
                 loadInvestmentHighlights();
             }
+        });
+    }
+
+    // Movement Suggestions Management Modal Listeners
+    if (DOM.menuMovementSuggestionsBtn && DOM.movementSuggestionsModal && DOM.closeMovementSuggestionsModal) {
+        DOM.menuMovementSuggestionsBtn.addEventListener('click', () => {
+            if (state.isMenuOpen) toggleMenu();
+            renderManageMovementSuggestionsList();
+            DOM.movementSuggestionsModal.classList.add('active');
+        });
+
+        DOM.closeMovementSuggestionsModal.addEventListener('click', () => {
+            DOM.movementSuggestionsModal.classList.remove('active');
+        });
+
+        DOM.movementSuggestionsModal.addEventListener('click', (e) => {
+            if (e.target === DOM.movementSuggestionsModal) {
+                DOM.movementSuggestionsModal.classList.remove('active');
+            }
+        });
+    }
+
+    if (DOM.addMovementSuggestionForm) {
+        DOM.addMovementSuggestionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = DOM.newMovementSuggestionInput?.value;
+            if (!text) return;
+            await addMovementSuggestion(text);
+            if (DOM.newMovementSuggestionInput) DOM.newMovementSuggestionInput.value = '';
         });
     }
 }
@@ -2552,6 +2640,316 @@ async function deleteExpenseSuggestion(id) {
         renderManageSuggestionsList();
         renderExpenseSuggestionsChips();
     }
+}
+
+// --- Movement & Investment Suggestions ---
+const DEFAULT_MOVEMENT_SUGGESTIONS = [
+    'Commissione acquisto titoli',
+    'Commissione ETF',
+    'Dividendo',
+    'Interessi',
+    'Imposta di bollo',
+    'Ritenuta fiscale'
+];
+
+async function loadMovementSuggestions() {
+    if (state.isDemo) {
+        state.movementSuggestions = (state.demoData && state.demoData.movement_suggestions)
+            ? [...state.demoData.movement_suggestions]
+            : DEFAULT_MOVEMENT_SUGGESTIONS.map((text, idx) => ({ id: `demo-mov-sug-${idx}`, text }));
+        renderMovementSuggestionsChips();
+        return;
+    }
+
+    if (!state.user) {
+        state.movementSuggestions = [];
+        renderMovementSuggestionsChips();
+        return;
+    }
+
+    const seededKey = `movement_suggestions_seeded_${state.user.id}`;
+    const hasBeenSeeded = localStorage.getItem(seededKey) === 'true';
+
+    try {
+        const { data, error } = await supabase
+            .from('movement_suggestions')
+            .select('*')
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.warn("Could not load movement suggestions from Supabase (using local cache or defaults):", error.message);
+            const cached = localStorage.getItem('movement_suggestions_cache');
+            if (cached) {
+                state.movementSuggestions = JSON.parse(cached);
+            } else if (!hasBeenSeeded) {
+                state.movementSuggestions = DEFAULT_MOVEMENT_SUGGESTIONS.map((text, idx) => ({
+                    id: `local_mov_sug_${idx}`,
+                    text: text
+                }));
+            } else {
+                state.movementSuggestions = [];
+            }
+        } else if (!data || data.length === 0) {
+            if (!hasBeenSeeded) {
+                localStorage.setItem(seededKey, 'true');
+                const toInsert = DEFAULT_MOVEMENT_SUGGESTIONS.map(text => ({
+                    user_id: state.user.id,
+                    text: text
+                }));
+                const { data: inserted, error: insErr } = await supabase
+                    .from('movement_suggestions')
+                    .insert(toInsert)
+                    .select();
+
+                if (!insErr && inserted && inserted.length > 0) {
+                    state.movementSuggestions = inserted;
+                } else {
+                    state.movementSuggestions = toInsert.map((item, idx) => ({ id: `default_mov_${idx}`, ...item }));
+                }
+                localStorage.setItem('movement_suggestions_cache', JSON.stringify(state.movementSuggestions));
+            } else {
+                state.movementSuggestions = [];
+                localStorage.setItem('movement_suggestions_cache', JSON.stringify([]));
+            }
+        } else {
+            localStorage.setItem(seededKey, 'true');
+            state.movementSuggestions = data;
+            localStorage.setItem('movement_suggestions_cache', JSON.stringify(data));
+        }
+    } catch (e) {
+        console.warn("Error fetching movement suggestions:", e);
+        const cached = localStorage.getItem('movement_suggestions_cache');
+        state.movementSuggestions = cached ? JSON.parse(cached) : [];
+    }
+
+    renderMovementSuggestionsChips();
+}
+
+function renderMovementSuggestionsChips() {
+    if (!DOM.movementSuggestionsList) return;
+    DOM.movementSuggestionsList.innerHTML = '';
+
+    const currentDesc = (document.getElementById('movimento-desc')?.value || '').trim().toLowerCase();
+
+    const wrapper = document.getElementById('movement-suggestions-wrapper');
+    if (!state.movementSuggestions || state.movementSuggestions.length === 0) {
+        DOM.movementSuggestionsList.style.display = 'none';
+        if (wrapper) wrapper.style.display = 'none';
+        return;
+    }
+
+    if (wrapper) wrapper.style.display = 'block';
+    DOM.movementSuggestionsList.style.display = 'flex';
+
+    state.movementSuggestions.forEach(sug => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'suggestion-chip';
+        chip.setAttribute('data-text', sug.text);
+        chip.textContent = sug.text;
+
+        if (sug.text.trim().toLowerCase() === currentDesc) {
+            chip.classList.add('active');
+        }
+
+        chip.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(25);
+            const descInput = document.getElementById('movimento-desc');
+            if (descInput) {
+                descInput.value = sug.text;
+                descInput.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            DOM.movementSuggestionsList.querySelectorAll('.suggestion-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+        });
+
+        DOM.movementSuggestionsList.appendChild(chip);
+    });
+}
+
+function renderManageMovementSuggestionsList() {
+    if (!DOM.manageMovementSuggestionsList) return;
+    DOM.manageMovementSuggestionsList.innerHTML = '';
+
+    if (!state.movementSuggestions || state.movementSuggestions.length === 0) {
+        DOM.manageMovementSuggestionsList.innerHTML = `<p style="text-align: center; color: var(--text-secondary); font-size: 14px; padding: 20px 0;" data-i18n="no_movement_suggestions">${t('no_movement_suggestions')}</p>`;
+        return;
+    }
+
+    state.movementSuggestions.forEach(sug => {
+        const item = document.createElement('div');
+        item.className = 'suggestion-manage-item';
+        item.innerHTML = `
+            <span>${escapeHTML(sug.text)}</span>
+            <button type="button" class="delete-suggestion-btn" data-id="${sug.id}" title="${t('confirm_delete')}">
+                <i class="ph ph-trash"></i>
+            </button>
+        `;
+
+        const delBtn = item.querySelector('.delete-suggestion-btn');
+        if (delBtn) {
+            delBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (confirm(t('confirm_delete_movement_suggestion'))) {
+                    await deleteMovementSuggestion(sug.id);
+                }
+            });
+        }
+
+        DOM.manageMovementSuggestionsList.appendChild(item);
+    });
+}
+
+async function addMovementSuggestion(text) {
+    text = (text || '').trim();
+    if (!text) return;
+
+    const exists = state.movementSuggestions.some(s => s.text.toLowerCase() === text.toLowerCase());
+    if (exists) {
+        alert(t('alert_movement_suggestion_exists'));
+        return;
+    }
+
+    if (state.isDemo) {
+        const newSug = {
+            id: `demo-mov-sug-${Date.now()}`,
+            user_id: 'demo-user-id',
+            text: text,
+            created_at: new Date().toISOString()
+        };
+        if (!state.demoData.movement_suggestions) state.demoData.movement_suggestions = [];
+        state.demoData.movement_suggestions.push(newSug);
+        state.movementSuggestions = state.demoData.movement_suggestions;
+        renderManageMovementSuggestionsList();
+        renderMovementSuggestionsChips();
+        return;
+    }
+
+    if (state.user) {
+        try {
+            const { data, error } = await supabase
+                .from('movement_suggestions')
+                .insert([{ user_id: state.user.id, text }])
+                .select();
+
+            if (error) {
+                console.warn("Could not insert movement suggestion to Supabase, saving locally:", error.message);
+                state.movementSuggestions.push({ id: `local_mov_sug_${Date.now()}`, text });
+            } else if (data && data.length > 0) {
+                state.movementSuggestions.push(data[0]);
+            } else {
+                state.movementSuggestions.push({ id: `local_mov_sug_${Date.now()}`, text });
+            }
+        } catch (e) {
+            console.warn("Error inserting movement suggestion:", e);
+            state.movementSuggestions.push({ id: `local_mov_sug_${Date.now()}`, text });
+        }
+        localStorage.setItem('movement_suggestions_cache', JSON.stringify(state.movementSuggestions));
+        renderManageMovementSuggestionsList();
+        renderMovementSuggestionsChips();
+    }
+}
+
+async function deleteMovementSuggestion(id) {
+    if (state.isDemo) {
+        if (state.demoData && state.demoData.movement_suggestions) {
+            state.demoData.movement_suggestions = state.demoData.movement_suggestions.filter(s => s.id !== id);
+            state.movementSuggestions = state.demoData.movement_suggestions;
+        }
+        renderManageMovementSuggestionsList();
+        renderMovementSuggestionsChips();
+        return;
+    }
+
+    if (state.user) {
+        try {
+            const { error } = await supabase
+                .from('movement_suggestions')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                console.warn("Could not delete from Supabase:", error.message);
+            }
+        } catch (e) {
+            console.warn("Error deleting movement suggestion:", e);
+        }
+        state.movementSuggestions = state.movementSuggestions.filter(s => s.id !== id);
+        localStorage.setItem('movement_suggestions_cache', JSON.stringify(state.movementSuggestions));
+        renderManageMovementSuggestionsList();
+        renderMovementSuggestionsChips();
+    }
+}
+
+// --- Investment Suggestion (Last description used) ---
+
+async function getLastInvestmentDescription() {
+    if (state.lastInvestmentDescription) return state.lastInvestmentDescription;
+    const cached = localStorage.getItem('last_investment_desc');
+    if (cached) {
+        state.lastInvestmentDescription = cached;
+        return cached;
+    }
+    if (state.isDemo && state.demoData && state.demoData.investments && state.demoData.investments.length > 0) {
+        const sorted = [...state.demoData.investments].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+        state.lastInvestmentDescription = sorted[0].description;
+        return state.lastInvestmentDescription;
+    }
+    if (state.user) {
+        try {
+            const { data } = await supabase
+                .from('investments')
+                .select('description')
+                .order('date', { ascending: false })
+                .limit(1);
+            if (data && data.length > 0 && data[0].description) {
+                state.lastInvestmentDescription = data[0].description;
+                localStorage.setItem('last_investment_desc', data[0].description);
+                return data[0].description;
+            }
+        } catch (e) {
+            console.warn("Could not fetch last investment description:", e);
+        }
+    }
+    return '';
+}
+
+async function renderInvestmentSuggestionChip() {
+    if (!DOM.investmentSuggestionsList || !DOM.investmentSuggestionWrapper) return;
+    DOM.investmentSuggestionsList.innerHTML = '';
+
+    const lastDesc = await getLastInvestmentDescription();
+    if (!lastDesc || !lastDesc.trim()) {
+        DOM.investmentSuggestionWrapper.style.display = 'none';
+        return;
+    }
+
+    DOM.investmentSuggestionWrapper.style.display = 'block';
+    DOM.investmentSuggestionsList.style.display = 'flex';
+
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'suggestion-chip';
+    chip.setAttribute('data-text', lastDesc);
+    chip.textContent = lastDesc;
+
+    const currentInputVal = (document.getElementById('investimento-desc')?.value || '').trim();
+    if (currentInputVal.toLowerCase() === lastDesc.trim().toLowerCase()) {
+        chip.classList.add('active');
+    }
+
+    chip.addEventListener('click', () => {
+        if (navigator.vibrate) navigator.vibrate(25);
+        const descInput = document.getElementById('investimento-desc');
+        if (descInput) {
+            descInput.value = lastDesc;
+            descInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        DOM.investmentSuggestionsList.querySelectorAll('.suggestion-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+    });
+
+    DOM.investmentSuggestionsList.appendChild(chip);
 }
 
 // --- RAL History & Statistics Charts ---
@@ -3391,6 +3789,12 @@ async function loadInvestments() {
             .order('date', { ascending: false });
 
         if (error) throw error;
+
+        if (data && data.length > 0 && data[0].description) {
+            state.lastInvestmentDescription = data[0].description;
+            localStorage.setItem('last_investment_desc', data[0].description);
+            renderInvestmentSuggestionChip();
+        }
 
         if (!data || data.length === 0) {
             DOM.investmentsList.innerHTML = `

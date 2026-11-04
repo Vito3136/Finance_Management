@@ -1172,6 +1172,32 @@ main {
     box-shadow: 0 2px 8px rgba(97, 187, 97, 0.3);
 }
 
+#movement-suggestions-list .suggestion-chip:hover {
+    border-color: #FF9500;
+    color: #FF9500;
+}
+
+#movement-suggestions-list .suggestion-chip.active {
+    background: #FF9500;
+    color: #ffffff;
+    border-color: #FF9500;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255, 149, 0, 0.3);
+}
+
+#investment-suggestions-list .suggestion-chip:hover {
+    border-color: #5856d6;
+    color: #5856d6;
+}
+
+#investment-suggestions-list .suggestion-chip.active {
+    background: #5856d6;
+    color: #ffffff;
+    border-color: #5856d6;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(88, 86, 214, 0.3);
+}
+
 /* Manage Suggestions Modal & Form */
 .add-suggestion-form {
     display: flex !important;
