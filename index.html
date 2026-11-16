@@ -15,7 +15,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.png">
 
-    <link rel="stylesheet" href="./css/style.css?v=54">
+    <link rel="stylesheet" href="./css/style.css?v=55">
 
     <!-- Phosphor Icons for SVG icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -25,13 +25,42 @@
 
     <!-- Chart.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Critical Splash Theme Styles -->
+    <style>
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #f0f2f5;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.35s ease;
+        }
+        #splash-screen .splash-title {
+            color: #1c1c1e;
+        }
+        @media (prefers-color-scheme: dark) {
+            #splash-screen {
+                background-color: #000000 !important;
+            }
+            #splash-screen .splash-title {
+                color: #ffffff !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
     <!-- Splash Screen -->
-    <div id="splash-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: var(--bg-primary, #f0f2f5); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s ease;">
-        <i class="ph ph-wallet" style="font-size: 72px; color: var(--primary-color, #007aff); margin-bottom: 16px;"></i>
-        <h2 style="margin: 0; font-size: 24px; font-weight: 600; color: var(--text-primary, #1c1c1e);" data-i18n="app_title">Finance Management</h2>
+    <div id="splash-screen" class="splash-screen">
+        <i class="ph ph-wallet splash-icon"></i>
+        <h2 class="splash-title" data-i18n="app_title">Finance Management</h2>
     </div>
 
     <!-- Login Screen Overlay -->
@@ -990,7 +1019,7 @@
         </div>
     </main>
 
-    <script src="./js/main.js?v=54" type="module"></script>
+    <script src="./js/main.js?v=55" type="module"></script>
 </body>
 
 </html>
