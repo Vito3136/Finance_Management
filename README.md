@@ -3,7 +3,7 @@
 > **Document Version:** 1.0.0  
 > **Target Audience:** Large Language Models (LLMs), AI Agents, and Software Engineers.  
 > **Application Type:** Progressive Web Application (PWA) / Single Page Application (SPA).  
-> **Author & Owner:** Vito Ditrani (`vito3136@gmail.com`).  
+> **Author & Owner:** Vito Ditrani  
 > **Deployment Target:** GitHub Pages (`https://vito3136.github.io/Finance_Management/`).  
 > **Backend Infrastructure:** Supabase (PostgreSQL, Auth, Row Level Security, Edge Functions with Deno & Resend API).
 
@@ -313,25 +313,25 @@ When the user switches to the **Grafici** tab in the Statistics section:
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Attacker as User / Intruder
-    participant App as Client (main.js)
-    participant Local as localStorage
-    participant Supa as Supabase Auth & Edge
-    participant Resend as Resend Email Service
-    actor Owner as Vito Ditrani
+    actor Client as Client / User
+    participant App as Application Core
+    participant Sec as Security Controller
+    participant Cloud as Cloud Security Service
+    actor Owner as Administrator
 
-    Attacker->>App: Submits incorrect password (Attempt 1)
-    App->>Local: Set failed_attempts = 1
-    App->>Supa: Invoke edge function 'security-alert' (warning)
-    Supa->>Resend: Dispatch Alert Email to vito3136@gmail.com
-    App-->>Attacker: Display attempt 1/2 warning
-
-    Attacker->>App: Submits incorrect password (Attempt 2)
-    App->>Local: Set failed_attempts = 2, locked_until = Date.now() + 24h
-    App->>Supa: Invoke edge function 'security-alert' (lockout=true)
-    Supa->>Resend: Dispatch URGENT 24h Lockout Email
-    App-->>Attacker: Display 24-hour countdown timer (Password Disabled)
-    Note over App,Attacker: Hardware Face ID remains available for legitimate owner
+    Client->>App: Submits password credentials
+    alt Invalid Credentials (Attempt 1)
+        App->>Sec: Record failed attempt & evaluate policy
+        Sec->>Cloud: Dispatch threat warning alert
+        Cloud-->>Owner: Alert email delivered
+        App-->>Client: Display attempt 1/2 warning
+    else Consecutive Failure (Attempt 2)
+        App->>Sec: Enforce 24h lockout policy
+        Sec->>Cloud: Dispatch emergency lockout alert
+        Cloud-->>Owner: Immediate intrusion notification
+        App-->>Client: Password login disabled (24h countdown)
+        Note over App,Client: Biometric Face ID remains authenticated for the owner
+    end
 ```
 
 ---
@@ -391,7 +391,8 @@ When releasing updates:
 
 ## 9. Security & Access Rules for LLMs / Collaborators
 
-1. **Owner Data Privacy:** The pre-configured owner email is `vito3136@gmail.com`. Do not modify or leak credentials or API keys.
+1. **Owner Data Privacy:** Maintain strict user data privacy. Never log, hardcode, or disclose administrator email addresses, passwords, or personal credentials.
 2. **Face ID Integrity:** Never bypass or alter the Web Crypto encryption parameters in `js/faceid.js`.
 3. **Preserve Demo Mode:** Any modification to database queries must also be mirrored in `js/demo_data.js` so offline demonstration functionality never breaks.
 4. **Bilingual Requirement:** Every new UI string must be registered in both `it` and `en` blocks in `js/translations.js`.
+
